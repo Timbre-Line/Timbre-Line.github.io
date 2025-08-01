@@ -1,50 +1,204 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Timbre's Blog</title>
     <style>
         * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+        
         body {
             display: flex;
             flex-direction: column;
             height: 100vh;
+            background: linear-gradient(135deg, #f9f9f9 0%, #f0f0f0 100%);
+            color: #333;
+            overflow-x: hidden;
         }
+        
         nav {
-            background-color: #7CCD7C;
+            background: linear-gradient(135deg, #4CAF50 0%, #2E8B57 100%);
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 20px;
-            box-sizing: border-box;
-            height: 50px;
+            height: 60px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            position: relative;
+            z-index: 10;
         }
+        
+        nav::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent 10%, rgba(255, 255, 255, 0.5), transparent 90%);
+        }
+        
         h1 {
             color: white;
+            font-weight: 600;
+            font-size: 1.8rem;
+            letter-spacing: -0.5px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
         }
+        
         .btn {
-            background-color: #7CCD7C;
-            border: none;
-            padding: 0 20px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            border-radius: 8px;
+            padding: 8px 24px;
             text-decoration: none;
             color: white;
-            transition: background-color 0.3s;
-            height: 100%;
+            transition: all 0.3s ease;
+            height: 70%;
             display: flex;
             align-items: center;
-            font-weight: bold;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(4px);
+            box-shadow: 
+                0 2px 4px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25);
         }
+        
         .btn:hover {
-            background-color: #2E8B57;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 
+                0 6px 12px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
         }
+        
         main {
             flex: 1;
-            padding: 20px;
-            font-size: 2em;
-            color: black;
+            padding: 40px;
+            font-size: 2.5rem;
+            color: #333;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            line-height: 1.2;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        
+        .content::after {
+            content: '°';
+            color: #4CAF50;
+            animation: pulse 2s infinite ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        
+        .background-deco {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 35%;
+            background: linear-gradient(45deg, rgba(76, 175, 80, 0.03) 0%, rgba(76, 175, 80, 0.08) 100%);
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 30% 100%);
+            z-index: 1;
+        }
+        
+        .subdued-texture {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(76, 175, 80, 0.03) 0%, transparent 20%), 
+                radial-gradient(circle at 90% 80%, rgba(76, 175, 80, 0.03) 0%, transparent 20%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .animated-circle {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            width: 60px;
+            height: 60px;
+            background: rgba(76, 175, 80, 0.2);
+            border-radius: 50%;
+            animation: float 8s infinite ease-in-out;
+        }
+        
+        .animated-circle:nth-child(2) {
+            left: auto;
+            right: 80px;
+            top: 100px;
+            width: 40px;
+            height: 40px;
+            animation: float 10s infinite ease-in-out;
+            animation-delay: -2s;
+            background: rgba(46, 139, 87, 0.15);
+        }
+        
+        .animated-circle:nth-child(3) {
+            top: 30%;
+            left: 25%;
+            width: 20px;
+            height: 20px;
+            animation: float 12s infinite ease-in-out;
+            animation-delay: -4s;
+            background: rgba(46, 139, 87, 0.1);
+        }
+        
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0) translateX(0); 
+                opacity: 0.8;
+            }
+            25% { transform: translateY(-20px) translateX(15px); }
+            50% { transform: translateY(10px) translateX(-20px); opacity: 0.6; }
+            75% { transform: translateY(-15px) translateX(-10px); }
+        }
+        
+        @media (max-width: 768px) {
+            nav {
+                padding: 0 15px;
+                height: 56px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .btn {
+                padding: 6px 16px;
+                font-size: 0.9rem;
+            }
+            
+            main {
+                padding: 30px 20px;
+                font-size: 2rem;
+            }
+            
+            .animated-circle {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -53,6 +207,14 @@
         <h1>Timbre's Blog</h1>
         <a href="https://timbre-line.github.io/et" class="btn">Easy Template</a>
     </nav>
-    <main>欢迎来到 Timbre 的博客</main>
+    
+    <main>
+        <div class="content">欢迎来到 Timbre 的博客</div>
+        <div class="background-deco"></div>
+        <div class="subdued-texture"></div>
+        <div class="animated-circle"></div>
+        <div class="animated-circle"></div>
+        <div class="animated-circle"></div>
+    </main>
 </body>
 </html>
