@@ -1,61 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Timbre - Welcome</title>
+    <title>Timbre's Blog</title>
     <style>
-        body {
-            background-color: #e8f5e9;
-            margin: 0;  /* padding: 0; 已删除 */
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            height: 100vh;
+        nav {
+            background-color: #98FB98;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+        }
+        .btn {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 8px 15px;
+            text-decoration: none;
+            color: black;
+        }
+        main {
+            height: 85vh;
+            display: flex;
             align-items: center;
-            text-align: center;
-        }
-
-        h1 {
-            font-size: 5rem;
-            font-weight: 300;
-            color: #2e7d32;
-            margin-bottom: 2rem;
-            margin-top: -5rem;
-        }
-
-        .welcome-text {
-            font-size: 1.8rem;
-            color: #4caf50;
-            margin-bottom: 3rem;  /* letter-spacing: -0.02em; 已删除 */
-        }
-
-        .get-started-btn {
-            background-color: #4caf50;
-            color: white;
-            border: none;
-            padding: 1rem 3rem;
-            font-size: 1.2rem;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .get-started-btn:hover {
-            background-color: #388e3c;
-            transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        .get-started-btn:active {
-            transform: translateY(0);
+            justify-content: center;
+            font-size: 2em;
+            color: #98FB98;
         }
     </style>
 </head>
 <body>
-    <h1>Timbre</h1>
-    <p class="welcome-text">Welcome to Timbre's Blog</p>
-    <button class="get-started-btn">Get Started</button>
+    <nav>
+        <h1>Timbre's Blog</h1>
+        <a href="https://timbre-line.github.io/et" class="btn">Easy Template</a>
+    </nav>
+    <main>欢迎来到 Timbre 的博客</main>
 </body>
 </html>
