@@ -1,1 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简洁信息页面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: #e0f7e0; /* 浅绿色背景 */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .container {
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(38, 166, 91, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            color: #2e8b57;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .message {
+            font-size: 1.8rem;
+            color: #1a6b4b;
+            line-height: 1.6;
+            margin: 30px auto;
+            max-width: 600px;
+            padding: 0 20px;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: linear-gradient(145deg, #3cb371, #2e8b57);
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 600;
+            padding: 16px 50px;
+            margin-top: 40px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 15px rgba(46, 139, 87, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(46, 139, 87, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 8px rgba(46, 139, 87, 0.4);
+        }
+        
+        .btn::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: all 0.6s ease;
+        }
+        
+        .btn:hover::after {
+            left: 100%;
+        }
+        
+        .pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.08;
+            pointer-events: none;
+            background-image: radial-gradient(#2e8b57 1px, transparent 1px);
+            background-size: 20px 20px;
+            z-index: -1;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .message {
+                font-size: 1.4rem;
+            }
+            
+            .btn {
+                font-size: 1.2rem;
+                padding: 14px 40px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .message {
+                font-size: 1.2rem;
+            }
+            
+            .container {
+                padding: 30px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="pattern"></div>
+    
+    <div class="container">
+        <h1>欢迎来到绿色世界</h1>
+        <p class="message">
+            这是一个简洁而优雅的设计示例，展示了如何在浅绿色背景上创建有吸引力的内容布局。所有元素都经过精心设计，具有平滑的动画和响应式能力。
+        </p>
+        <button class="btn" onclick="showMessage()">探索更多</button>
+    </div>
 
+    <script>
+        function showMessage() {
+            alert("感谢您的点击！这是一个演示按钮的功能。");
+            
+            // 为按钮添加动画效果
+            const btn = document.querySelector('.btn');
+            btn.style.transform = 'scale(0.95)';
+            
+            setTimeout(() => {
+                btn.style.transform = '';
+            }, 300);
+        }
+        
+        // 添加随机的叶子浮动效果
+        document.addEventListener('DOMContentLoaded', () => {
+            const body = document.querySelector('body');
+            const pattern = document.querySelector('.pattern');
+            
+            for (let i = 0; i < 15; i++) {
+                const leaf = document.createElement('div');
+                leaf.innerHTML = '🍃';
+                leaf.style.position = 'fixed';
+                leaf.style.fontSize = Math.random() * 20 + 15 + 'px';
+                leaf.style.top = '-50px';
+                leaf.style.left = Math.random() * window.innerWidth + 'px';
+                leaf.style.opacity = Math.random() * 0.4 + 0.2;
+                leaf.style.zIndex = -1;
+                leaf.style.pointerEvents = 'none';
+                leaf.style.transition = 'opacity 1s';
+                body.appendChild(leaf);
+                
+                // 动画
+                animateLeaf(leaf);
+            }
+        });
+        
+        function animateLeaf(leaf) {
+            const duration = Math.random() * 15 + 10;
+            const delay = Math.random() * 5;
+            const amplitude = Math.random() * 100 + 50;
+            
+            leaf.style.transition = `left ${duration}s linear, top ${duration}s linear`;
+            
+            setTimeout(() => {
+                leaf.style.top = window.innerHeight + 'px';
+                leaf.style.left = parseFloat(leaf.style.left) + amplitude * (Math.random() > 0.5 ? 1 : -1) + 'px';
+                
+                // 重置动画
+                setTimeout(() => {
+                    leaf.style.top = '-50px';
+                    leaf.style.left = Math.random() * window.innerWidth + 'px';
+                    animateLeaf(leaf);
+                }, duration * 1000);
+            }, delay * 1000);
+        }
+    </script>
+</body>
+</html>
