@@ -96,8 +96,32 @@
             font-size: 2rem;
             color: black;
             display: flex;
+            flex-direction: column; /* 修改为列布局 */
             align-items: flex-start;
             justify-content: flex-start;
+        }
+
+        /* 新增的社交内容样式 */
+        .social-section {
+            margin-top: 30px;
+        }
+        
+        .social-section h2 {
+            font-size: 1.8rem;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+        
+        .qq-container {
+            display: flex;
+            align-items: center;
+            font-size: 1.6rem;
+        }
+        
+        .qq-logo {
+            width: 36px;
+            height: 36px;
+            margin: 0 15px;
         }
 
         /* 移动端样式 */
@@ -199,6 +223,21 @@
             .menu-toggle {
                 display: flex;
             }
+
+            /* 移动端社交内容调整 */
+            .social-section h2 {
+                font-size: 1.6rem;
+            }
+            
+            .qq-container {
+                font-size: 1.4rem;
+            }
+            
+            .qq-logo {
+                width: 32px;
+                height: 32px;
+                margin: 0 10px;
+            }
         }
 
         @media (min-width: 769px) {
@@ -222,7 +261,20 @@
         </button>
     </nav>
     
-    <main>欢迎来到 Timbre 的博客</main>
+    <main>
+        <!-- 原欢迎语 -->
+        欢迎来到 Timbre 的博客
+        
+        <!-- 新增的社交内容 -->
+        <div class="social-section">
+            <h2>社交</h2>
+            <div class="qq-container">
+                <span>QQ</span>
+                <img class="qq-logo" src="/assets/logos/QQ.png" alt="QQ Logo">
+                <span>3665909064</span>
+            </div>
+        </div>
+    </main>
     
     <!-- 侧边栏抽屉 -->
     <div class="sidebar">
