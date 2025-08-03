@@ -124,18 +124,8 @@
             border-radius: 2px;
         }
 
-        .menu-toggle.active span:nth-child(1) {
-            transform: translateY(9px) rotate(45deg);
-        }
-
-        .menu-toggle.active span:nth-child(2) {
-            opacity: 0;
-        }
-
-        .menu-toggle.active span:nth-child(3) {
-            transform: translateY(-9px) rotate(-45deg);
-        }
-
+        /* 已移除菜单按钮动画 */
+        
         /* 侧边栏样式 */
         .sidebar {
             position: fixed;
@@ -256,14 +246,12 @@
         function openSidebar() {
             sidebar.classList.add('active');
             overlay.style.display = 'block';
-            menuToggle.classList.add('active');
             document.body.style.overflow = 'hidden';
         }
         
         function closeSidebar() {
             sidebar.classList.remove('active');
             overlay.style.display = 'none';
-            menuToggle.classList.remove('active');
             document.body.style.overflow = 'auto';
         }
         
