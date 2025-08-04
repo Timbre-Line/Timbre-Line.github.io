@@ -6,283 +6,145 @@
     <title>Timbre's Blog</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --primary: #A5D6A7;
-            --primary-dark: #388E3C;
-            --white: #ffffff;
-            --nav-height: 60px;
-            --transition-fast: 0.3s ease;
-            --shadow: -5px 0 15px rgba(0,0,0,0.1);
-        }
-        
-        @font-face {
-            font-family: 'SF Pro Display';
-            src: url('/assets/fonts/SF-Pro.otf') format('opentype');
-            font-weight: normal;
-            font-style: normal;
-            font-display: swap;
-        }
-        
-        * {
+        /* 公共组件样式会通过iframe加载 */
+
+        /* 主站专属样式 */
+        body {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            font-family: 'SF Pro Display', 'Microsoft YaHei', sans-serif;
+            font-family: -apple-system, 'Microsoft YaHei', sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            position: relative;
+            overflow-x: hidden;
         }
         
-        nav {
-            background-color: var(--primary);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: var(--nav-height);
-            position: relative;
+        #common-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
             z-index: 100;
         }
         
-        h1 {
-            color: var(--white);
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-left: 20px;
-        }
-        
-        .nav-buttons {
-            display: flex;
-            height: 100%;
-        }
-        
-        .btn {
-            background-color: var(--primary);
-            padding: 0 24px;
-            text-decoration: none;
-            color: var(--white);
-            height: 100%;
-            display: flex;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-            font-size: 1.2rem;
-            font-weight: 500;
-            letter-spacing: 0.5px;
-            z-index: 1;
-            transition: all var(--transition-fast);
-        }
-        
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
+        #common-container iframe {
             width: 100%;
             height: 100%;
-            background-color: var(--primary-dark);
-            transition: transform var(--transition-fast);
-            z-index: -1;
-        }
-        
-        .btn:hover::before {
-            transform: translateX(100%);
+            border: none;
         }
         
         main {
-            flex: 1;
-            padding: 40px;
+            padding: 80px 40px 40px;
             font-size: 2rem;
             color: black;
             display: flex;
             flex-direction: column;
+            align-items: flex-start;
             justify-content: flex-start;
+            min-height: 100vh;
+            position: relative;
+            z-index: 10;
         }
 
+        .welcome-section {
+            animation: fadeIn 1s ease;
+            max-width: 800px;
+        }
+        
+        .welcome-section h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            color: #2E7D32;
+        }
+        
         .social-section {
-            margin-top: 30px;
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #f8f8f8;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 500px;
         }
         
         .social-section h2 {
             font-size: 1.8rem;
             font-weight: 500;
             margin-bottom: 15px;
+            color: #388E3C;
         }
         
         .qq-container {
             display: flex;
             align-items: center;
             font-size: 1.6rem;
-            gap: 15px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
         }
         
         .qq-logo {
-            width: 30px;
-            height: auto;
+            width: 36px;
+            height: 36px;
+            margin: 0 15px;
         }
-
-        .menu-toggle {
-            display: none;
-            width: 44px;
-            height: 44px;
-            background: transparent;
-            border: none;
-            margin-right: 15px;
-            cursor: pointer;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .menu-toggle span {
-            display: block;
-            width: 28px;
-            height: 3px;
-            background-color: var(--white);
-            margin: 3px 0;
-            transition: transform var(--transition-fast);
-            border-radius: 2px;
-        }
-
-        .sidebar {
-            position: fixed;
-            top: 0;
-            right: -300px;
-            height: 100%;
-            width: 280px;
-            background-color: var(--white);
-            box-shadow: var(--shadow);
-            z-index: 999;
-            transition: right var(--transition-fast);
-            padding-top: var(--nav-height);
-        }
-
-        .sidebar.active {
-            right: 0;
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            font-size: 2rem;
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
             color: #666;
-            background: none;
-            border: none;
-            cursor: pointer;
-            transition: transform var(--transition-fast);
+            font-size: 1rem;
         }
-
-        .close-btn:hover {
-            transform: translateX(5px);
-            color: #333;
+        
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-
-        .sidebar a {
-            display: block;
-            padding: 18px 25px;
-            text-decoration: none;
-            color: #444;
-            font-size: 1.4rem;
-            border-bottom: 1px solid #eee;
-            transition: background-color var(--transition-fast);
-        }
-
-        .sidebar a:hover {
-            background-color: #f8f8f8;
-            color: var(--primary-dark);
-        }
-
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 99;
-            display: none;
-        }
-
+        
+        /* 响应式设计 */
         @media (max-width: 768px) {
-            .nav-buttons {
-                display: none;
+            main {
+                padding: 70px 20px 20px;
+                font-size: 1.8rem;
             }
-
-            .menu-toggle {
-                display: flex;
+            
+            .welcome-section h1 {
+                font-size: 2.5rem;
             }
-        }
-
-        @media (min-width: 769px) {
-            .sidebar, .overlay {
-                display: none !important;
+            
+            .qq-container {
+                font-size: 1.4rem;
             }
         }
     </style>
 </head>
 <body>
-    <nav>
-        <h1>Timbre's Blog</h1>
-        <div class="nav-buttons">
-            <a href="https://timbre-line.github.io/poolcore" class="btn">Poolcore</a>
-            <a href="https://timbre-line.github.io/et" class="btn">Easy Template</a>
-        </div>
-        <button class="menu-toggle" aria-label="Toggle menu">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
-    </nav>
+    <!-- 公共组件容器 -->
+    <div id="common-container">
+        <iframe src="common.html" title="公共导航栏和侧边栏"></iframe>
+    </div>
     
+    <!-- 主站专属内容 -->
     <main>
-        欢迎来到 Timbre 的博客
-
-        <div class="social-section">
-            <h2>社交</h2>
-            <div class="qq-container">
-                <span>QQ</span>
-                <img class="qq-logo" src="https://upload.wikimedia.org/wikipedia/commons/5/5d/Tencent_QQ.png" alt="QQ Logo">
-                <span>3665909064</span>
+        <div class="welcome-section">
+            <h1>欢迎来到 Timbre 的博客</h1>
+            <p>在这里分享Web开发、前端技术和创新想法</p>
+            
+            <div class="social-section">
+                <h2>社交联系方式</h2>
+                <div class="qq-container">
+                    <span>QQ</span>
+                    <img class="qq-logo" src="/assets/logos/QQ.png" alt="QQ Logo">
+                    <span>3665909064</span>
+                </div>
             </div>
         </div>
     </main>
-
-    <div class="sidebar">
-        <button class="close-btn" aria-label="Close menu">
-            <i class="fas fa-arrow-right"></i>
-        </button>
-        <a href="https://timbre-line.github.io/poolcore">Poolcore</a>
-        <a href="https://timbre-line.github.io/et">Easy Template</a>
-    </div>
-
-    <div class="overlay"></div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const menuToggle = document.querySelector('.menu-toggle');
-            const sidebar = document.querySelector('.sidebar');
-            const overlay = document.querySelector('.overlay');
-            const closeBtn = document.querySelector('.close-btn');
-            
-            const toggleSidebar = (shouldOpen) => {
-                sidebar.classList.toggle('active', shouldOpen);
-                overlay.style.display = shouldOpen ? 'block' : 'none';
-                document.body.style.overflow = shouldOpen ? 'hidden' : 'auto';
-            };
-            
-            menuToggle.addEventListener('click', () => toggleSidebar(true));
-            closeBtn.addEventListener('click', () => toggleSidebar(false));
-            overlay.addEventListener('click', () => toggleSidebar(false));
-
-            window.addEventListener('resize', () => {
-                if (window.innerWidth > 768) toggleSidebar(false);
-            });
-        });
-    </script>
+    
+    <footer class="footer">
+        © 2023 Timbre's Blog - 分享知识和创意
+    </footer>
 </body>
 </html>
