@@ -6,6 +6,15 @@
     <title>Timbre's Blog</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #A5D6A7;
+            --primary-dark: #388E3C;
+            --white: #ffffff;
+            --nav-height: 60px;
+            --transition-fast: 0.3s ease;
+            --shadow: -5px 0 15px rgba(0,0,0,0.1);
+        }
+        
         @font-face {
             font-family: 'SF Pro Display';
             src: url('/assets/fonts/SF-Pro.otf') format('opentype');
@@ -23,26 +32,24 @@
         body {
             display: flex;
             flex-direction: column;
-            height: 100vh;
+            min-height: 100vh;
             font-family: 'SF Pro Display', 'Microsoft YaHei', sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            position: relative;
-            overflow-x: hidden;
         }
         
         nav {
-            background-color: #A5D6A7;
+            background-color: var(--primary);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 60px;
+            height: var(--nav-height);
             position: relative;
             z-index: 100;
         }
         
         h1 {
-            color: white;
+            color: var(--white);
             font-size: 1.5rem;
             font-weight: 600;
             margin-left: 20px;
@@ -54,10 +61,10 @@
         }
         
         .btn {
-            background-color: #A5D6A7;
+            background-color: var(--primary);
             padding: 0 24px;
             text-decoration: none;
-            color: white;
+            color: var(--white);
             height: 100%;
             display: flex;
             align-items: center;
@@ -67,6 +74,7 @@
             font-weight: 500;
             letter-spacing: 0.5px;
             z-index: 1;
+            transition: all var(--transition-fast);
         }
         
         .btn::before {
@@ -76,18 +84,13 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background-color: #388E3C;
-            transition: transform 0.4s ease;
+            background-color: var(--primary-dark);
+            transition: transform var(--transition-fast);
             z-index: -1;
         }
         
         .btn:hover::before {
             transform: translateX(100%);
-        }
-        
-        .btn span {
-            position: relative;
-            z-index: 1;
         }
         
         main {
@@ -97,7 +100,6 @@
             color: black;
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
             justify-content: flex-start;
         }
 
@@ -115,12 +117,12 @@
             display: flex;
             align-items: center;
             font-size: 1.6rem;
+            gap: 15px;
         }
         
         .qq-logo {
             width: 30px;
             height: auto;
-            margin: 0 15px;
         }
 
         .menu-toggle {
@@ -140,9 +142,9 @@
             display: block;
             width: 28px;
             height: 3px;
-            background-color: white;
+            background-color: var(--white);
             margin: 3px 0;
-            transition: transform 0.3s ease;
+            transition: transform var(--transition-fast);
             border-radius: 2px;
         }
 
@@ -152,13 +154,11 @@
             right: -300px;
             height: 100%;
             width: 280px;
-            background-color: white;
-            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            background-color: var(--white);
+            box-shadow: var(--shadow);
             z-index: 999;
-            transition: right 0.4s ease;
-            display: flex;
-            flex-direction: column;
-            padding-top: 60px;
+            transition: right var(--transition-fast);
+            padding-top: var(--nav-height);
         }
 
         .sidebar.active {
@@ -174,7 +174,7 @@
             background: none;
             border: none;
             cursor: pointer;
-            transition: transform 0.3s ease;
+            transition: transform var(--transition-fast);
         }
 
         .close-btn:hover {
@@ -189,12 +189,12 @@
             color: #444;
             font-size: 1.4rem;
             border-bottom: 1px solid #eee;
-            transition: background-color 0.3s;
+            transition: background-color var(--transition-fast);
         }
 
         .sidebar a:hover {
             background-color: #f8f8f8;
-            color: #388E3C;
+            color: var(--primary-dark);
         }
 
         .overlay {
@@ -216,9 +216,6 @@
             .menu-toggle {
                 display: flex;
             }
-            
-            /* 移除了媒体查询中关于社交内容的尺寸定义 */
-            /* 现在社交内容在所有设备上大小统一 */
         }
 
         @media (min-width: 769px) {
@@ -232,10 +229,10 @@
     <nav>
         <h1>Timbre's Blog</h1>
         <div class="nav-buttons">
-            <a href="https://timbre-line.github.io/poolcore" class="btn"><span>Poolcore</span></a>
-            <a href="https://timbre-line.github.io/et" class="btn"><span>Easy Template</span></a>
+            <a href="https://timbre-line.github.io/poolcore" class="btn">Poolcore</a>
+            <a href="https://timbre-line.github.io/et" class="btn">Easy Template</a>
         </div>
-        <button class="menu-toggle">
+        <button class="menu-toggle" aria-label="Toggle menu">
             <span></span>
             <span></span>
             <span></span>
@@ -249,14 +246,14 @@
             <h2>社交</h2>
             <div class="qq-container">
                 <span>QQ</span>
-                <img class="qq-logo" src="/assets/logos/QQ.png" alt="QQ Logo">
+                <img class="qq-logo" src="https://upload.wikimedia.org/wikipedia/commons/5/5d/Tencent_QQ.png" alt="QQ Logo">
                 <span>3665909064</span>
             </div>
         </div>
     </main>
 
     <div class="sidebar">
-        <button class="close-btn">
+        <button class="close-btn" aria-label="Close menu">
             <i class="fas fa-arrow-right"></i>
         </button>
         <a href="https://timbre-line.github.io/poolcore">Poolcore</a>
@@ -266,34 +263,26 @@
     <div class="overlay"></div>
 
     <script>
-        const menuToggle = document.querySelector('.menu-toggle');
-        const sidebar = document.querySelector('.sidebar');
-        const overlay = document.querySelector('.overlay');
-        const closeBtn = document.querySelector('.close-btn');
-        
-        function openSidebar() {
-            sidebar.classList.add('active');
-            overlay.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        }
-        
-        function closeSidebar() {
-            sidebar.classList.remove('active');
-            overlay.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-        
-        menuToggle.addEventListener('click', openSidebar);
-        closeBtn.addEventListener('click', closeSidebar);
-        overlay.addEventListener('click', closeSidebar);
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuToggle = document.querySelector('.menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.overlay');
+            const closeBtn = document.querySelector('.close-btn');
+            
+            const toggleSidebar = (shouldOpen) => {
+                sidebar.classList.toggle('active', shouldOpen);
+                overlay.style.display = shouldOpen ? 'block' : 'none';
+                document.body.style.overflow = shouldOpen ? 'hidden' : 'auto';
+            };
+            
+            menuToggle.addEventListener('click', () => toggleSidebar(true));
+            closeBtn.addEventListener('click', () => toggleSidebar(false));
+            overlay.addEventListener('click', () => toggleSidebar(false));
 
-        window.addEventListener('resize', function() {
-            if (window.innerWidth > 768) {
-                closeSidebar();
-            }
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 768) toggleSidebar(false);
+            });
         });
     </script>
 </body>
 </html>
-
-
