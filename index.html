@@ -96,12 +96,11 @@
             font-size: 2rem;
             color: black;
             display: flex;
-            flex-direction: column; /* 修改为列布局 */
+            flex-direction: column;
             align-items: flex-start;
             justify-content: flex-start;
         }
 
-        /* 新增的社交内容样式 */
         .social-section {
             margin-top: 30px;
         }
@@ -124,7 +123,6 @@
             margin: 0 15px;
         }
 
-        /* 移动端样式 */
         .menu-toggle {
             display: none;
             width: 44px;
@@ -148,9 +146,6 @@
             border-radius: 2px;
         }
 
-        /* 已移除菜单按钮动画 */
-        
-        /* 侧边栏样式 */
         .sidebar {
             position: fixed;
             top: 0;
@@ -202,7 +197,6 @@
             color: #388E3C;
         }
 
-        /* 背景遮罩 */
         .overlay {
             position: fixed;
             top: 0;
@@ -214,7 +208,6 @@
             display: none;
         }
 
-        /* 媒体查询 */
         @media (max-width: 768px) {
             .nav-buttons {
                 display: none;
@@ -224,7 +217,6 @@
                 display: flex;
             }
 
-            /* 移动端社交内容调整 */
             .social-section h2 {
                 font-size: 1.6rem;
             }
@@ -262,10 +254,8 @@
     </nav>
     
     <main>
-        <!-- 原欢迎语 -->
         欢迎来到 Timbre 的博客
-        
-        <!-- 新增的社交内容 -->
+
         <div class="social-section">
             <h2>社交</h2>
             <div class="qq-container">
@@ -275,8 +265,7 @@
             </div>
         </div>
     </main>
-    
-    <!-- 侧边栏抽屉 -->
+
     <div class="sidebar">
         <button class="close-btn">
             <i class="fas fa-arrow-right"></i>
@@ -284,12 +273,10 @@
         <a href="https://timbre-line.github.io/poolcore">Poolcore</a>
         <a href="https://timbre-line.github.io/et">Easy Template</a>
     </div>
-    
-    <!-- 背景遮罩层 -->
+
     <div class="overlay"></div>
 
     <script>
-        // 汉堡菜单和关闭按钮逻辑
         const menuToggle = document.querySelector('.menu-toggle');
         const sidebar = document.querySelector('.sidebar');
         const overlay = document.querySelector('.overlay');
@@ -310,14 +297,7 @@
         menuToggle.addEventListener('click', openSidebar);
         closeBtn.addEventListener('click', closeSidebar);
         overlay.addEventListener('click', closeSidebar);
-        
-        // 点击侧边栏内的链接也关闭抽屉
-        const sidebarLinks = document.querySelectorAll('.sidebar a');
-        sidebarLinks.forEach(link => {
-            link.addEventListener('click', closeSidebar);
-        });
-        
-        // 监听窗口大小变化
+
         window.addEventListener('resize', function() {
             if (window.innerWidth > 768) {
                 closeSidebar();
