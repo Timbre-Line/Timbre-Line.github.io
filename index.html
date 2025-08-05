@@ -73,13 +73,11 @@
     </main>
 
     <script>
-        // 加载公共头部
         fetch('/header.html')
             .then(response => response.text())
             .then(data => {
                 document.getElementById('header-container').innerHTML = data;
-                
-                // 立即绑定事件（修复侧边栏打不开的问题）
+
                 const menuToggle = document.querySelector('.menu-toggle');
                 const sidebar = document.querySelector('.sidebar');
                 const overlay = document.querySelector('.overlay');
@@ -107,10 +105,6 @@
                     }
                 });
             })
-            .catch(error => {
-                console.error('加载header时出错:', error);
-                document.getElementById('header-container').innerHTML = '<nav style="background:#A5D6A7;padding:20px;color:white;text-align:center">导航加载失败</nav>';
-            });
     </script>
 </body>
 </html>
