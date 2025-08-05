@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>404 - Timbre's Blog</title>
+    <style>
+        * { margin: 0; padding: 0; }
+        body { font-family: 'Microsoft YaHei', sans-serif; text-align: center; }
+        main { font-size: 2rem; padding-top: 100px; }
+    </style>
+</head>
+<body>
+    <div id="header-container"></div>
+    <main>此界面不存在</main>
+    
+    <script>
+        fetch('/header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-container').innerHTML = data;
+            });
+    </script>
+</body>
+</html>
