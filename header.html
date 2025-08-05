@@ -200,37 +200,5 @@
     </div>
 
     <div class="overlay"></div>
-
-    <script>
-        // 在页面加载时绑定事件
-        document.addEventListener('DOMContentLoaded', function() {
-            const menuToggle = document.querySelector('.menu-toggle');
-            const sidebar = document.querySelector('.sidebar');
-            const overlay = document.querySelector('.overlay');
-            const closeBtn = document.querySelector('.close-btn');
-            
-            function openSidebar() {
-                sidebar.classList.add('active');
-                overlay.style.display = 'block';
-                document.body.style.overflow = 'hidden';
-            }
-            
-            function closeSidebar() {
-                sidebar.classList.remove('active');
-                overlay.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            }
-            
-            if (menuToggle) menuToggle.addEventListener('click', openSidebar);
-            if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
-            if (overlay) overlay.addEventListener('click', closeSidebar);
-
-            window.addEventListener('resize', function() {
-                if (window.innerWidth > 768) {
-                    closeSidebar();
-                }
-            });
-        });
-    </script>
 </body>
 </html>
