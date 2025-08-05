@@ -5,146 +5,233 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Timbre's Blog</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 包含公共部分 -->
     <style>
-        /* 公共组件样式会通过iframe加载 */
-
-        /* 主站专属样式 */
-        body {
+        * {
             margin: 0;
             padding: 0;
-            font-family: -apple-system, 'Microsoft YaHei', sans-serif;
+            box-sizing: border-box;
+        }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            font-family: 'SF Pro Display', 'Microsoft YaHei', sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             position: relative;
             overflow-x: hidden;
         }
         
-        #common-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
+        nav {
+            background-color: #A5D6A7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             height: 60px;
+            position: relative;
             z-index: 100;
         }
         
-        #common-container iframe {
+        h1 {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-left: 20px;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            height: 100%;
+        }
+        
+        .btn {
+            background-color: #A5D6A7;
+            padding: 0 24px;
+            text-decoration: none;
+            color: white;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            font-size: 1.2rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            z-index: 1;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
             width: 100%;
             height: 100%;
-            border: none;
+            background-color: #388E3C;
+            transition: transform 0.4s ease;
+            z-index: -1;
+        }
+        
+        .btn:hover::before {
+            transform: translateX(100%);
+        }
+        
+        .btn span {
+            position: relative;
+            z-index: 1;
         }
         
         main {
-            padding: 80px 40px 40px;
+            flex: 1;
+            padding: 40px;
             font-size: 2rem;
             color: black;
             display: flex;
             flex-direction: column;
             align-items: flex-start;
             justify-content: flex-start;
-            min-height: 100vh;
-            position: relative;
-            z-index: 10;
         }
 
-        .welcome-section {
-            animation: fadeIn 1s ease;
-            max-width: 800px;
-        }
-        
-        .welcome-section h1 {
-            font-size: 3.5rem;
-            margin-bottom: 20px;
-            color: #2E7D32;
-        }
-        
         .social-section {
-            margin-top: 40px;
-            padding: 20px;
-            background-color: #f8f8f8;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            width: 100%;
-            max-width: 500px;
+            margin-top: 30px;
         }
         
         .social-section h2 {
             font-size: 1.8rem;
             font-weight: 500;
             margin-bottom: 15px;
-            color: #388E3C;
         }
         
         .qq-container {
             display: flex;
             align-items: center;
             font-size: 1.6rem;
-            padding: 10px;
-            background: white;
-            border-radius: 8px;
         }
         
         .qq-logo {
-            width: 36px;
-            height: 36px;
+            width: 30px;
+            height: auto;
             margin: 0 15px;
         }
-        
-        .footer {
-            text-align: center;
-            padding: 20px;
+
+        .menu-toggle {
+            display: none;
+            width: 44px;
+            height: 44px;
+            background: transparent;
+            border: none;
+            margin-right: 15px;
+            cursor: pointer;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .menu-toggle span {
+            display: block;
+            width: 28px;
+            height: 3px;
+            background-color: white;
+            margin: 3px 0;
+            transition: transform 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            height: 100%;
+            width: 280px;
+            background-color: white;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            z-index: 999;
+            transition: right 0.4s ease;
+            display: flex;
+            flex-direction: column;
+            padding-top: 60px;
+        }
+
+        .sidebar.active {
+            right: 0;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2rem;
             color: #666;
-            font-size: 1rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.3s ease;
         }
-        
-        /* 动画效果 */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+
+        .close-btn:hover {
+            transform: translateX(5px);
+            color: #333;
         }
-        
-        /* 响应式设计 */
+
+        .sidebar a {
+            display: block;
+            padding: 18px 25px;
+            text-decoration: none;
+            color: #444;
+            font-size: 1.4rem;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar a:hover {
+            background-color: #f8f8f8;
+            color: #388E3C;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+            display: none;
+        }
+
         @media (max-width: 768px) {
-            main {
-                padding: 70px 20px 20px;
-                font-size: 1.8rem;
+            .nav-buttons {
+                display: none;
             }
-            
-            .welcome-section h1 {
-                font-size: 2.5rem;
+
+            .menu-toggle {
+                display: flex;
             }
-            
-            .qq-container {
-                font-size: 1.4rem;
+        }
+
+        @media (min-width: 769px) {
+            .sidebar, .overlay {
+                display: none !important;
             }
         }
     </style>
 </head>
 <body>
-    <!-- 公共组件容器 -->
-    <div id="common-container">
-        <iframe src="common.html" title="公共导航栏和侧边栏"></iframe>
-    </div>
-    
-    <!-- 主站专属内容 -->
+    <iframe src="/header.html" style="width: 100%; height: 60px; border: none;"></iframe>
+
     <main>
-        <div class="welcome-section">
-            <h1>欢迎来到 Timbre 的博客</h1>
-            <p>在这里分享Web开发、前端技术和创新想法</p>
-            
-            <div class="social-section">
-                <h2>社交联系方式</h2>
-                <div class="qq-container">
-                    <span>QQ</span>
-                    <img class="qq-logo" src="/assets/logos/QQ.png" alt="QQ Logo">
-                    <span>3665909064</span>
-                </div>
+        欢迎来到 Timbre 的博客
+
+        <div class="social-section">
+            <h2>社交</h2>
+            <div class="qq-container">
+                <span>QQ</span>
+                <img class="qq-logo" src="/assets/logos/QQ.png" alt="QQ Logo">
+                <span>3665909064</span>
             </div>
         </div>
     </main>
-    
-    <footer class="footer">
-        © 2023 Timbre's Blog - 分享知识和创意
-    </footer>
 </body>
 </html>
