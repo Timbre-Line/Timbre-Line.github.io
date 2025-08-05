@@ -5,52 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Timbre's Blog</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script>
-        // 加载公共头部
-        fetch('/header.html')
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('header-container').innerHTML = data;
-                
-                // 重新绑定header中的事件
-                const headerScript = document.createElement('script');
-                headerScript.text = `
-                    document.addEventListener('DOMContentLoaded', function() {
-                        const menuToggle = document.querySelector('.menu-toggle');
-                        const sidebar = document.querySelector('.sidebar');
-                        const overlay = document.querySelector('.overlay');
-                        const closeBtn = document.querySelector('.close-btn');
-                        
-                        function openSidebar() {
-                            sidebar.classList.add('active');
-                            overlay.style.display = 'block';
-                            document.body.style.overflow = 'hidden';
-                        }
-                        
-                        function closeSidebar() {
-                            sidebar.classList.remove('active');
-                            overlay.style.display = 'none';
-                            document.body.style.overflow = 'auto';
-                        }
-                        
-                        if (menuToggle) menuToggle.addEventListener('click', openSidebar);
-                        if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
-                        if (overlay) overlay.addEventListener('click', closeSidebar);
-
-                        window.addEventListener('resize', function() {
-                            if (window.innerWidth > 768) {
-                                closeSidebar();
-                            }
-                        });
-                    });
-                `;
-                document.head.appendChild(headerScript);
-            })
-            .catch(error => {
-                console.error('加载header时出错:', error);
-                document.getElementById('header-container').innerHTML = '<nav style="background:#A5D6A7;padding:20px;color:white;text-align:center">导航加载失败</nav>';
-            });
-    </script>
     <style>
         body {
             display: flex;
@@ -117,5 +71,46 @@
             </div>
         </div>
     </main>
+
+    <script>
+        // 加载公共头部
+        fetch('/header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-container').innerHTML = data;
+                
+                // 立即绑定事件（修复侧边栏打不开的问题）
+                const menuToggle = document.querySelector('.menu-toggle');
+                const sidebar = document.querySelector('.sidebar');
+                const overlay = document.querySelector('.overlay');
+                const closeBtn = document.querySelector('.close-btn');
+                
+                function openSidebar() {
+                    sidebar.classList.add('active');
+                    overlay.style.display = 'block';
+                    document.body.style.overflow = 'hidden';
+                }
+                
+                function closeSidebar() {
+                    sidebar.classList.remove('active');
+                    overlay.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+                
+                menuToggle.addEventListener('click', openSidebar);
+                closeBtn.addEventListener('click', closeSidebar);
+                overlay.addEventListener('click', closeSidebar);
+
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth > 768) {
+                        closeSidebar();
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('加载header时出错:', error);
+                document.getElementById('header-container').innerHTML = '<nav style="background:#A5D6A7;padding:20px;color:white;text-align:center">导航加载失败</nav>';
+            });
+    </script>
 </body>
 </html>
