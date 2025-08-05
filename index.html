@@ -5,14 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Timbre's Blog</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- 包含公共部分 -->
+    <script>
+        // 加载公共头部
+        fetch('/header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-container').innerHTML = data;
+                
+                // 重新绑定header中的事件
+                const headerScript = document.createElement('script');
+                headerScript.text = `
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const menuToggle = document.querySelector('.menu-toggle');
+                        const sidebar = document.querySelector('.sidebar');
+                        const overlay = document.querySelector('.overlay');
+                        const closeBtn = document.querySelector('.close-btn');
+                        
+                        function openSidebar() {
+                            sidebar.classList.add('active');
+                            overlay.style.display = 'block';
+                            document.body.style.overflow = 'hidden';
+                        }
+                        
+                        function closeSidebar() {
+                            sidebar.classList.remove('active');
+                            overlay.style.display = 'none';
+                            document.body.style.overflow = 'auto';
+                        }
+                        
+                        if (menuToggle) menuToggle.addEventListener('click', openSidebar);
+                        if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+                        if (overlay) overlay.addEventListener('click', closeSidebar);
+
+                        window.addEventListener('resize', function() {
+                            if (window.innerWidth > 768) {
+                                closeSidebar();
+                            }
+                        });
+                    });
+                `;
+                document.head.appendChild(headerScript);
+            })
+            .catch(error => {
+                console.error('加载header时出错:', error);
+                document.getElementById('header-container').innerHTML = '<nav style="background:#A5D6A7;padding:20px;color:white;text-align:center">导航加载失败</nav>';
+            });
+    </script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
             display: flex;
             flex-direction: column;
@@ -22,65 +61,6 @@
             -moz-osx-font-smoothing: grayscale;
             position: relative;
             overflow-x: hidden;
-        }
-        
-        nav {
-            background-color: #A5D6A7;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 60px;
-            position: relative;
-            z-index: 100;
-        }
-        
-        h1 {
-            color: white;
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-left: 20px;
-        }
-        
-        .nav-buttons {
-            display: flex;
-            height: 100%;
-        }
-        
-        .btn {
-            background-color: #A5D6A7;
-            padding: 0 24px;
-            text-decoration: none;
-            color: white;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-            font-size: 1.2rem;
-            font-weight: 500;
-            letter-spacing: 0.5px;
-            z-index: 1;
-        }
-        
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background-color: #388E3C;
-            transition: transform 0.4s ease;
-            z-index: -1;
-        }
-        
-        .btn:hover::before {
-            transform: translateX(100%);
-        }
-        
-        .btn span {
-            position: relative;
-            z-index: 1;
         }
         
         main {
@@ -115,112 +95,16 @@
             height: auto;
             margin: 0 15px;
         }
-
-        .menu-toggle {
-            display: none;
-            width: 44px;
-            height: 44px;
-            background: transparent;
-            border: none;
-            margin-right: 15px;
-            cursor: pointer;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .menu-toggle span {
-            display: block;
-            width: 28px;
-            height: 3px;
-            background-color: white;
-            margin: 3px 0;
-            transition: transform 0.3s ease;
-            border-radius: 2px;
-        }
-
-        .sidebar {
-            position: fixed;
-            top: 0;
-            right: -300px;
-            height: 100%;
-            width: 280px;
-            background-color: white;
-            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
-            z-index: 999;
-            transition: right 0.4s ease;
-            display: flex;
-            flex-direction: column;
-            padding-top: 60px;
-        }
-
-        .sidebar.active {
-            right: 0;
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            font-size: 2rem;
-            color: #666;
-            background: none;
-            border: none;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-
-        .close-btn:hover {
-            transform: translateX(5px);
-            color: #333;
-        }
-
-        .sidebar a {
-            display: block;
-            padding: 18px 25px;
-            text-decoration: none;
-            color: #444;
-            font-size: 1.4rem;
-            border-bottom: 1px solid #eee;
-            transition: background-color 0.3s;
-        }
-
-        .sidebar a:hover {
-            background-color: #f8f8f8;
-            color: #388E3C;
-        }
-
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 99;
-            display: none;
-        }
-
-        @media (max-width: 768px) {
-            .nav-buttons {
-                display: none;
-            }
-
-            .menu-toggle {
-                display: flex;
-            }
-        }
-
-        @media (min-width: 769px) {
-            .sidebar, .overlay {
-                display: none !important;
-            }
+        
+        #header-container {
+            position: relative;
+            z-index: 100;
         }
     </style>
 </head>
 <body>
-    <iframe src="/header.html" style="width: 100%; height: 60px; border: none;"></iframe>
-
+    <div id="header-container"></div>
+    
     <main>
         欢迎来到 Timbre 的博客
 
