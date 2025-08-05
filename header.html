@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 字体定义 -->
+    <style>
+        @font-face {
+            font-family: 'SF Pro Display';
+            src: url('/assets/fonts/SF-Pro.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <h1>Timbre's Blog</h1>
+        <div class="nav-buttons">
+            <a href="https://timbre-line.github.io/poolcore" class="btn"><span>Poolcore</span></a>
+            <a href="https://timbre-line.github.io/et" class="btn"><span>Easy Template</span></a>
+        </div>
+        <button class="menu-toggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </nav>
+
+    <div class="sidebar">
+        <button class="close-btn">
+            <i class="fas fa-arrow-right"></i>
+        </button>
+        <a href="https://timbre-line.github.io/poolcore">Poolcore</a>
+        <a href="https://timbre-line.github.io/et">Easy Template</a>
+    </div>
+
+    <div class="overlay"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.querySelector('.menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.overlay');
+            const closeBtn = document.querySelector('.close-btn');
+            
+            function openSidebar() {
+                sidebar.classList.add('active');
+                overlay.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            }
+            
+            function closeSidebar() {
+                sidebar.classList.remove('active');
+                overlay.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+            
+            if (menuToggle) menuToggle.addEventListener('click', openSidebar);
+            if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+            if (overlay) overlay.addEventListener('click', closeSidebar);
+
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    closeSidebar();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
