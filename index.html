@@ -6,6 +6,14 @@
     <title>Timbre's Blog</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        @font-face {
+            font-family: 'SF Pro Display';
+            src: url('/assets/fonts/SF-Pro.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
         body {
             display: flex;
             flex-direction: column;
@@ -16,7 +24,7 @@
             position: relative;
             overflow-x: hidden;
         }
-        
+
         main {
             flex: 1;
             padding: 40px;
@@ -31,25 +39,25 @@
         .social-section {
             margin-top: 30px;
         }
-        
+
         .social-section h2 {
             font-size: 1.8rem;
             font-weight: 500;
             margin-bottom: 15px;
         }
-        
+
         .qq-container {
             display: flex;
             align-items: center;
             font-size: 1.6rem;
         }
-        
+
         .qq-logo {
             width: 30px;
             height: auto;
             margin: 0 15px;
         }
-        
+
         #header-container {
             position: relative;
             z-index: 100;
@@ -58,7 +66,7 @@
 </head>
 <body>
     <div id="header-container"></div>
-    
+
     <main>
         欢迎来到 Timbre 的博客
 
@@ -82,19 +90,19 @@
                 const sidebar = document.querySelector('.sidebar');
                 const overlay = document.querySelector('.overlay');
                 const closeBtn = document.querySelector('.close-btn');
-                
+
                 function openSidebar() {
                     sidebar.classList.add('active');
                     overlay.style.display = 'block';
                     document.body.style.overflow = 'hidden';
                 }
-                
+
                 function closeSidebar() {
                     sidebar.classList.remove('active');
                     overlay.style.display = 'none';
                     document.body.style.overflow = 'auto';
                 }
-                
+
                 menuToggle.addEventListener('click', openSidebar);
                 closeBtn.addEventListener('click', closeSidebar);
                 overlay.addEventListener('click', closeSidebar);
@@ -108,3 +116,4 @@
     </script>
 </body>
 </html>
+
