@@ -2,23 +2,69 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>404 - Timbre's Blog</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; }
-        body { font-family: 'Microsoft YaHei', sans-serif; text-align: center; }
-        main { font-size: 2rem; padding-top: 100px; }
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            font-family: 'SF Pro Display', 'Microsoft YaHei', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: black;
+        }
     </style>
 </head>
 <body>
     <div id="header-container"></div>
-    <main>此界面不存在</main>
     
+    <main>
+        此界面不存在
+    </main>
+
     <script>
         fetch('/header.html')
             .then(response => response.text())
             .then(data => {
                 document.getElementById('header-container').innerHTML = data;
-            });
+
+                const menuToggle = document.querySelector('.menu-toggle');
+                const sidebar = document.querySelector('.sidebar');
+                const overlay = document.querySelector('.overlay');
+                const closeBtn = document.querySelector('.close-btn');
+                
+                function openSidebar() {
+                    sidebar.classList.add('active');
+                    overlay.style.display = 'block';
+                    document.body.style.overflow = 'hidden';
+                }
+                
+                function closeSidebar() {
+                    sidebar.classList.remove('active');
+                    overlay.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+                
+                menuToggle && menuToggle.addEventListener('click', openSidebar);
+                closeBtn && closeBtn.addEventListener('click', closeSidebar);
+                overlay && overlay.addEventListener('click', closeSidebar);
+
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth > 768) {
+                        closeSidebar();
+                    }
+                });
+            })
     </script>
 </body>
 </html>
