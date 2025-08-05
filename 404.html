@@ -3,16 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 - Timbre's Blog</title>
+    <title>页面未找到</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            font-family: 'SF Pro Display', 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            position: relative;
+        }
+        
         main {
             flex: 1;
             display: flex;
-            align-items: center;
             justify-content: center;
-            font-size: 3rem;
-            color: black;
+            align-items: center;
+            font-size: 2.5rem;
+            font-weight: 600;
         }
     </style>
 </head>
@@ -28,34 +37,31 @@
             .then(response => response.text())
             .then(data => {
                 document.getElementById('header-container').innerHTML = data;
-
-                const menuToggle = document.querySelector('.menu-toggle');
-                const sidebar = document.querySelector('.sidebar');
-                const overlay = document.querySelector('.overlay');
-                const closeBtn = document.querySelector('.close-btn');
-                
-                function openSidebar() {
-                    sidebar.classList.add('active');
-                    overlay.style.display = 'block';
-                    document.body.style.overflow = 'hidden';
-                }
-                
-                function closeSidebar() {
-                    sidebar.classList.remove('active');
-                    overlay.style.display = 'none';
-                    document.body.style.overflow = 'auto';
-                }
-                
-                menuToggle && menuToggle.addEventListener('click', openSidebar);
-                closeBtn && closeBtn.addEventListener('click', closeSidebar);
-                overlay && overlay.addEventListener('click', closeSidebar);
-
-                window.addEventListener('resize', function() {
-                    if (window.innerWidth > 768) {
-                        closeSidebar();
-                    }
-                });
-            })
+                initNavbar();
+            });
+            
+        function initNavbar() {
+            const menuToggle = document.querySelector('.menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.overlay');
+            const closeBtn = document.querySelector('.close-btn');
+            
+            function openSidebar() {
+                sidebar.classList.add('active');
+                overlay.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            }
+            
+            function closeSidebar() {
+                sidebar.classList.remove('active');
+                overlay.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+            
+            menuToggle?.addEventListener('click', openSidebar);
+            closeBtn?.addEventListener('click', closeSidebar);
+            overlay?.addEventListener('click', closeSidebar);
+        }
     </script>
 </body>
 </html>
