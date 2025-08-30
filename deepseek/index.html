@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeepSeek - 深色模式</title>
+    <title>DeepSeek</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet">
     <style>
         * {
@@ -274,7 +274,8 @@
             messageElement.className = `message ${role}`;
             
             const avatar = document.createElement('img');
-            avatar.src = role === 'user' ? 'https://i.imgur.com/3ZQZQ9M.png' : 'https://i.imgur.com/7vZGh9a.png';
+            // 使用提供的头像路径
+            avatar.src = role === 'user' ? 'deepseek/user-avatar.png' : 'deepseek/bot-avatar.png';
             avatar.alt = role === 'user' ? '用户' : 'DeepSeek';
 
             const messageContent = document.createElement('div');
@@ -305,22 +306,49 @@
                 loadingElement.style.display = 'block';
             }
 
-            // 模拟API响应
-            setTimeout(() => {
+            // 使用真实的API
+            const apiKey = 'sk-b580580bfbd24876bbc97bee8af4a5f9';
+            const endpoint = 'https://api.deepseek.com/chat/completions';
+
+            const payload = {
+                model: "deepseek-chat",
+                messages: [
+                    { role: "system", content: "You are a helpful assistant" },
+                    { role: "user", content: message }
+                ],
+                stream: false
+            };
+
+            fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 隐藏加载动画
                 if (loadingElement) {
                     loadingElement.style.display = 'none';
                 }
-                
-                // 模拟不同的响应内容
-                const responses = [
-                    "你好！我是DeepSeek助手，有什么我可以帮您的吗？",
-                    "### 关于DeepSeek\n\nDeepSeek是一个先进的人工智能助手，专注于提供准确、有用的信息。\n\n**主要功能**:\n- 回答问题\n- 提供建议\n- 协助创作\n- 技术支持\n\n### 使用提示\n\n1. **清晰提问**: 提供更多细节以获得更准确的回答\n2. **具体需求**: 明确您需要什么类型的帮助\n3. **持续对话**: 可以基于之前的对话继续提问",
-                    "### 当前时间\n\n现在是2025年8月30日，星期六，下午4:15。\n\n### 技术支持\n\n如果您遇到任何技术问题，请提供以下信息：\n- 问题描述\n- 出现的错误信息\n- 您尝试过的解决方法\n\n我们将尽快为您提供解决方案。"
-                ];
-                
-                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                displayMessage('bot', randomResponse);
-            }, 1500);
+
+                if (data.choices && data.choices.length > 0) {
+                    displayMessage('bot', data.choices[0].message.content);
+                } else {
+                    displayMessage('bot', '出错了，请稍后再试。');
+                }
+            })
+            .catch(error => {
+                // 隐藏加载动画
+                if (loadingElement) {
+                    loadingElement.style.display = 'none';
+                }
+
+                displayMessage('bot', '出错了，请稍后再试。');
+                console.error('Error:', error);
+            });
         }
 
         // 添加回车发送功能
@@ -330,13 +358,6 @@
                 sendMessage();
             }
         });
-
-        // 初始欢迎消息
-        window.onload = function() {
-            setTimeout(() => {
-                displayMessage('bot', "你好！我是DeepSeek助手。有什么我可以帮您的吗？");
-            }, 500);
-        };
     </script>
 </body>
 </html>
