@@ -57,6 +57,10 @@
             font-size: 16px;
             line-height: 1.6;
             color: #fff;
+            /* 修复换行问题 */
+            overflow-wrap: break-word;
+            word-break: break-word;
+            white-space: pre-wrap;
         }
 
         .message.user {
@@ -176,7 +180,7 @@
             messageElement.appendChild(avatar);
             messageElement.appendChild(messageContent);
             messagesContainer.appendChild(messageElement);
-            messageElement.scrollIntoView();
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
         document.getElementById('chat-input').addEventListener('keypress', function(event) {
