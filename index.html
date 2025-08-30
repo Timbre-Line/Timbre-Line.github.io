@@ -31,10 +31,9 @@
             width: 100%;
             text-align: center;
             padding: 40px;
-            background: rgba(15, 15, 15, 0.8);
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(80, 80, 80, 0.3);
+            background: transparent;
+            border: none;
+            box-shadow: none;
         }
         
         h1 {
@@ -45,14 +44,12 @@
             background-clip: text;
             color: transparent;
             text-shadow: 0 2px 10px rgba(138, 43, 226, 0.3);
-            animation: fadeIn 1.5s ease-out;
         }
         
         .subtitle {
             font-size: 1.3rem;
             margin-bottom: 50px;
             color: #aaa;
-            animation: fadeIn 2s ease-out;
         }
         
         .deepseek-btn {
@@ -67,14 +64,12 @@
             transition: all 0.4s ease;
             box-shadow: 0 5px 15px rgba(30, 60, 114, 0.4);
             border: 2px solid rgba(100, 149, 237, 0.3);
-            animation: pulse 2s infinite;
         }
         
         .deepseek-btn:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 25px rgba(30, 60, 114, 0.6);
             background: linear-gradient(45deg, #2a5298, #3a6bc5);
-            animation: none;
         }
         
         .deepseek-btn:active {
@@ -86,29 +81,6 @@
             margin-top: 50px;
             color: #666;
             font-size: 0.9rem;
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(42, 82, 152, 0.6);
-            }
-            70% {
-                box-shadow: 0 0 0 15px rgba(42, 82, 152, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(42, 82, 152, 0);
-            }
         }
         
         @media (max-width: 600px) {
@@ -135,7 +107,3 @@
     </div>
 </body>
 </html>
-
-
-
-
