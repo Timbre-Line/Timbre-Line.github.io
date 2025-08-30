@@ -1,11 +1,205 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeepSeek</title>
+    <title>DeepSeek - 深色模式</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a1a1a;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #e0e0e0;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: #2d2d2d;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            height: 80vh;
+            margin-top: 10px;
+            backdrop-filter: blur(80px);
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            border: 1px solid #444;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #383838;
+            font-size: 16px;
+        }
+
+        .message {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .message img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .message-content {
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 85%;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #fff;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message.user img {
+            margin-left: 10px;
+            margin-right: 0;
+        }
+
+        .message.user .message-content {
+            background-color: #0056b3;
+            backdrop-filter: blur(80px);
+            color: white;
+            text-align: right;
+        }
+
+        .message.bot .message-content {
+            background-color: #444;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .input-container input {
+            flex: 1;
+            min-width: 0;
+            padding: 10px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            font-size: 16px;
+            background-color: #383838;
+            color: #fff;
+        }
+
+        .input-container input::placeholder {
+            color: #aaa;
+        }
+
+        .input-container button {
+            padding: 10px 15px;
+            min-width: 60px;
+            white-space: nowrap;
+            background-color: #0056b3;
+            backdrop-filter: blur(80px);
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .input-container button:hover {
+            background-color: #003d80;
+            backdrop-filter: blur(80px);
+        }
+
+        /* 段落样式 */
+        .message-content p {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+
+        /* 粗体文本样式 */
+        .message-content .bold-text {
+            font-size: 1.1em;
+            color: #fff;
+        }
+
+        /* 段落标题样式 */
+        .message-content .section-title {
+            font-size: 1.1em;
+            margin: 16px 0 8px 0;
+        }
+
+        /* 子段落样式 */
+        .message-content .subsection {
+            margin: 8px 0 8px 20px;
+        }
+
+        /* 正文样式 */
+        .message-content .subtitle {
+            color: #ddd;
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 16px;
+            color: #aaa;
+            margin-bottom: 20px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            .chat-container {
+                height: 83vh;
+                padding: 15px;
+            }
+
+            .messages {
+                padding: 20px;
+                font-size: 15px;
+            }
+
+            .input-container {
+                gap: 8px;
+            }
+
+            .input-container input {
+                font-size: 14px;
+            }
+
+            .input-container button {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+
+            .message img {
+                width: 30px;
+                height: 30px;
+            }
+
+            .message-content {
+                font-size: 15px;
+                max-width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="chat-container">
@@ -14,18 +208,135 @@
         <div class="input-container">
             <input id="chat-input" type="text" placeholder="给 DeepSeek 发送消息" />
             <button onclick="sendMessage()">发送</button>
-            <div class="dropdown">
-                <button onclick="toggleDropdown(event)">更多</button>
-                <div class="dropdown-content" id="dropdownMenu">
-                    <div class="dropdown-item" onclick="toggleTheme()">
-                        <span>浅色/深色</span>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
-    <script src="script.js"></script>
-</body>
+    <script>
+        // 格式化消息文本
+        function formatMessage(text) {
+            if (!text) return '';
+            
+            // 处理标题和换行
+            let lines = text.split('\n');
+            let formattedLines = lines.map(line => {
+                // 处理标题（**文本**）
+                line = line.replace(/\*\*(.*?)\*\*/g, '<span class="bold-text">$1</span>');
+                return line;
+            });
+            
+            // 将 ### 替换为换行，并确保每个部分都是一个段落
+            let processedText = formattedLines.join('\n');
+            let sections = processedText
+                .split('###')
+                .filter(section => section.trim())
+                .map(section => {
+                    // 移除多余的换行和空格
+                    let lines = section.split('\n').filter(line => line.trim());
+                    
+                    if (lines.length === 0) return '';
+                    
+                    // 处理每个部分
+                    let result = '';
+                    let currentIndex = 0;
+                    
+                    while (currentIndex < lines.length) {
+                        let line = lines[currentIndex].trim();
+                        
+                        // 如果是数字开头（如 "1.")
+                        if (/^\d+\./.test(line)) {
+                            result += `<p class="section-title">${line}</p>`;
+                        }
+                        // 如果是小标题（以破折号开头）
+                        else if (line.startsWith('-')) {
+                            result += `<p class="subsection"><span class="bold-text">${line.replace(/^-/, '').trim()}</span></p>`;
+                        }
+                        // 如果是正文（包含冒号的行）
+                        else if (line.includes(':')) {
+                            let [subtitle, content] = line.split(':').map(part => part.trim());
+                            result += `<p><span class="subtitle">${subtitle}</span>: ${content}</p>`;
+                        }
+                        // 普通文本
+                        else {
+                            result += `<p>${line}</p>`;
+                        }
+                        currentIndex++;
+                    }
+                    return result;
+                });
+            
+            return sections.join('');
+        }
 
+        // 显示消息
+        function displayMessage(role, message) {
+            const messagesContainer = document.getElementById('messages');
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${role}`;
+            
+            const avatar = document.createElement('img');
+            avatar.src = role === 'user' ? 'https://i.imgur.com/3ZQZQ9M.png' : 'https://i.imgur.com/7vZGh9a.png';
+            avatar.alt = role === 'user' ? '用户' : 'DeepSeek';
+
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            
+            // 用户消息直接显示，机器人消息需要格式化
+            messageContent.innerHTML = role === 'user' ? message : formatMessage(message);
+
+            messageElement.appendChild(avatar);
+            messageElement.appendChild(messageContent);
+            messagesContainer.appendChild(messageElement);
+            
+            // 平滑滚动到底部
+            messageElement.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function sendMessage() {
+            const inputElement = document.getElementById('chat-input');
+            const message = inputElement.value;
+            if (!message.trim()) return;
+
+            displayMessage('user', message);
+            inputElement.value = '';
+
+            // 显示加载动画
+            const loadingElement = document.getElementById('loading');
+            if (loadingElement) {
+                loadingElement.style.display = 'block';
+            }
+
+            // 模拟API响应
+            setTimeout(() => {
+                if (loadingElement) {
+                    loadingElement.style.display = 'none';
+                }
+                
+                // 模拟不同的响应内容
+                const responses = [
+                    "你好！我是DeepSeek助手，有什么我可以帮您的吗？",
+                    "### 关于DeepSeek\n\nDeepSeek是一个先进的人工智能助手，专注于提供准确、有用的信息。\n\n**主要功能**:\n- 回答问题\n- 提供建议\n- 协助创作\n- 技术支持\n\n### 使用提示\n\n1. **清晰提问**: 提供更多细节以获得更准确的回答\n2. **具体需求**: 明确您需要什么类型的帮助\n3. **持续对话**: 可以基于之前的对话继续提问",
+                    "### 当前时间\n\n现在是2025年8月30日，星期六，下午4:15。\n\n### 技术支持\n\n如果您遇到任何技术问题，请提供以下信息：\n- 问题描述\n- 出现的错误信息\n- 您尝试过的解决方法\n\n我们将尽快为您提供解决方案。"
+                ];
+                
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                displayMessage('bot', randomResponse);
+            }, 1500);
+        }
+
+        // 添加回车发送功能
+        document.getElementById('chat-input').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // 初始欢迎消息
+        window.onload = function() {
+            setTimeout(() => {
+                displayMessage('bot', "你好！我是DeepSeek助手。有什么我可以帮您的吗？");
+            }, 500);
+        };
+    </script>
+</body>
 </html>
