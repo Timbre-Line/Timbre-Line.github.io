@@ -274,8 +274,7 @@
             messageElement.className = `message ${role}`;
             
             const avatar = document.createElement('img');
-            // 使用提供的头像路径
-            avatar.src = role === 'user' ? 'deepseek/user-avatar.png' : 'deepseek/bot-avatar.png';
+            avatar.src = role === 'user' ? 'user-avatar.png' : 'bot-avatar.png';
             avatar.alt = role === 'user' ? '用户' : 'DeepSeek';
 
             const messageContent = document.createElement('div');
