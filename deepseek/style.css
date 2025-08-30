@@ -57,7 +57,7 @@ body {
 
 .message-content .title {
     font-size: 1.3em;
-    font-weight: bold;
+    /* 移除 font-weight: bold; */
     display: block;
     margin: 16px 0 12px 0;
     color: #333;
@@ -247,7 +247,7 @@ body.dark-mode {
 /* 调整标题和段落样式 */
 .message-content .title {
     font-size: 1.3em;
-    font-weight: bold;
+    /* 移除 font-weight: bold; */
     display: block;
     margin: 16px 0 12px 0;
     color: #333;
@@ -264,7 +264,7 @@ body.dark-mode {
 
 /* 粗体文本样式 */
 .message-content .bold-text {
-    font-weight: bold;
+    /* 移除 font-weight: bold; */
     font-size: 1.1em;
     color: #333;
 }
@@ -272,7 +272,7 @@ body.dark-mode {
 /* 段落标题样式 */
 .message-content .section-title {
     font-size: 1.1em;
-    font-weight: bold;
+    /* 移除 font-weight: bold; */
     margin: 16px 0 8px 0;
 }
 
@@ -283,7 +283,7 @@ body.dark-mode {
 
 /* 正文样式 */
 .message-content .subtitle {
-    font-weight: bold;
+    /* 移除 font-weight: bold; */
 }
 
 /* 深色模式适配 */
