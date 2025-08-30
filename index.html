@@ -1,119 +1,136 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Timbre's Blog</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @font-face {
-            font-family: 'SF Pro Display';
-            src: url('/assets/fonts/SF-Pro.otf') format('opentype');
-            font-weight: normal;
-            font-style: normal;
-            font-display: swap;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-
+        
         body {
+            background: #0a0a0a;
+            color: #f0f0f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            font-family: 'SF Pro Display', 'Microsoft YaHei', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        main {
-            flex: 1;
-            padding: 40px;
-            font-size: 2rem;
-            color: black;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            justify-content: flex-start;
-        }
-
-        .social-section {
-            margin-top: 30px;
-        }
-
-        .social-section h2 {
-            font-size: 1.8rem;
-            font-weight: 500;
-            margin-bottom: 15px;
-        }
-
-        .qq-container {
-            display: flex;
             align-items: center;
-            font-size: 1.6rem;
+            justify-content: center;
+            padding: 20px;
+            background-image: radial-gradient(circle at 10% 20%, rgba(40, 40, 40, 0.1) 0%, rgba(10, 10, 10, 0.1) 90%);
         }
-
-        .qq-logo {
-            width: 30px;
-            height: auto;
-            margin: 0 15px;
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            padding: 40px;
+            background: rgba(15, 15, 15, 0.8);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(80, 80, 80, 0.3);
         }
-
-        #header-container {
-            position: relative;
-            z-index: 100;
+        
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #8a2be2, #1e90ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 10px rgba(138, 43, 226, 0.3);
+            animation: fadeIn 1.5s ease-out;
+        }
+        
+        .subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 50px;
+            color: #aaa;
+            animation: fadeIn 2s ease-out;
+        }
+        
+        .deepseek-btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(45deg, #1e3c72, #2a5298);
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 50px;
+            transition: all 0.4s ease;
+            box-shadow: 0 5px 15px rgba(30, 60, 114, 0.4);
+            border: 2px solid rgba(100, 149, 237, 0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        .deepseek-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(30, 60, 114, 0.6);
+            background: linear-gradient(45deg, #2a5298, #3a6bc5);
+            animation: none;
+        }
+        
+        .deepseek-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 10px rgba(30, 60, 114, 0.4);
+        }
+        
+        .footer {
+            margin-top: 50px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(42, 82, 152, 0.6);
+            }
+            70% {
+                box-shadow: 0 0 0 15px rgba(42, 82, 152, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(42, 82, 152, 0);
+            }
+        }
+        
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .container {
+                padding: 30px 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="header-container"></div>
-
-    <main>
-        欢迎来到 Timbre 的博客
-
-        <div class="social-section">
-            <h2>社交</h2>
-            <div class="qq-container">
-                <span>QQ</span>
-                <img class="qq-logo" src="/assets/logos/QQ.png" alt="QQ Logo">
-                <span>3665909064</span>
-            </div>
-        </div>
-    </main>
-
-    <script>
-        fetch('/header.html')
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('header-container').innerHTML = data;
-
-                const menuToggle = document.querySelector('.menu-toggle');
-                const sidebar = document.querySelector('.sidebar');
-                const overlay = document.querySelector('.overlay');
-                const closeBtn = document.querySelector('.close-btn');
-
-                function openSidebar() {
-                    sidebar.classList.add('active');
-                    overlay.style.display = 'block';
-                    document.body.style.overflow = 'hidden';
-                }
-
-                function closeSidebar() {
-                    sidebar.classList.remove('active');
-                    overlay.style.display = 'none';
-                    document.body.style.overflow = 'auto';
-                }
-
-                menuToggle.addEventListener('click', openSidebar);
-                closeBtn.addEventListener('click', closeSidebar);
-                overlay.addEventListener('click', closeSidebar);
-
-                window.addEventListener('resize', function() {
-                    if (window.innerWidth > 768) {
-                        closeSidebar();
-                    }
-                });
-            })
-    </script>
+    <div class="container">
+        <h1>我的个人博客</h1>
+        <p class="subtitle">探索技术、分享思考、记录成长</p>
+        <a href="https://www.deepseek.com" target="_blank" class="deepseek-btn">DeepSeek</a>
+        <p class="footer">© 2025 个人博客 | 黑色主题</p>
+    </div>
 </body>
 </html>
-
