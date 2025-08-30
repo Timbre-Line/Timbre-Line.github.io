@@ -7,7 +7,8 @@
     <link rel="icon" href="bot-avatar.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet">
     <style>
-        * {
+        ▪ {
+
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -148,50 +149,48 @@
             displayMessage('user', message);
             inputElement.value = '';
 
-            fetch('/.netlify/functions/deepseek-proxy', {
+            const apiKey = 'sk-b580580bfbd24876bbc97bee8af4a5f9';
+            const endpoint = 'https://api.deepseek.com/chat/completions';
+
+            const payload = {
+                model: "deepseek-chat",
+                messages: [{ role: "user", content: message }],
+                stream: false
+            };
+
+            fetch(endpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
                 },
-                body: JSON.stringify({ message })
+                body: JSON.stringify(payload)
             })
-            .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
                 if (data.choices?.length > 0) {
                     displayMessage('bot', data.choices[0].message.content);
-                } else if (data.error) {
-                    displayMessage('bot', `API错误: ${data.error.message || '请稍后再试'}`);
                 } else {
                     displayMessage('bot', '出错了，请稍后再试。');
                 }
             })
-            .catch(error => {
-                console.error('Fetch error:', error);
-                displayMessage('bot', '连接API时出错，请稍后再试。');
+            .catch(() => {
+                displayMessage('bot', '出错了，请稍后再试。');
             });
         }
-
 
         function displayMessage(role, message) {
             const messagesContainer = document.getElementById('messages');
             const messageElement = document.createElement('div');
             messageElement.className = `message ${role}`;
-        
+            
             const avatar = document.createElement('img');
             avatar.src = role === 'user' ? 'user-avatar.png' : 'bot-avatar.png';
             avatar.alt = role === 'user' ? '用户' : 'DeepSeek';
 
             const messageContent = document.createElement('div');
             messageContent.className = 'message-content';
-
-            if (role === 'bot') {
-                messageContent.innerHTML = marked.parse(message);
-            } else {
-                messageContent.textContent = message;
-            }
+            messageContent.textContent = message;
 
             messageElement.appendChild(avatar);
             messageElement.appendChild(messageContent);
