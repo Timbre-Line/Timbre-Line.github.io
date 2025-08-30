@@ -1,4 +1,3 @@
-
 exports.handler = async function(event, context) {
     // 只允许POST请求
     if (event.httpMethod !== 'POST') {
