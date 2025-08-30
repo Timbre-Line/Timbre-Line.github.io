@@ -110,19 +110,11 @@
         .input-container button:hover {
             background-color: #003d80;
         }
-
-        .loading {
-            text-align: center;
-            font-size: 16px;
-            color: #aaa;
-            margin-bottom: 20px;
-        }
     </style>
 </head>
 <body>
     <div class="chat-container">
         <div class="messages" id="messages"></div>
-        <div id="loading" class="loading" style="display: none;">给 DeepSeek 发送消息</div>
         <div class="input-container">
             <input id="chat-input" type="text" placeholder="给 DeepSeek 发送消息" />
             <button onclick="sendMessage()">发送</button>
@@ -137,9 +129,6 @@
 
             displayMessage('user', message);
             inputElement.value = '';
-
-            const loadingElement = document.getElementById('loading');
-            if (loadingElement) loadingElement.style.display = 'block';
 
             const apiKey = 'sk-b580580bfbd24876bbc97bee8af4a5f9';
             const endpoint = 'https://api.deepseek.com/chat/completions';
@@ -160,7 +149,6 @@
             })
             .then(response => response.json())
             .then(data => {
-                if (loadingElement) loadingElement.style.display = 'none';
                 if (data.choices?.length > 0) {
                     displayMessage('bot', data.choices[0].message.content);
                 } else {
@@ -168,7 +156,6 @@
                 }
             })
             .catch(() => {
-                if (loadingElement) loadingElement.style.display = 'none';
                 displayMessage('bot', '出错了，请稍后再试。');
             });
         }
