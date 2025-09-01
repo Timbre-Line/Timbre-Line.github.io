@@ -93,11 +93,70 @@
             background-color: #2d2d2d;
         }
 
+        .input-area {
+            padding: 0 20px 20px;
+        }
+        
+        /* 新增的上下文控制栏样式 */
+        .context-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+            margin-bottom: 8px;
+            color: #aaa;
+            font-size: 14px;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 22px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #666;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: #e0e0e0;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #0056b3;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(18px);
+        }
+
         .input-container {
             display: flex;
             gap: 8px;
             align-items: center;
-            padding: 0 20px 20px;
         }
 
         .input-container input {
@@ -133,6 +192,11 @@
             background-color: #666;
             cursor: not-allowed;
         }
+        
+        .status-label {
+            margin-left: 4px;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -140,9 +204,19 @@
         <div class="messages" id="messages">
             <div class="welcome-title">你好，我是 DeepSeek V3.1</div>
         </div>
-        <div class="input-container">
-            <input id="chat-input" type="text" placeholder="给 DeepSeek 发送消息" />
-            <button id="send-button" onclick="sendMessage()">发送</button>
+        <div class="input-area">
+            <div class="context-control" id="context-control">
+                <label class="switch">
+                    <input type="checkbox" id="context-switch" checked>
+                    <span class="slider"></span>
+                </label>
+                <span>上下文 <span class="status-label" id="context-status">(启用)</span></span>
+            </div>
+            
+            <div class="input-container">
+                <input id="chat-input" type="text" placeholder="给 DeepSeek 发送消息" />
+                <button id="send-button" onclick="sendMessage()">发送</button>
+            </div>
         </div>
     </div>
 
@@ -151,6 +225,31 @@
         let messageHistory = [];
         // 最大上下文消息数（支持3轮对话）
         const MAX_CONTEXT_MESSAGES = 6;
+        // 上下文功能状态
+        let contextEnabled = true;
+        
+        // 初始化上下文开关
+        function initContextSwitch() {
+            const switchElement = document.getElementById('context-switch');
+            const statusElement = document.getElementById('context-status');
+            
+            switchElement.addEventListener('change', function() {
+                contextEnabled = this.checked;
+                statusElement.textContent = contextEnabled ? "(启用)" : "(关闭)";
+                
+                if (contextEnabled) {
+                    document.getElementById('context-control').classList.remove('disabled');
+                } else {
+                    document.getElementById('context-control').classList.add('disabled');
+                    showContextDisabledHint();
+                }
+            });
+        }
+        
+        // 显示上下文已关闭的提示
+        function showContextDisabledHint() {
+            displayMessage('bot', '上下文功能已关闭 - AI 将不会记住之前的对话');
+        }
         
         function sendMessage() {
             const inputElement = document.getElementById('chat-input');
@@ -158,22 +257,30 @@
             const message = inputElement.value;
             if (!message.trim()) return;
 
-            // 禁用发送按钮
             sendButton.disabled = true;
             sendButton.textContent = "思考中...";
             
             displayMessage('user', message);
             inputElement.value = '';
 
-            // 将用户消息添加到历史
-            messageHistory.push({ role: "user", content: message });
-
             const apiKey = 'sk-b580580bfbd24876bbc97bee8af4a5f9';
             const endpoint = 'https://api.deepseek.com/chat/completions';
 
+            // 确定要发送的消息内容（根据上下文状态）
+            let messagesToSend;
+            
+            if (contextEnabled) {
+                // 启用上下文 - 添加用户消息到历史
+                messageHistory.push({ role: "user", content: message });
+                messagesToSend = messageHistory;
+            } else {
+                // 关闭上下文 - 只发送当前消息
+                messagesToSend = [{ role: "user", content: message }];
+            }
+
             const payload = {
                 model: "deepseek-chat",
-                messages: messageHistory,
+                messages: messagesToSend,
                 stream: false
             };
 
@@ -190,13 +297,14 @@
                 if (data.choices?.length > 0) {
                     const botResponse = data.choices[0].message.content;
                     displayMessage('bot', botResponse);
-                    
-                    // 将AI回复添加到历史
-                    messageHistory.push({ role: "assistant", content: botResponse });
 
-                    if (messageHistory.length > MAX_CONTEXT_MESSAGES) {
-                        messageHistory.shift();
-                        messageHistory.shift();
+                    if (contextEnabled) {
+                        messageHistory.push({ role: "assistant", content: botResponse });
+
+                        if (messageHistory.length > MAX_CONTEXT_MESSAGES) {
+                            messageHistory.shift();
+                            messageHistory.shift();
+                        }
                     }
                 } else {
                     displayMessage('bot', '服务器繁忙，请稍后再试。');
@@ -236,10 +344,14 @@
             }
         }
 
-        document.getElementById('chat-input').addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') sendMessage();
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            initContextSwitch();
+            
+            document.getElementById('chat-input').addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') sendMessage();
+            });
         });
     </script>
 </body>
 </html>
-
