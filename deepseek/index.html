@@ -129,17 +129,27 @@
             background-color: #003d80;
         }
 
-        /* 新增：禁用按钮样式 */
         .input-container button:disabled {
             background-color: #666;
             cursor: not-allowed;
+        }
+        
+        /* 新增上下文指示器 */
+        .context-indicator {
+            padding: 8px 16px;
+            background-color: #333;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 15px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
     <div class="chat-container">
         <div class="messages" id="messages">
-            <div class="welcome-title">你好，我是 DeepSeek</div>
+            <div class="welcome-title">你好，我是 DeepSeek V3.1</div>
         </div>
         <div class="input-container">
             <input id="chat-input" type="text" placeholder="给 DeepSeek 发送消息" />
@@ -148,6 +158,11 @@
     </div>
 
     <script>
+        // 存储对话历史（上下文）
+        let messageHistory = [];
+        // 最大上下文消息数（控制token消耗）
+        const MAX_CONTEXT_MESSAGES = 4;
+        
         function sendMessage() {
             const inputElement = document.getElementById('chat-input');
             const sendButton = document.getElementById('send-button');
@@ -161,12 +176,15 @@
             displayMessage('user', message);
             inputElement.value = '';
 
+            // 将用户消息添加到历史
+            messageHistory.push({ role: "user", content: message });
+
             const apiKey = 'sk-b580580bfbd24876bbc97bee8af4a5f9';
             const endpoint = 'https://api.deepseek.com/chat/completions';
 
             const payload = {
                 model: "deepseek-chat",
-                messages: [{ role: "user", content: message }],
+                messages: messageHistory, // 发送整个上下文历史
                 stream: false
             };
 
@@ -181,7 +199,24 @@
             .then(response => response.json())
             .then(data => {
                 if (data.choices?.length > 0) {
-                    displayMessage('bot', data.choices[0].message.content);
+                    const botResponse = data.choices[0].message.content;
+                    displayMessage('bot', botResponse);
+                    
+                    // 将AI回复添加到历史
+                    messageHistory.push({ role: "assistant", content: botResponse });
+                    
+                    // 控制上下文长度，避免token消耗过大
+                    if (messageHistory.length > MAX_CONTEXT_MESSAGES) {
+                        // 移除最旧的消息（保留最近的对话）
+                        messageHistory.shift();
+                        // 如果移除了用户消息，确保移除对应的AI回复
+                        if (messageHistory.length > 0 && messageHistory[0].role === "assistant") {
+                            messageHistory.shift();
+                        }
+                        
+                        // 显示上下文更新提示
+                        showContextIndicator();
+                    }
                 } else {
                     displayMessage('bot', '出错了，请稍后再试。');
                 }
@@ -218,6 +253,19 @@
             if (welcomeTitle) {
                 welcomeTitle.style.display = messagesContainer.querySelector('.message') ? 'none' : 'block';
             }
+        }
+        
+        function showContextIndicator() {
+            const messagesContainer = document.getElementById('messages');
+            const existingIndicator = document.querySelector('.context-indicator');
+            if (existingIndicator) {
+                existingIndicator.remove();
+            }
+            
+            const indicator = document.createElement('div');
+            indicator.className = 'context-indicator';
+            indicator.textContent = '已更新上下文（保留最近对话）';
+            messagesContainer.appendChild(indicator);
         }
 
         document.getElementById('chat-input').addEventListener('keypress', function(event) {
