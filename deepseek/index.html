@@ -122,10 +122,17 @@
             border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
+            transition: background-color 0.2s;
         }
 
         .input-container button:hover {
             background-color: #003d80;
+        }
+
+        /* 新增：禁用按钮样式 */
+        .input-container button:disabled {
+            background-color: #666;
+            cursor: not-allowed;
         }
     </style>
 </head>
@@ -136,16 +143,21 @@
         </div>
         <div class="input-container">
             <input id="chat-input" type="text" placeholder="给 DeepSeek 发送消息" />
-            <button onclick="sendMessage()">发送</button>
+            <button id="send-button" onclick="sendMessage()">发送</button>
         </div>
     </div>
 
     <script>
         function sendMessage() {
             const inputElement = document.getElementById('chat-input');
+            const sendButton = document.getElementById('send-button');
             const message = inputElement.value;
             if (!message.trim()) return;
 
+            // 禁用发送按钮
+            sendButton.disabled = true;
+            sendButton.textContent = "思考中...";
+            
             displayMessage('user', message);
             inputElement.value = '';
 
@@ -176,6 +188,11 @@
             })
             .catch(() => {
                 displayMessage('bot', '出错了，请稍后再试。');
+            })
+            .finally(() => {
+                // 无论成功失败，都重新启用按钮
+                sendButton.disabled = false;
+                sendButton.textContent = "发送";
             });
         }
 
