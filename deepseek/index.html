@@ -97,7 +97,7 @@
             padding: 0 20px 20px;
         }
         
-        /* 新增的上下文控制栏样式 */
+        /* 上下文控制栏样式 */
         .context-control {
             display: flex;
             align-items: center;
@@ -192,11 +192,6 @@
             background-color: #666;
             cursor: not-allowed;
         }
-        
-        .status-label {
-            margin-left: 4px;
-            font-weight: 500;
-        }
     </style>
 </head>
 <body>
@@ -210,7 +205,7 @@
                     <input type="checkbox" id="context-switch" checked>
                     <span class="slider"></span>
                 </label>
-                <span>上下文 <span class="status-label" id="context-status">(启用)</span></span>
+                <span>上下文</span>
             </div>
             
             <div class="input-container">
@@ -231,24 +226,10 @@
         // 初始化上下文开关
         function initContextSwitch() {
             const switchElement = document.getElementById('context-switch');
-            const statusElement = document.getElementById('context-status');
             
             switchElement.addEventListener('change', function() {
                 contextEnabled = this.checked;
-                statusElement.textContent = contextEnabled ? "(启用)" : "(关闭)";
-                
-                if (contextEnabled) {
-                    document.getElementById('context-control').classList.remove('disabled');
-                } else {
-                    document.getElementById('context-control').classList.add('disabled');
-                    showContextDisabledHint();
-                }
             });
-        }
-        
-        // 显示上下文已关闭的提示
-        function showContextDisabledHint() {
-            displayMessage('bot', '上下文功能已关闭 - AI 将不会记住之前的对话');
         }
         
         function sendMessage() {
@@ -314,7 +295,6 @@
                 displayMessage('bot', '你似乎未连接到 Internet');
             })
             .finally(() => {
-                // 无论成功失败，都重新启用按钮
                 sendButton.disabled = false;
                 sendButton.textContent = "发送";
             });
