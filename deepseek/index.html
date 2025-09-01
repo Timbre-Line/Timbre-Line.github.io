@@ -173,7 +173,7 @@
 
             const payload = {
                 model: "deepseek-chat",
-                messages: messageHistory, // 发送整个上下文历史
+                messages: messageHistory,
                 stream: false
             };
 
@@ -199,11 +199,11 @@
                         messageHistory.shift();
                     }
                 } else {
-                    displayMessage('bot', '出错了，请稍后再试。');
+                    displayMessage('bot', '服务器繁忙，请稍后再试。');
                 }
             })
             .catch(() => {
-                displayMessage('bot', '出错了，请稍后再试。');
+                displayMessage('bot', '你似乎未连接到 Internet');
             })
             .finally(() => {
                 // 无论成功失败，都重新启用按钮
@@ -242,3 +242,4 @@
     </script>
 </body>
 </html>
+
