@@ -6,9 +6,10 @@
     <title>DeepSeek</title>
     <link rel="icon" href="bot-avatar.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet">
+    <!-- 引入marked.js用于Markdown渲染 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         * {
-
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -193,6 +194,71 @@
             background-color: #666;
             cursor: not-allowed;
         }
+
+        .message-content h1, .message-content h2, .message-content h3 {
+            margin-top: 0.5em;
+            margin-bottom: 0.5em;
+        }
+        
+        .message-content p {
+            margin-bottom: 1em;
+        }
+        
+        .message-content ul, .message-content ol {
+            margin-left: 1.5em;
+            margin-bottom: 1em;
+        }
+        
+        .message-content li {
+            margin-bottom: 0.5em;
+        }
+        
+        .message-content pre {
+            background-color: #1e1e1e;
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1em 0;
+            font-family: monospace;
+        }
+        
+        .message-content code {
+            background-color: #1e1e1e;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        .message-content blockquote {
+            border-left: 3px solid #555;
+            padding-left: 1em;
+            margin: 1em 0;
+            color: #aaa;
+        }
+        
+        .message-content table {
+            border-collapse: collapse;
+            margin: 1em 0;
+            width: 100%;
+        }
+        
+        .message-content th, .message-content td {
+            border: 1px solid #555;
+            padding: 8px;
+        }
+        
+        .message-content th {
+            background-color: #333;
+        }
+        
+        .message-content a {
+            color: #4da6ff;
+            text-decoration: none;
+        }
+        
+        .message-content a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -223,6 +289,13 @@
         const MAX_CONTEXT_MESSAGES = 6;
         // 上下文功能状态
         let contextEnabled = true;
+
+        marked.setOptions({
+            breaks: true,
+            gfm: true,
+            smartLists: true,
+            smartypants: true
+        });
         
         // 初始化上下文开关
         function initContextSwitch() {
@@ -252,11 +325,9 @@
             let messagesToSend;
             
             if (contextEnabled) {
-                // 启用上下文 - 添加用户消息到历史
                 messageHistory.push({ role: "user", content: message });
                 messagesToSend = messageHistory;
             } else {
-                // 关闭上下文 - 只发送当前消息
                 messagesToSend = [{ role: "user", content: message }];
             }
 
@@ -312,7 +383,12 @@
 
             const messageContent = document.createElement('div');
             messageContent.className = 'message-content';
-            messageContent.textContent = message;
+            
+            if (role === 'bot') {
+                messageContent.innerHTML = marked.parse(message);
+            } else {
+                messageContent.textContent = message;
+            }
 
             messageElement.appendChild(avatar);
             messageElement.appendChild(messageContent);
