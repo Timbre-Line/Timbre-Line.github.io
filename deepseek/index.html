@@ -6,19 +6,7 @@
     <title>DeepSeek</title>
     <link rel="icon" href="bot-avatar.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet">
-    <!-- 引入Marked.js用于Markdown解析 -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!-- 引入DOMPurify用于安全地渲染HTML -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js"></script>
-    <!-- 引入highlight.js用于代码高亮 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/shell.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -206,117 +194,61 @@
             cursor: not-allowed;
         }
 
-        /* Markdown渲染样式 */
-        .message-content h1, .message-content h2, .message-content h3 {
-            margin: 1em 0 0.5em 0;
-            font-weight: 600;
+        .message.bot .message-content h1,
+        .message.bot .message-content h2,
+        .message.bot .message-content h3 {
+            margin: 10px 0;
+            color: #fff;
         }
-
-        .message-content h1 {
-            font-size: 1.5em;
-            border-bottom: 1px solid #555;
-            padding-bottom: 0.3em;
+        
+        .message.bot .message-content p {
+            margin: 8px 0;
         }
-
-        .message-content h2 {
-            font-size: 1.3em;
+        
+        .message.bot .message-content ul,
+        .message.bot .message-content ol {
+            padding-left: 20px;
+            margin: 8px 0;
         }
-
-        .message-content h3 {
-            font-size: 1.1em;
+        
+        .message.bot .message-content li {
+            margin: 4px 0;
         }
-
-        .message-content p {
-            margin: 0.8em 0;
-            line-height: 1.6;
-        }
-
-        .message-content ul, .message-content ol {
-            margin: 0.8em 0;
-            padding-left: 1.5em;
-        }
-
-        .message-content li {
-            margin: 0.4em 0;
-        }
-
-        .message-content blockquote {
-            border-left: 3px solid #0056b3;
-            padding-left: 1em;
-            margin: 1em 0;
-            color: #aaa;
-        }
-
-        .message-content pre {
-            background-color: #1a1a1a;
-            border-radius: 8px;
-            padding: 12px;
-            overflow-x: auto;
-            margin: 1em 0;
-            position: relative;
-        }
-
-        .message-content code {
-            font-family: 'Fira Code', 'Consolas', monospace;
-            background-color: #333;
-            padding: 0.2em 0.4em;
+        
+        .message.bot .message-content code {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 2px 4px;
             border-radius: 4px;
-            font-size: 0.95em;
+            font-family: monospace;
         }
-
-        .message-content pre code {
+        
+        .message.bot .message-content pre {
+            background-color: #1e1e1e;
+            padding: 12px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        
+        .message.bot .message-content pre code {
             background: none;
             padding: 0;
-            border-radius: 0;
         }
-
-        .message-content table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1em 0;
+        
+        .message.bot .message-content blockquote {
+            border-left: 3px solid #0056b3;
+            padding-left: 10px;
+            margin: 10px 0;
+            color: #aaa;
         }
-
-        .message-content th, .message-content td {
-            border: 1px solid #555;
-            padding: 8px;
-            text-align: left;
-        }
-
-        .message-content th {
-            background-color: #333;
-        }
-
-        .message-content tr:nth-child(even) {
-            background-color: #2a2a2a;
-        }
-
-        .message-content a {
+        
+        .message.bot .message-content a {
             color: #4da6ff;
             text-decoration: none;
         }
-
-        .message-content a:hover {
+        
+        .message.bot .message-content a:hover {
             text-decoration: underline;
-        }
-
-        .copy-btn {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: #e0e0e0;
-            border-radius: 4px;
-            padding: 4px 8px;
-            font-size: 12px;
-            cursor: pointer;
-            opacity: 0.7;
-            transition: opacity 0.2s;
-        }
-
-        .copy-btn:hover {
-            opacity: 1;
-            background: rgba(255, 255, 255, 0.2);
         }
     </style>
 </head>
@@ -377,11 +309,9 @@
             let messagesToSend;
             
             if (contextEnabled) {
-                // 启用上下文 - 添加用户消息到历史
                 messageHistory.push({ role: "user", content: message });
                 messagesToSend = messageHistory;
             } else {
-                // 关闭上下文 - 只发送当前消息
                 messagesToSend = [{ role: "user", content: message }];
             }
 
@@ -426,39 +356,6 @@
             });
         }
 
-        // 渲染Markdown内容为HTML
-        function renderMarkdown(content) {
-            // 使用Marked解析Markdown
-            const unsafeHtml = marked.parse(content);
-            
-            // 使用DOMPurify进行安全过滤
-            const safeHtml = DOMPurify.sanitize(unsafeHtml);
-            
-            // 创建容器元素
-            const container = document.createElement('div');
-            container.innerHTML = safeHtml;
-            
-            // 为代码块添加复制按钮
-            const codeBlocks = container.querySelectorAll('pre');
-            codeBlocks.forEach(pre => {
-                const button = document.createElement('button');
-                button.className = 'copy-btn';
-                button.textContent = '复制';
-                button.onclick = function() {
-                    const code = pre.querySelector('code')?.innerText || '';
-                    navigator.clipboard.writeText(code).then(() => {
-                        button.textContent = '已复制!';
-                        setTimeout(() => {
-                            button.textContent = '复制';
-                        }, 2000);
-                    });
-                };
-                pre.appendChild(button);
-            });
-            
-            return container;
-        }
-
         function displayMessage(role, message) {
             const messagesContainer = document.getElementById('messages');
             const messageElement = document.createElement('div');
@@ -470,20 +367,10 @@
 
             const messageContent = document.createElement('div');
             messageContent.className = 'message-content';
-            
+
             if (role === 'bot') {
-                // 渲染Markdown内容
-                const markdownContent = renderMarkdown(message);
-                messageContent.appendChild(markdownContent);
-                
-                // 高亮代码块
-                setTimeout(() => {
-                    messageContent.querySelectorAll('pre code').forEach((block) => {
-                        hljs.highlightElement(block);
-                    });
-                }, 0);
+                messageContent.innerHTML = marked.parse(message);
             } else {
-                // 用户消息保持纯文本
                 messageContent.textContent = message;
             }
 
@@ -504,18 +391,6 @@
             
             document.getElementById('chat-input').addEventListener('keypress', function(event) {
                 if (event.key === 'Enter') sendMessage();
-            });
-
-            marked.setOptions({
-                breaks: true,
-                gfm: true,
-                tables: true,
-                highlight: function(code, lang) {
-                    if (hljs.getLanguage(lang)) {
-                        return hljs.highlight(code, { language: lang }).value;
-                    }
-                    return hljs.highlightAuto(code).value;
-                }
             });
         });
     </script>
