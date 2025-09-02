@@ -369,6 +369,7 @@
             messageContent.className = 'message-content';
 
             if (role === 'bot') {
+                // 修复：去除消息末尾的空白字符，避免多余空行
                 const trimmedMessage = message.trim();
                 messageContent.innerHTML = marked.parse(trimmedMessage);
             } else {
@@ -397,4 +398,3 @@
     </script>
 </body>
 </html>
-
