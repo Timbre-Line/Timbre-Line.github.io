@@ -6,9 +6,9 @@
     <title>DeepSeek</title>
     <link rel="icon" href="bot-avatar.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        * {
+        ▪ {
+
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -193,63 +193,6 @@
             background-color: #666;
             cursor: not-allowed;
         }
-
-        .message.bot .message-content h1,
-        .message.bot .message-content h2,
-        .message.bot .message-content h3 {
-            margin: 10px 0;
-            color: #fff;
-        }
-        
-        .message.bot .message-content p {
-            margin: 8px 0;
-        }
-        
-        .message.bot .message-content ul,
-        .message.bot .message-content ol {
-            padding-left: 20px;
-            margin: 8px 0;
-        }
-        
-        .message.bot .message-content li {
-            margin: 4px 0;
-        }
-        
-        .message.bot .message-content code {
-            background-color: rgba(0, 0, 0, 0.2);
-            padding: 2px 4px;
-            border-radius: 4px;
-            font-family: monospace;
-        }
-        
-        .message.bot .message-content pre {
-            background-color: #1e1e1e;
-            padding: 12px;
-            border-radius: 4px;
-            overflow-x: auto;
-            margin: 10px 0;
-        }
-        
-        .message.bot .message-content pre code {
-            background: none;
-            padding: 0;
-        }
-        
-        .message.bot .message-content blockquote {
-            border-left: 3px solid #0056b3;
-            padding-left: 10px;
-            margin: 10px 0;
-            color: #aaa;
-        }
-        
-        .message.bot .message-content a {
-            color: #4da6ff;
-            text-decoration: none;
-        }
-        
-        .message.bot .message-content a:hover {
-            text-decoration: underline;
-        }
     </style>
 </head>
 <body>
@@ -309,9 +252,11 @@
             let messagesToSend;
             
             if (contextEnabled) {
+                // 启用上下文 - 添加用户消息到历史
                 messageHistory.push({ role: "user", content: message });
                 messagesToSend = messageHistory;
             } else {
+                // 关闭上下文 - 只发送当前消息
                 messagesToSend = [{ role: "user", content: message }];
             }
 
@@ -367,14 +312,7 @@
 
             const messageContent = document.createElement('div');
             messageContent.className = 'message-content';
-
-            if (role === 'bot') {
-                // 修复：去除消息末尾的空白字符，避免多余空行
-                const trimmedMessage = message.trim();
-                messageContent.innerHTML = marked.parse(trimmedMessage);
-            } else {
-                messageContent.textContent = message;
-            }
+            messageContent.textContent = message;
 
             messageElement.appendChild(avatar);
             messageElement.appendChild(messageContent);
