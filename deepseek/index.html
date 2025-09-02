@@ -8,7 +8,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        * {
+        ▪ {
+
+
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -199,9 +201,12 @@
             margin-bottom: 0.5em;
         }
         
-        /* 关键修复：减少段落间距 */
         .message-content p {
-            margin-bottom: 0.25em; /* 从0.5em减少到0.25em */
+            margin-bottom: 0.5em;
+        }
+
+        .message.bot .message-content p {
+            margin-bottom: 0;
         }
         
         .message-content ul, .message-content ol {
@@ -291,7 +296,7 @@
         let contextEnabled = true;
 
         marked.setOptions({
-            breaks: false,
+            breaks: true,
             gfm: true,
             smartLists: true,
             smartypants: true
@@ -412,4 +417,3 @@
     </script>
 </body>
 </html>
-
