@@ -6,7 +6,6 @@
     <title>DeepSeek</title>
     <link rel="icon" href="bot-avatar.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet">
-    <!-- 引入marked.js用于Markdown渲染 -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         * {
@@ -75,20 +74,11 @@
             color: #fff;
             overflow-wrap: break-word;
             word-break: break-word;
-            white-space: pre-wrap;
-        }
-
-        .message.user {
-            flex-direction: row-reverse;
-        }
-
-        .message.user img {
-            margin-left: 10px;
-            margin-right: 0;
         }
 
         .message.user .message-content {
             background-color: #0056b3;
+            white-space: pre-wrap;
         }
 
         .message.bot .message-content {
@@ -291,7 +281,7 @@
         let contextEnabled = true;
 
         marked.setOptions({
-            breaks: true,
+            breaks: false, // 禁用自动将换行符转换为<br>
             gfm: true,
             smartLists: true,
             smartypants: true
