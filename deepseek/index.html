@@ -6,10 +6,10 @@
     <title>DeepSeek</title>
     <link rel="icon" href="bot-avatar.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet">
-    <!-- 引入marked库用于Markdown渲染 -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        * {
+        ▪ {
+
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -194,8 +194,7 @@
             background-color: #666;
             cursor: not-allowed;
         }
-        
-        /* Markdown渲染样式增强 */
+
         .message.bot .message-content h1,
         .message.bot .message-content h2,
         .message.bot .message-content h3 {
@@ -371,7 +370,6 @@
             messageContent.className = 'message-content';
 
             if (role === 'bot') {
-                // 使用marked将Markdown转换为HTML
                 messageContent.innerHTML = marked.parse(message);
             } else {
                 messageContent.textContent = message;
