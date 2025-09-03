@@ -6,9 +6,10 @@
     <title>DeepSeek</title>
     <link rel="icon" href="bot-avatar.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet">
+    <!-- 引入marked库用于Markdown渲染 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         * {
-
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -92,6 +93,65 @@
 
         .message.bot .message-content {
             background-color: #3d3d3d;
+        }
+
+        /* Markdown渲染样式 */
+        .message.bot .message-content h1, 
+        .message.bot .message-content h2, 
+        .message.bot .message-content h3 {
+            margin-top: 1em;
+            margin-bottom: 0.5em;
+            color: #f0f0f0;
+        }
+
+        .message.bot .message-content p {
+            margin-bottom: 1em;
+        }
+
+        .message.bot .message-content ul, 
+        .message.bot .message-content ol {
+            margin-left: 1.5em;
+            margin-bottom: 1em;
+        }
+
+        .message.bot .message-content li {
+            margin-bottom: 0.5em;
+        }
+
+        .message.bot .message-content code {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .message.bot .message-content pre {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 12px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1em 0;
+        }
+
+        .message.bot .message-content pre code {
+            background: none;
+            padding: 0;
+        }
+
+        .message.bot .message-content blockquote {
+            border-left: 3px solid #0056b3;
+            padding-left: 12px;
+            margin: 1em 0;
+            color: #aaa;
+        }
+
+        .message.bot .message-content a {
+            color: #4da6ff;
+            text-decoration: none;
+        }
+
+        .message.bot .message-content a:hover {
+            text-decoration: underline;
         }
 
         .input-area {
@@ -312,7 +372,14 @@
 
             const messageContent = document.createElement('div');
             messageContent.className = 'message-content';
-            messageContent.textContent = message;
+            
+            // 仅对bot的消息使用Markdown渲染
+            if (role === 'bot') {
+                // 使用marked库将Markdown转换为HTML
+                messageContent.innerHTML = marked.parse(message);
+            } else {
+                messageContent.textContent = message;
+            }
 
             messageElement.appendChild(avatar);
             messageElement.appendChild(messageContent);
