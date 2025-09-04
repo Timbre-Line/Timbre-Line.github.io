@@ -9,7 +9,6 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         * {
-
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -67,8 +66,6 @@
         }
 
         .message-content {
-            padding: 12px 16px;
-            border-radius: 12px;
             max-width: 85%;
             font-size: 16px;
             line-height: 1.6;
@@ -89,10 +86,15 @@
 
         .message.user .message-content {
             background-color: #0056b3;
+            padding: 12px 16px;
+            border-radius: 12px;
         }
 
+        /* 移除bot消息的气泡效果 */
         .message.bot .message-content {
-            background-color: #3d3d3d;
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
         }
 
         .message.bot .message-content h1, 
@@ -398,4 +400,3 @@
     </script>
 </body>
 </html>
-
