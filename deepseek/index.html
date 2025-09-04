@@ -6,7 +6,6 @@
     <title>DeepSeek</title>
     <link rel="icon" href="bot-avatar.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet">
-    <!-- 引入marked库用于Markdown渲染 -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         * {
@@ -95,7 +94,6 @@
             background-color: #3d3d3d;
         }
 
-        /* Markdown渲染样式 */
         .message.bot .message-content h1, 
         .message.bot .message-content h2, 
         .message.bot .message-content h3 {
@@ -312,11 +310,9 @@
             let messagesToSend;
             
             if (contextEnabled) {
-                // 启用上下文 - 添加用户消息到历史
                 messageHistory.push({ role: "user", content: message });
                 messagesToSend = messageHistory;
             } else {
-                // 关闭上下文 - 只发送当前消息
                 messagesToSend = [{ role: "user", content: message }];
             }
 
@@ -372,10 +368,8 @@
 
             const messageContent = document.createElement('div');
             messageContent.className = 'message-content';
-            
-            // 仅对bot的消息使用Markdown渲染
+
             if (role === 'bot') {
-                // 使用marked库将Markdown转换为HTML
                 messageContent.innerHTML = marked.parse(message);
             } else {
                 messageContent.textContent = message;
