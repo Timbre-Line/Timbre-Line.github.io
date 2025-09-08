@@ -8,7 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        * {
+        ▪ {
+
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -168,21 +169,6 @@
 
         .message.bot .message-content a:hover {
             text-decoration: underline;
-        }
-
-        /* 修复列表项间的多余空行 */
-        .message.bot .message-content li p {
-            margin: 0;
-            padding: 0;
-            display: inline;
-        }
-
-        .message.bot .message-content ul ul,
-        .message.bot .message-content ol ol,
-        .message.bot .message-content ul ol,
-        .message.bot .message-content ol ul {
-            margin-top: 0.2em;
-            margin-bottom: 0.2em;
         }
 
         .input-area {
@@ -359,8 +345,10 @@
         let messageHistory = [];
         // 最大上下文消息数（支持3轮对话）
         const MAX_CONTEXT_MESSAGES = 6;
-        let thinkingMode = false;
+        // 上下文功能状态
         let contextEnabled = true;
+        // 思考模式状态
+        let thinkingMode = false;
         
         // 初始化开关
         function initSwitches() {
