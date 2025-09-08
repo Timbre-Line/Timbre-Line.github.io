@@ -306,9 +306,6 @@
             displayMessage('user', message);
             inputElement.value = '';
 
-            const apiKey = 'sk-b580580bfbd24876bbc97bee8af4a5f9';
-            const endpoint = 'https://api.deepseek.com/chat/completions';
-
             // 确定要发送的消息内容（根据上下文状态）
             let messagesToSend;
             
@@ -325,11 +322,11 @@
                 stream: false
             };
 
-            fetch(endpoint, {
+            // 使用 Netlify 函数代理 API 请求
+            fetch('/.netlify/functions/deepseek-proxy', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(payload)
             })
@@ -352,7 +349,7 @@
                 }
             })
             .catch(() => {
-                displayMessage('bot', '你似乎未连接到 Internet');
+                displayMessage('bot', '请求失败，请检查网络连接');
             })
             .finally(() => {
                 sendButton.disabled = false;
