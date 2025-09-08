@@ -322,7 +322,7 @@
                 stream: false
             };
 
-            // 使用 Netlify 函数代理 API 请求
+            // 使用Netlify函数代理
             fetch('/.netlify/functions/deepseek-proxy', {
                 method: 'POST',
                 headers: {
@@ -330,7 +330,12 @@
                 },
                 body: JSON.stringify(payload)
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.choices?.length > 0) {
                     const botResponse = data.choices[0].message.content;
@@ -348,8 +353,9 @@
                     displayMessage('bot', '服务器繁忙，请稍后再试。');
                 }
             })
-            .catch(() => {
-                displayMessage('bot', '请求失败，请检查网络连接');
+            .catch((error) => {
+                console.error('Error:', error);
+                displayMessage('bot', '请求失败: ' + error.message);
             })
             .finally(() => {
                 sendButton.disabled = false;
