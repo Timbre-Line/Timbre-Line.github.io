@@ -9,7 +9,6 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         * {
-
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -28,6 +27,39 @@
             flex-direction: column;
             height: 100vh;
             background-color: #2d2d2d;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            background-color: #1a1a1a;
+            border-bottom: 1px solid #444;
+        }
+
+        .model-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background-color: #333;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .model-indicator .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .model-indicator .reasoner {
+            background-color: #4da6ff;
+        }
+
+        .model-indicator .chat {
+            background-color: #00cc66;
         }
 
         .messages {
@@ -276,39 +308,21 @@
             background-color: #666;
             cursor: not-allowed;
         }
-
-        .model-indicator {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
-            background-color: #333;
-            border-radius: 20px;
-            font-size: 14px;
-            margin-left: auto;
-        }
-
-        .model-indicator .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: #4da6ff;
-        }
-
-        .model-indicator .reasoner {
-            background-color: #4da6ff;
-        }
-
-        .model-indicator .chat {
-            background-color: #00cc66;
-        }
     </style>
 </head>
 <body>
     <div class="chat-container">
+        <div class="top-bar">
+            <div class="model-indicator">
+                <span class="dot reasoner"></span>
+                <span id="model-name">Reasoner</span>
+            </div>
+        </div>
+        
         <div class="messages" id="messages">
             <div class="welcome-title">你好，我是 DeepSeek V3.1</div>
         </div>
+        
         <div class="input-area">
             <div class="context-control" id="context-control">
                 <div class="switch-container">
@@ -316,7 +330,7 @@
                         <input type="checkbox" id="thinking-switch">
                         <span class="slider"></span>
                     </label>
-                    <span>思考</span>
+                    <span>深度思考</span>
                 </div>
                 
                 <div class="switch-container">
@@ -325,11 +339,6 @@
                         <span class="slider"></span>
                     </label>
                     <span>上下文</span>
-                </div>
-                
-                <div class="model-indicator">
-                    <span class="dot reasoner"></span>
-                    <span id="model-name">DeepSeek-Reasoner</span>
                 </div>
             </div>
             
@@ -345,10 +354,8 @@
         let messageHistory = [];
         // 最大上下文消息数（支持3轮对话）
         const MAX_CONTEXT_MESSAGES = 6;
-        // 上下文功能状态
-        let contextEnabled = true;
-        // 思考模式状态
         let thinkingMode = false;
+        let contextEnabled = true;
         
         // 初始化开关
         function initSwitches() {
@@ -370,10 +377,10 @@
             const dot = document.querySelector('.model-indicator .dot');
             
             if (thinkingMode) {
-                modelName.textContent = "DeepSeek-Reasoner";
+                modelName.textContent = "Reasoner";
                 dot.className = "dot reasoner";
             } else {
-                modelName.textContent = "DeepSeek-Chat";
+                modelName.textContent = "Chat";
                 dot.className = "dot chat";
             }
         }
@@ -489,4 +496,3 @@
     </script>
 </body>
 </html>
-
