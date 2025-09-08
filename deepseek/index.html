@@ -170,6 +170,18 @@
             text-decoration: underline;
         }
 
+        .message.bot .message-content li p {
+            display: inline;
+        }
+
+        .message.bot .message-content ul ul,
+        .message.bot .message-content ol ol,
+        .message.bot .message-content ul ol,
+        .message.bot .message-content ol ul {
+            margin-top: 0.2em;
+            margin-bottom: 0.2em;
+        }
+
         .input-area {
             padding: 10px 20px;
             background-color: #1a1a1a;
@@ -344,10 +356,8 @@
         let messageHistory = [];
         // 最大上下文消息数（支持3轮对话）
         const MAX_CONTEXT_MESSAGES = 6;
-        // 上下文功能状态
-        let contextEnabled = true;
-        // 思考模式状态
         let thinkingMode = false;
+        let contextEnabled = true;
         
         // 初始化开关
         function initSwitches() {
@@ -488,4 +498,3 @@
     </script>
 </body>
 </html>
-
