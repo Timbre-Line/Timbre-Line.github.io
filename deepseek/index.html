@@ -115,7 +115,7 @@
         }
 
         .message.bot .message-content li {
-            margin-bottom: 0.1em;
+            margin-bottom: 0.3em;
         }
 
         .message.bot .message-content code {
@@ -162,11 +162,17 @@
         .context-control {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 15px;
             padding: 15px 0;
             margin-bottom: 6px;
             color: #aaa;
             font-size: 14px;
+        }
+        
+        .switch-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .switch {
@@ -253,20 +259,61 @@
             background-color: #666;
             cursor: not-allowed;
         }
+
+        .model-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background-color: #333;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-left: auto;
+        }
+
+        .model-indicator .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #4da6ff;
+        }
+
+        .model-indicator .reasoner {
+            background-color: #4da6ff;
+        }
+
+        .model-indicator .chat {
+            background-color: #00cc66;
+        }
     </style>
 </head>
 <body>
     <div class="chat-container">
         <div class="messages" id="messages">
-            <div class="welcome-title">你好，我是 DeepSeek V3.1 Thinking</div>
+            <div class="welcome-title">你好，我是 DeepSeek V3.1</div>
         </div>
         <div class="input-area">
             <div class="context-control" id="context-control">
-                <label class="switch">
-                    <input type="checkbox" id="context-switch" checked>
-                    <span class="slider"></span>
-                </label>
-                <span>上下文</span>
+                <div class="switch-container">
+                    <label class="switch">
+                        <input type="checkbox" id="thinking-switch">
+                        <span class="slider"></span>
+                    </label>
+                    <span>思考</span>
+                </div>
+                
+                <div class="switch-container">
+                    <label class="switch">
+                        <input type="checkbox" id="context-switch" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span>上下文</span>
+                </div>
+                
+                <div class="model-indicator">
+                    <span class="dot reasoner"></span>
+                    <span id="model-name">DeepSeek-Reasoner</span>
+                </div>
             </div>
             
             <div class="input-container">
@@ -283,14 +330,35 @@
         const MAX_CONTEXT_MESSAGES = 6;
         // 上下文功能状态
         let contextEnabled = true;
+        // 思考模式状态
+        let thinkingMode = false;
         
-        // 初始化上下文开关
-        function initContextSwitch() {
-            const switchElement = document.getElementById('context-switch');
+        // 初始化开关
+        function initSwitches() {
+            const contextSwitch = document.getElementById('context-switch');
+            const thinkingSwitch = document.getElementById('thinking-switch');
             
-            switchElement.addEventListener('change', function() {
+            contextSwitch.addEventListener('change', function() {
                 contextEnabled = this.checked;
             });
+            
+            thinkingSwitch.addEventListener('change', function() {
+                thinkingMode = this.checked;
+                updateModelIndicator();
+            });
+        }
+
+        function updateModelIndicator() {
+            const modelName = document.getElementById('model-name');
+            const dot = document.querySelector('.model-indicator .dot');
+            
+            if (thinkingMode) {
+                modelName.textContent = "DeepSeek-Reasoner";
+                dot.className = "dot reasoner";
+            } else {
+                modelName.textContent = "DeepSeek-Chat";
+                dot.className = "dot chat";
+            }
         }
         
         function sendMessage() {
@@ -315,8 +383,10 @@
                 messagesToSend = [{ role: "user", content: message }];
             }
 
+            const model = thinkingMode ? "deepseek-reasoner" : "deepseek-chat";
+            
             const payload = {
-                model: "deepseek-reasoner",
+                model: model,
                 messages: messagesToSend,
                 stream: false
             };
@@ -392,7 +462,8 @@
 
         // 初始化页面
         document.addEventListener('DOMContentLoaded', function() {
-            initContextSwitch();
+            initSwitches();
+            updateModelIndicator();
             
             document.getElementById('chat-input').addEventListener('keypress', function(event) {
                 if (event.key === 'Enter') sendMessage();
@@ -401,4 +472,3 @@
     </script>
 </body>
 </html>
-
