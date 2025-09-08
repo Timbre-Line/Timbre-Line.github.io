@@ -77,17 +77,28 @@
             color: #555;
             font-size: 0.9rem;
         }
-
+        
+        /* 文本选中样式 */
         ::-moz-selection {
             background: linear-gradient(90deg, #8a2be2, #00bfff);
             color: white;
             text-shadow: none;
         }
-
+        
         ::selection {
             background: linear-gradient(90deg, #8a2be2, #00bfff);
             color: white;
             text-shadow: none;
+        }
+
+        .deepseek-btn::-moz-selection {
+            background: white;
+            color: #6a11cb;
+        }
+        
+        .deepseek-btn::selection {
+            background: white;
+            color: #6a11cb;
         }
     </style>
 </head>
