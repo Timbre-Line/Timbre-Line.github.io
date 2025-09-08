@@ -1,0 +1,8 @@
+[build]
+  functions = "netlify/functions"
+  publish = "deepseek"  # 你的前端文件所在目录
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
