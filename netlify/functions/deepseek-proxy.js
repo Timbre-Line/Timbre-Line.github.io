@@ -1,7 +1,7 @@
 const fetch = require('node-fetch');
 
 exports.handler = async function (event, context) {
-    const { messages } = JSON.parse(event.body);
+    const payload = JSON.parse(event.body);
     
     try {
         const response = await fetch('https://api.deepseek.com/chat/completions', {
@@ -11,9 +11,9 @@ exports.handler = async function (event, context) {
                 'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`
             },
             body: JSON.stringify({
-                model: "deepseek-chat",
-                messages: messages,
-                stream: false
+                model: payload.model,
+                messages: payload.messages,
+                stream: payload.stream || false
             })
         });
 
