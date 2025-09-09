@@ -16,8 +16,8 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #1a1a1a;
-            color: #e0e0e0;
+            background-color: #efede6;
+            color: #000;
             height: 100vh;
             padding: 0;
         }
@@ -26,7 +26,7 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
-            background-color: #2d2d2d;
+            background-color: #efede6;
         }
 
         .top-bar {
@@ -34,8 +34,8 @@
             justify-content: center;
             align-items: center;
             padding: 10px;
-            background-color: #1a1a1a;
-            border-bottom: 1px solid #444;
+            background-color: #efede6;
+            border-bottom: 1px solid #d0cbc0;
         }
 
         .model-indicator {
@@ -43,16 +43,17 @@
             align-items: center;
             gap: 8px;
             padding: 8px 12px;
-            background-color: #333;
+            background-color: #e0dcd1;
             border-radius: 20px;
             font-size: 14px;
+            color: #000;
         }
 
         .model-indicator .dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background-color: #d4a8ff;
+            background-color: #b85c37;
         }
 
         .messages {
@@ -61,6 +62,7 @@
             padding: 20px;
             font-size: 16px;
             position: relative;
+            background-color: #efede6;
         }
 
         .messages::-webkit-scrollbar {
@@ -68,16 +70,16 @@
         }
 
         .messages::-webkit-scrollbar-track {
-            background: #1a1a1a;
+            background: #e0dcd1;
         }
 
         .messages::-webkit-scrollbar-thumb {
-            background: #444;
+            background: #b85c37;
             border-radius: 4px;
         }
 
         .messages::-webkit-scrollbar-thumb:hover {
-            background: #555;
+            background: #a04d2d;
         }
 
         .welcome-title {
@@ -91,7 +93,7 @@
             z-index: 1;
             opacity: 0.7;
             pointer-events: none;
-            color: #f0f0f0;
+            color: #000;
         }
 
         .message {
@@ -111,7 +113,7 @@
             max-width: 85%;
             font-size: 16px;
             line-height: 1.5;
-            color: #fff;
+            color: #000;
             overflow-wrap: break-word;
             word-break: break-word;
             white-space: pre-wrap;
@@ -127,8 +129,8 @@
         }
 
         .message.user .message-content {
-            background-color: #d4a8ff;
-            color: #1a1a1a;
+            background-color: #dfd6c8;
+            color: #000;
             padding: 12px 16px;
             border-radius: 12px;
         }
@@ -137,6 +139,7 @@
             background-color: transparent;
             padding: 0;
             border-radius: 0;
+            color: #000;
         }
 
         .message.bot .message-content h1, 
@@ -144,32 +147,36 @@
         .message.bot .message-content h3 {
             margin-top: 0.8em;
             margin-bottom: 0.4em;
-            color: #f0f0f0;
+            color: #000;
         }
 
         .message.bot .message-content p {
             margin-bottom: 0.5em;
+            color: #000;
         }
 
         .message.bot .message-content ul, 
         .message.bot .message-content ol {
             margin-left: 1.5em;
             margin-bottom: 0.8em;
+            color: #000;
         }
 
         .message.bot .message-content li {
             margin-bottom: 0.3em;
+            color: #000;
         }
 
         .message.bot .message-content code {
-            background-color: rgba(0, 0, 0, 0.2);
+            background-color: rgba(0, 0, 0, 0.1);
             padding: 0.2em 0.4em;
             border-radius: 4px;
             font-family: monospace;
+            color: #000;
         }
 
         .message.bot .message-content pre {
-            background-color: rgba(0, 0, 0, 0.2);
+            background-color: rgba(0, 0, 0, 0.1);
             padding: 12px;
             border-radius: 8px;
             overflow-x: auto;
@@ -179,17 +186,18 @@
         .message.bot .message-content pre code {
             background: none;
             padding: 0;
+            color: #000;
         }
 
         .message.bot .message-content blockquote {
-            border-left: 3px solid #d4a8ff;
+            border-left: 3px solid #b85c37;
             padding-left: 12px;
             margin: 0.8em 0;
-            color: #aaa;
+            color: #444;
         }
 
         .message.bot .message-content a {
-            color: #d4a8ff; /* Claude主题色 */
+            color: #b85c37;
             text-decoration: none;
         }
 
@@ -199,7 +207,8 @@
 
         .input-area {
             padding: 10px 20px;
-            background-color: #1a1a1a;
+            background-color: #efede6;
+            border-top: 1px solid #d0cbc0;
         }
 
         .input-container {
@@ -211,21 +220,21 @@
         .input-container input {
             flex: 1;
             padding: 12px;
-            border: 1px solid #444;
+            border: 1px solid #d0cbc0;
             border-radius: 8px;
             font-size: 16px;
-            background-color: #2d2d2d;
-            color: #fff;
+            background-color: #fff;
+            color: #000;
         }
 
         .input-container input::placeholder {
-            color: #aaa;
+            color: #888;
         }
 
         .input-container button {
             padding: 12px 20px;
-            background-color: #d4a8ff;
-            color: #1a1a1a;
+            background-color: #b85c37;
+            color: #fff;
             border: none;
             border-radius: 8px;
             cursor: pointer;
@@ -235,13 +244,13 @@
         }
 
         .input-container button:hover {
-            background-color: #c090e6;
+            background-color: #a04d2d;
         }
 
         .input-container button:disabled {
-            background-color: #666;
+            background-color: #d0cbc0;
             cursor: not-allowed;
-            color: #aaa;
+            color: #888;
         }
     </style>
 </head>
