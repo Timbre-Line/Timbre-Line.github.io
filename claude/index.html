@@ -52,7 +52,7 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background-color: #4da6ff;
+            background-color: #d4a8ff;
         }
 
         .messages {
@@ -105,7 +105,6 @@
             height: 40px;
             border-radius: 50%;
             margin-right: 10px;
-            background-color: #4da6ff;
         }
 
         .message-content {
@@ -125,11 +124,11 @@
         .message.user img {
             margin-left: 10px;
             margin-right: 0;
-            background-color: #0056b3;
         }
 
         .message.user .message-content {
-            background-color: #0056b3;
+            background-color: #d4a8ff;
+            color: #1a1a1a;
             padding: 12px 16px;
             border-radius: 12px;
         }
@@ -183,14 +182,14 @@
         }
 
         .message.bot .message-content blockquote {
-            border-left: 3px solid #0056b3;
+            border-left: 3px solid #d4a8ff;
             padding-left: 12px;
             margin: 0.8em 0;
             color: #aaa;
         }
 
         .message.bot .message-content a {
-            color: #4da6ff;
+            color: #d4a8ff; /* Claude主题色 */
             text-decoration: none;
         }
 
@@ -225,22 +224,24 @@
 
         .input-container button {
             padding: 12px 20px;
-            background-color: #0056b3;
-            color: #fff;
+            background-color: #d4a8ff;
+            color: #1a1a1a;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
             transition: background-color 0.2s;
+            font-weight: bold;
         }
 
         .input-container button:hover {
-            background-color: #003d80;
+            background-color: #c090e6;
         }
 
         .input-container button:disabled {
             background-color: #666;
             cursor: not-allowed;
+            color: #aaa;
         }
     </style>
 </head>
@@ -291,7 +292,6 @@
                 messageHistory.shift();
             }
 
-            // 使用 puter.ai.chat() 调用 Claude
             puter.ai.chat(message, { model: 'claude-sonnet-4' })
                 .then(response => {
                     const botResponse = response.message.content[0].text;
@@ -322,6 +322,7 @@
             messageElement.className = `message ${role}`;
             
             const avatar = document.createElement('img');
+            avatar.src = role === 'user' ? 'user-avatar.png' : 'bot-avatar.png';
             avatar.alt = role === 'user' ? '用户' : 'Claude';
 
             const messageContent = document.createElement('div');
