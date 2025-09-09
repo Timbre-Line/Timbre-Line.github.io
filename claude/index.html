@@ -260,7 +260,7 @@
         <div class="top-bar">
             <div class="model-indicator">
                 <span class="dot"></span>
-                <span id="model-name">Claude Sonnet 4</span>
+                <span id="model-name">Claude 3.5 Sonnet</span>
             </div>
         </div>
         
@@ -302,7 +302,7 @@
                 messageHistory.shift();
             }
 
-            puter.ai.chat(message, { model: 'claude-opus-4' })
+            puter.ai.chat(message, { model: 'claude-3-7-sonnet' })
                 .then(response => {
                     const botResponse = response.message.content[0].text;
                     displayMessage('bot', botResponse);
