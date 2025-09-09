@@ -265,7 +265,7 @@
         </div>
         
         <div class="messages" id="messages">
-            <div class="welcome-title">你好，我是 Claude</div>
+            <div class="welcome-title">Hi, I'm Claude</div>
         </div>
         
         <div class="input-area">
@@ -302,7 +302,7 @@
                 messageHistory.shift();
             }
 
-            puter.ai.chat(message, { model: 'claude-sonnet-4' })
+            puter.ai.chat(message, { model: 'claude-opus-4' })
                 .then(response => {
                     const botResponse = response.message.content[0].text;
                     displayMessage('bot', botResponse);
