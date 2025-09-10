@@ -69,6 +69,7 @@
         .message-container {
             display: flex;
             max-width: 100%;
+            flex-direction: column; /* 改为垂直布局 */
         }
         
         .ai-message-container {
@@ -77,11 +78,10 @@
         
         .user-message-container {
             align-items: flex-end;
-            justify-content: flex-end;
         }
         
         .message {
-            max-width: calc(100% - 50px);
+            max-width: calc(100% - 20px);
             padding: 16px 20px;
             border-radius: 18px;
             line-height: 1.5;
@@ -100,14 +100,12 @@
             background-color: #ffffff;
             border-bottom-right-radius: 5px;
             border: 1px solid #e2e8f0;
-            margin-right: 10px;
         }
         
         .ai-message {
             background-color: #ffffff;
             border-bottom-left-radius: 5px;
             border: 1px solid #e2e8f0;
-            margin-left: 10px;
         }
         
         .user-icon, .ai-icon {
@@ -120,16 +118,19 @@
             font-weight: bold;
             font-size: 1rem;
             flex-shrink: 0;
+            margin-bottom: 5px; /* 头像和气泡之间的间距 */
         }
         
         .user-icon {
             background-color: #4b6cb7;
             color: white;
+            align-self: flex-end; /* 用户头像靠右 */
         }
         
         .ai-icon {
             background-color: #3182ce;
             color: white;
+            align-self: flex-start; /* AI头像靠左 */
         }
         
         .message-content {
@@ -251,7 +252,7 @@
             }
             
             .message {
-                max-width: calc(100% - 45px);
+                max-width: calc(100% - 15px);
                 padding: 14px 16px;
                 font-size: 1rem;
             }
