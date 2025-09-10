@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Claude</title>
+    <title>Grok</title>
     <link rel="icon" href="bot-avatar.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -260,17 +260,17 @@
         <div class="top-bar">
             <div class="model-indicator">
                 <span class="dot"></span>
-                <span id="model-name">Claude 3.5 Sonnet</span>
+                <span id="model-name">Grok 4</span>
             </div>
         </div>
         
         <div class="messages" id="messages">
-            <div class="welcome-title">Hi, I'm Claude</div>
+            <div class="welcome-title">Hi, I'm Grok</div>
         </div>
         
         <div class="input-area">
             <div class="input-container">
-                <input id="chat-input" type="text" placeholder="给 Claude 发送消息" />
+                <input id="chat-input" type="text" placeholder="给 Grok 发送消息" />
                 <button id="send-button" onclick="sendMessage()">发送</button>
             </div>
         </div>
@@ -302,7 +302,7 @@
                 messageHistory.shift();
             }
 
-            puter.ai.chat(message, { model: 'claude-3-7-sonnet' })
+            puter.ai.chat(message, { model: 'x-ai/grok-4' })
                 .then(response => {
                     const botResponse = response.message.content[0].text;
                     displayMessage('bot', botResponse);
