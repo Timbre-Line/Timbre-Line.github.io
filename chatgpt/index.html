@@ -69,7 +69,7 @@
         .message-container {
             display: flex;
             max-width: 100%;
-            flex-direction: column; /* 改为垂直布局 */
+            flex-direction: column;
         }
         
         .ai-message-container {
@@ -118,19 +118,19 @@
             font-weight: bold;
             font-size: 1rem;
             flex-shrink: 0;
-            margin-bottom: 5px; /* 头像和气泡之间的间距 */
+            margin-bottom: 5px;
         }
         
         .user-icon {
             background-color: #4b6cb7;
             color: white;
-            align-self: flex-end; /* 用户头像靠右 */
+            align-self: flex-end;
         }
         
         .ai-icon {
             background-color: #3182ce;
             color: white;
-            align-self: flex-start; /* AI头像靠左 */
+            align-self: flex-start;
         }
         
         .message-content {
@@ -300,9 +300,9 @@
     
     <div class="chat-container" id="chat-container">
         <div class="welcome-message">
-            <h2>欢迎使用 GPT-5 Mini</h2>
-            <p>这是一个简洁高效的对话界面</p>
-            <p>请直接在下方输入框输入您的问题或消息</p>
+            <h2>Hi, I'm ChatGPT</h2>
+            <p>与 ChatGPT 对话</p>
+            <p>我们不会保留会话的任何信息</p>
         </div>
     </div>
     
@@ -315,9 +315,8 @@
         const chatContainer = document.getElementById('chat-container');
         const messageInput = document.getElementById('message-input');
         const sendButton = document.getElementById('send-button');
-        
-        // 添加欢迎消息
-        addMessage('assistant', '您好！我是基于 GPT-5-mini 模型的 AI 助手。请问有什么可以帮您的吗？');
+
+        addMessage('assistant', '你好！我是 ChatGPT。请问有什么可以帮你的吗？');
         
         // 发送消息函数
         function sendMessage() {
