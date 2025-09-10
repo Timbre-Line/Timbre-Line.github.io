@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPT-5 Nano</title>
+    <title>ChatGPT</title>
     <link rel="icon" href="bot-avatar.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -265,12 +265,12 @@
         </div>
         
         <div class="messages" id="messages">
-            <div class="welcome-title">Hi, I'm GPT-5 Nano</div>
+            <div class="welcome-title">Hi, I'm GPT-4o</div>
         </div>
         
         <div class="input-area">
             <div class="input-container">
-                <input id="chat-input" type="text" placeholder="给 GPT-5 Nano 发送消息" />
+                <input id="chat-input" type="text" placeholder="给 GPT-4o 发送消息" />
                 <button id="send-button" onclick="sendMessage()">发送</button>
             </div>
         </div>
@@ -302,7 +302,7 @@
                 messageHistory.shift();
             }
 
-            puter.ai.chat(message, { model: 'gpt-5-mini' })
+            puter.ai.chat(message, { model: 'gpt-4o' })
                 .then(response => {
                     displayMessage('bot', response);
                     
