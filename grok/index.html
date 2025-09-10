@@ -3,64 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPT-5-mini 对话界面</title>
+    <title>GPT-5 Mini</title>
     <script src="https://js.puter.com/v2/"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
         }
         
         body {
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        .container {
-            width: 100%;
-            max-width: 800px;
-            background-color: rgba(255, 255, 255, 0.92);
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
+            background-color: #f5f7fa;
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            height: 90vh;
         }
         
         .header {
-            background: linear-gradient(90deg, #4b6cb7, #182848);
+            background-color: #ffffff;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eaeaea;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #4b6cb7, #182848);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: white;
-            padding: 20px;
-            text-align: center;
-            position: relative;
+            font-weight: bold;
+            font-size: 16px;
         }
         
-        .header h1 {
-            font-size: 1.8rem;
-            margin-bottom: 5px;
-        }
-        
-        .header p {
-            font-size: 0.9rem;
-            opacity: 0.9;
+        .logo-text {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2d3748;
         }
         
         .model-tag {
-            background-color: #ff6b6b;
-            color: white;
-            padding: 3px 10px;
+            background-color: #edf2f7;
+            color: #4a5568;
+            padding: 5px 12px;
             border-radius: 20px;
-            font-size: 0.8rem;
-            position: absolute;
-            top: 15px;
-            right: 15px;
+            font-size: 0.85rem;
+            font-weight: 500;
         }
         
         .chat-container {
@@ -69,16 +71,19 @@
             padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 20px;
+            background-color: #f5f7fa;
         }
         
         .message {
             max-width: 85%;
-            padding: 15px;
+            padding: 16px 20px;
             border-radius: 18px;
             line-height: 1.5;
             position: relative;
             animation: fadeIn 0.3s ease;
+            font-size: 1.05rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
         }
         
         @keyframes fadeIn {
@@ -87,82 +92,94 @@
         }
         
         .user-message {
-            background-color: #e3f2fd;
+            background-color: #ffffff;
             align-self: flex-end;
             border-bottom-right-radius: 5px;
+            border: 1px solid #e2e8f0;
         }
         
         .ai-message {
-            background-color: #f5f5f5;
+            background-color: #ffffff;
             align-self: flex-start;
             border-bottom-left-radius: 5px;
+            border: 1px solid #e2e8f0;
         }
         
         .message-header {
-            font-weight: bold;
-            margin-bottom: 5px;
+            font-weight: 600;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            color: #4a5568;
+            font-size: 0.95rem;
         }
         
         .user-icon, .ai-icon {
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
         }
         
         .user-icon {
-            background-color: #2196f3;
+            background-color: #4b6cb7;
             color: white;
         }
         
         .ai-icon {
-            background-color: #ff6b6b;
+            background-color: #3182ce;
             color: white;
+        }
+        
+        .message-content {
+            color: #2d3748;
+            line-height: 1.6;
         }
         
         .input-area {
             display: flex;
-            padding: 15px;
+            padding: 15px 20px;
             background-color: white;
-            border-top: 1px solid #eee;
-            gap: 10px;
+            border-top: 1px solid #eaeaea;
+            gap: 12px;
+            align-items: center;
         }
         
         #message-input {
             flex: 1;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 30px;
-            font-size: 1rem;
+            padding: 14px 18px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1.05rem;
             outline: none;
-            transition: border-color 0.3s;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background-color: #f8fafc;
         }
         
         #message-input:focus {
             border-color: #4b6cb7;
+            box-shadow: 0 0 0 3px rgba(75, 108, 183, 0.15);
         }
         
         #send-button {
-            background: linear-gradient(90deg, #4b6cb7, #182848);
+            background-color: #4b6cb7;
             color: white;
             border: none;
-            border-radius: 30px;
-            padding: 12px 25px;
-            font-size: 1rem;
+            border-radius: 12px;
+            padding: 14px 24px;
+            font-size: 1.05rem;
+            font-weight: 500;
             cursor: pointer;
-            transition: transform 0.2s, background 0.3s;
+            transition: background-color 0.3s, transform 0.2s;
         }
         
         #send-button:hover {
-            background: linear-gradient(90deg, #3a5ca0, #121f3d);
-            transform: scale(1.05);
+            background-color: #3a5ca0;
         }
         
         #send-button:active {
@@ -171,21 +188,22 @@
         
         .typing-indicator {
             display: none;
-            background-color: #f5f5f5;
-            padding: 15px;
+            background-color: #ffffff;
+            padding: 16px 20px;
             border-radius: 18px;
             align-self: flex-start;
-            margin-top: 10px;
+            margin-top: 5px;
             margin-bottom: 5px;
+            border: 1px solid #e2e8f0;
         }
         
         .typing-indicator span {
-            height: 8px;
-            width: 8px;
-            background-color: #999;
+            height: 10px;
+            width: 10px;
+            background-color: #a0aec0;
             border-radius: 50%;
             display: inline-block;
-            margin: 0 2px;
+            margin: 0 3px;
             animation: bounce 1.3s infinite;
         }
         
@@ -199,92 +217,109 @@
         
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
+            50% { transform: translateY(-6px); }
         }
         
         .welcome-message {
             text-align: center;
-            padding: 30px 20px;
-            color: #555;
+            padding: 40px 20px;
+            color: #4a5568;
+            max-width: 600px;
+            margin: 0 auto;
         }
         
         .welcome-message h2 {
-            margin-bottom: 15px;
-            color: #4b6cb7;
+            margin-bottom: 20px;
+            color: #2d3748;
+            font-size: 1.8rem;
+            font-weight: 600;
         }
         
         .welcome-message p {
-            margin-bottom: 10px;
-            line-height: 1.6;
+            margin-bottom: 15px;
+            line-height: 1.7;
+            font-size: 1.1rem;
         }
         
-        .features {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .feature {
-            background-color: #e3f2fd;
-            padding: 10px 15px;
-            border-radius: 10px;
-            font-size: 0.9rem;
-        }
-        
-        @media (max-width: 600px) {
-            .container {
-                height: 95vh;
-                border-radius: 15px;
+        @media (max-width: 768px) {
+            .header {
+                padding: 12px 15px;
             }
             
-            .header h1 {
-                font-size: 1.5rem;
+            .logo-text {
+                font-size: 1.2rem;
+            }
+            
+            .model-tag {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+            
+            .chat-container {
+                padding: 15px;
+                gap: 15px;
             }
             
             .message {
                 max-width: 90%;
+                padding: 14px 16px;
+                font-size: 1rem;
+            }
+            
+            .input-area {
+                padding: 12px 15px;
+            }
+            
+            #message-input {
+                padding: 12px 16px;
+                font-size: 1rem;
             }
             
             #send-button {
-                padding: 12px 20px;
+                padding: 12px 18px;
+                font-size: 1rem;
+            }
+            
+            .welcome-message {
+                padding: 30px 15px;
+            }
+            
+            .welcome-message h2 {
+                font-size: 1.5rem;
+            }
+            
+            .welcome-message p {
+                font-size: 1rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="model-tag">GPT-5-mini</div>
-            <h1>AI 对话助手</h1>
-            <p>基于 Puter AI 的 GPT-5-mini 模型</p>
+    <div class="header">
+        <div class="logo">
+            <div class="logo-icon">AI</div>
+            <div class="logo-text">GPT-5 Mini</div>
         </div>
-        
-        <div class="chat-container" id="chat-container">
-            <div class="welcome-message">
-                <h2>欢迎使用 GPT-5-mini 对话助手</h2>
-                <p>这是一个基于 Puter AI 平台的对话界面，使用高效的 GPT-5-mini 模型。</p>
-                <p>您可以询问任何问题，我会尽力提供准确、简洁的回答。</p>
-                
-                <div class="features">
-                    <div class="feature">快速响应</div>
-                    <div class="feature">高效模型</div>
-                    <div class="feature">简洁界面</div>
-                </div>
-            </div>
+        <div class="model-tag">基于 Puter AI</div>
+    </div>
+    
+    <div class="chat-container" id="chat-container">
+        <div class="welcome-message">
+            <h2>欢迎使用 GPT-5 Mini</h2>
+            <p>这是一个简洁高效的对话界面，使用 GPT-5-mini 模型提供快速响应。</p>
+            <p>请直接在下方输入框输入您的问题或消息。</p>
         </div>
-        
-        <div class="typing-indicator" id="typing-indicator">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
-        
-        <div class="input-area">
-            <input type="text" id="message-input" placeholder="输入消息..." autocomplete="off">
-            <button id="send-button">发送</button>
-        </div>
+    </div>
+    
+    <div class="typing-indicator" id="typing-indicator">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+    
+    <div class="input-area">
+        <input type="text" id="message-input" placeholder="输入消息..." autocomplete="off">
+        <button id="send-button">发送</button>
     </div>
 
     <script>
@@ -304,6 +339,7 @@
             // 添加用户消息
             addMessage('user', message);
             messageInput.value = '';
+            messageInput.focus();
             
             // 显示"正在输入"指示器
             typingIndicator.style.display = 'block';
@@ -363,58 +399,10 @@
             }
         });
         
-        // 示例问题按钮
-        const sampleQuestions = [
-            "解释量子计算的基本概念",
-            "写一首关于秋天的短诗",
-            "如何学习编程？",
-            "健康饮食的建议有哪些？"
-        ];
-        
-        // 添加示例问题按钮
-        const welcomeMessage = document.querySelector('.welcome-message');
-        const sampleContainer = document.createElement('div');
-        sampleContainer.style.marginTop = '20px';
-        sampleContainer.style.textAlign = 'center';
-        
-        sampleContainer.innerHTML = '<p style="margin-bottom: 10px; color: #666;">试试这些问题：</p>';
-        
-        const questionsDiv = document.createElement('div');
-        questionsDiv.style.display = 'flex';
-        questionsDiv.style.flexWrap = 'wrap';
-        questionsDiv.style.justifyContent = 'center';
-        questionsDiv.style.gap = '10px';
-        
-        sampleQuestions.forEach(question => {
-            const btn = document.createElement('button');
-            btn.textContent = question;
-            btn.style.background = 'linear-gradient(90deg, #4CAF50, #2E7D32)';
-            btn.style.color = 'white';
-            btn.style.border = 'none';
-            btn.style.borderRadius = '20px';
-            btn.style.padding = '8px 15px';
-            btn.style.cursor = 'pointer';
-            btn.style.fontSize = '0.85rem';
-            btn.style.transition = 'transform 0.2s';
-            
-            btn.addEventListener('click', () => {
-                messageInput.value = question;
-                sendMessage();
-            });
-            
-            btn.addEventListener('mouseenter', () => {
-                btn.style.transform = 'translateY(-2px)';
-            });
-            
-            btn.addEventListener('mouseleave', () => {
-                btn.style.transform = 'none';
-            });
-            
-            questionsDiv.appendChild(btn);
+        // 页面加载后自动聚焦输入框
+        window.addEventListener('load', () => {
+            messageInput.focus();
         });
-        
-        sampleContainer.appendChild(questionsDiv);
-        welcomeMessage.appendChild(sampleContainer);
     </script>
 </body>
 </html>
