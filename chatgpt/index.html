@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatGPT</title>
+    <title>GPT-5 Nano</title>
     <link rel="icon" href="bot-avatar.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://js.puter.com/v2/"></script>
     <style>
         * {
-
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -55,7 +54,7 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background-color: #b85c37;
+            background-color: #19c37d; /* 更改为OpenAI风格绿色 */
         }
 
         .messages {
@@ -76,12 +75,12 @@
         }
 
         .messages::-webkit-scrollbar-thumb {
-            background: #b85c37;
+            background: #19c37d; /* 更改为OpenAI风格绿色 */
             border-radius: 4px;
         }
 
         .messages::-webkit-scrollbar-thumb:hover {
-            background: #a04d2d;
+            background: #0d9d63; /* 更深的绿色 */
         }
 
         .welcome-title {
@@ -192,14 +191,14 @@
         }
 
         .message.bot .message-content blockquote {
-            border-left: 3px solid #b85c37;
+            border-left: 3px solid #19c37d; /* 更改为OpenAI风格绿色 */
             padding-left: 12px;
             margin: 0.8em 0;
             color: #444;
         }
 
         .message.bot .message-content a {
-            color: #b85c37;
+            color: #19c37d; /* 更改为OpenAI风格绿色 */
             text-decoration: none;
         }
 
@@ -235,7 +234,7 @@
 
         .input-container button {
             padding: 12px 20px;
-            background-color: #b85c37;
+            background-color: #19c37d; /* 更改为OpenAI风格绿色 */
             color: #fff;
             border: none;
             border-radius: 8px;
@@ -246,7 +245,7 @@
         }
 
         .input-container button:hover {
-            background-color: #a04d2d;
+            background-color: #0d9d63; /* 更深的绿色 */
         }
 
         .input-container button:disabled {
@@ -261,17 +260,17 @@
         <div class="top-bar">
             <div class="model-indicator">
                 <span class="dot"></span>
-                <span id="model-name">ChatGPT</span>
+                <span id="model-name">GPT-5 Nano</span>
             </div>
         </div>
         
         <div class="messages" id="messages">
-            <div class="welcome-title">Hi, I'm ChatGPT</div>
+            <div class="welcome-title">Hi, I'm GPT-5 Nano</div>
         </div>
         
         <div class="input-area">
             <div class="input-container">
-                <input id="chat-input" type="text" placeholder="给 ChatGPT 发送消息" />
+                <input id="chat-input" type="text" placeholder="给 GPT-5 Nano 发送消息" />
                 <button id="send-button" onclick="sendMessage()">发送</button>
             </div>
         </div>
@@ -303,13 +302,12 @@
                 messageHistory.shift();
             }
 
-            puter.ai.chat(message, { model: 'gpt-5-nano' })
+            puter.ai.chat(message, { model: 'gpt-5-mini' })
                 .then(response => {
-                    const botResponse = response.message.content[0].text;
-                    displayMessage('bot', botResponse);
+                    displayMessage('bot', response);
                     
                     // 添加AI响应到历史记录
-                    messageHistory.push({ role: "assistant", content: botResponse });
+                    messageHistory.push({ role: "assistant", content: response });
                     
                     // 再次限制历史记录长度
                     if (messageHistory.length > MAX_CONTEXT_MESSAGES) {
@@ -334,7 +332,7 @@
             
             const avatar = document.createElement('img');
             avatar.src = role === 'user' ? 'user-avatar.png' : 'bot-avatar.png';
-            avatar.alt = role === 'user' ? '用户' : 'Claude';
+            avatar.alt = role === 'user' ? '用户' : 'GPT';
 
             const messageContent = document.createElement('div');
             messageContent.className = 'message-content';
