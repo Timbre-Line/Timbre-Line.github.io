@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grok</title>
-    <link rel="icon" href="bot-avatar.png" type="image/png">
+    <title>GPT-5 Mini</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://js.puter.com/v2/"></script>
@@ -17,8 +16,8 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #efede6;
-            color: #000;
+            background-color: #f0f4f8;
+            color: #333;
             height: 100vh;
             padding: 0;
         }
@@ -27,7 +26,7 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
-            background-color: #efede6;
+            background-color: #f0f4f8;
         }
 
         .top-bar {
@@ -35,8 +34,8 @@
             justify-content: center;
             align-items: center;
             padding: 10px;
-            background-color: #efede6;
-            border-bottom: 1px solid #d0cbc0;
+            background-color: #f0f4f8;
+            border-bottom: 1px solid #d1d8e0;
         }
 
         .model-indicator {
@@ -44,17 +43,17 @@
             align-items: center;
             gap: 8px;
             padding: 8px 12px;
-            background-color: #e0dcd1;
+            background-color: #e1e8f0;
             border-radius: 20px;
             font-size: 14px;
-            color: #000;
+            color: #333;
         }
 
         .model-indicator .dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background-color: #b85c37;
+            background-color: #4a6cf7;
         }
 
         .messages {
@@ -63,7 +62,7 @@
             padding: 20px;
             font-size: 16px;
             position: relative;
-            background-color: #efede6;
+            background-color: #f0f4f8;
         }
 
         .messages::-webkit-scrollbar {
@@ -71,16 +70,16 @@
         }
 
         .messages::-webkit-scrollbar-track {
-            background: #e0dcd1;
+            background: #e1e8f0;
         }
 
         .messages::-webkit-scrollbar-thumb {
-            background: #b85c37;
+            background: #4a6cf7;
             border-radius: 4px;
         }
 
         .messages::-webkit-scrollbar-thumb:hover {
-            background: #a04d2d;
+            background: #3a5be0;
         }
 
         .welcome-title {
@@ -94,7 +93,7 @@
             z-index: 1;
             opacity: 0.7;
             pointer-events: none;
-            color: #000;
+            color: #333;
         }
 
         .message {
@@ -114,7 +113,7 @@
             max-width: 85%;
             font-size: 16px;
             line-height: 1.5;
-            color: #000;
+            color: #333;
             overflow-wrap: break-word;
             word-break: break-word;
             white-space: pre-wrap;
@@ -130,8 +129,8 @@
         }
 
         .message.user .message-content {
-            background-color: #dfd6c8;
-            color: #000;
+            background-color: #dbe4f3;
+            color: #333;
             padding: 12px 16px;
             border-radius: 12px;
         }
@@ -140,7 +139,7 @@
             background-color: transparent;
             padding: 0;
             border-radius: 0;
-            color: #000;
+            color: #333;
         }
 
         .message.bot .message-content h1, 
@@ -148,36 +147,36 @@
         .message.bot .message-content h3 {
             margin-top: 0.8em;
             margin-bottom: 0.4em;
-            color: #000;
+            color: #333;
         }
 
         .message.bot .message-content p {
             margin-bottom: 0.5em;
-            color: #000;
+            color: #333;
         }
 
         .message.bot .message-content ul, 
         .message.bot .message-content ol {
             margin-left: 1.5em;
             margin-bottom: 0.8em;
-            color: #000;
+            color: #333;
         }
 
         .message.bot .message-content li {
             margin-bottom: 0.3em;
-            color: #000;
+            color: #333;
         }
 
         .message.bot .message-content code {
-            background-color: rgba(0, 0, 0, 0.1);
+            background-color: rgba(74, 108, 247, 0.1);
             padding: 0.2em 0.4em;
             border-radius: 4px;
             font-family: monospace;
-            color: #000;
+            color: #333;
         }
 
         .message.bot .message-content pre {
-            background-color: rgba(0, 0, 0, 0.1);
+            background-color: rgba(74, 108, 247, 0.1);
             padding: 12px;
             border-radius: 8px;
             overflow-x: auto;
@@ -187,18 +186,18 @@
         .message.bot .message-content pre code {
             background: none;
             padding: 0;
-            color: #000;
+            color: #333;
         }
 
         .message.bot .message-content blockquote {
-            border-left: 3px solid #b85c37;
+            border-left: 3px solid #4a6cf7;
             padding-left: 12px;
             margin: 0.8em 0;
-            color: #444;
+            color: #555;
         }
 
         .message.bot .message-content a {
-            color: #b85c37;
+            color: #4a6cf7;
             text-decoration: none;
         }
 
@@ -208,8 +207,8 @@
 
         .input-area {
             padding: 10px 20px;
-            background-color: #efede6;
-            border-top: 1px solid #d0cbc0;
+            background-color: #f0f4f8;
+            border-top: 1px solid #d1d8e0;
         }
 
         .input-container {
@@ -221,11 +220,11 @@
         .input-container input {
             flex: 1;
             padding: 12px;
-            border: 1px solid #d0cbc0;
+            border: 1px solid #d1d8e0;
             border-radius: 8px;
             font-size: 16px;
             background-color: #fff;
-            color: #000;
+            color: #333;
         }
 
         .input-container input::placeholder {
@@ -234,7 +233,7 @@
 
         .input-container button {
             padding: 12px 20px;
-            background-color: #b85c37;
+            background-color: #4a6cf7;
             color: #fff;
             border: none;
             border-radius: 8px;
@@ -245,13 +244,13 @@
         }
 
         .input-container button:hover {
-            background-color: #a04d2d;
+            background-color: #3a5be0;
         }
 
         .input-container button:disabled {
-            background-color: #d0cbc0;
+            background-color: #a0b0f0;
             cursor: not-allowed;
-            color: #888;
+            color: #eee;
         }
     </style>
 </head>
@@ -260,17 +259,17 @@
         <div class="top-bar">
             <div class="model-indicator">
                 <span class="dot"></span>
-                <span id="model-name">Grok 3</span>
+                <span id="model-name">GPT-5 Mini</span>
             </div>
         </div>
         
         <div class="messages" id="messages">
-            <div class="welcome-title">Hi, I'm Grok</div>
+            <div class="welcome-title">你好，我是GPT-5 Mini</div>
         </div>
         
         <div class="input-area">
             <div class="input-container">
-                <input id="chat-input" type="text" placeholder="给 Grok 发送消息" />
+                <input id="chat-input" type="text" placeholder="给GPT-5 Mini发送消息" />
                 <button id="send-button" onclick="sendMessage()">发送</button>
             </div>
         </div>
@@ -302,13 +301,13 @@
                 messageHistory.shift();
             }
 
-            puter.ai.chat(message, { model: 'x-ai/grok-3-mini' })
+            // 使用gpt-5-mini模型
+            puter.ai.chat(message, { model: 'gpt-5-mini' })
                 .then(response => {
-                    const botResponse = response.message.content[0].text;
-                    displayMessage('bot', botResponse);
+                    displayMessage('bot', response);
                     
                     // 添加AI响应到历史记录
-                    messageHistory.push({ role: "assistant", content: botResponse });
+                    messageHistory.push({ role: "assistant", content: response });
                     
                     // 再次限制历史记录长度
                     if (messageHistory.length > MAX_CONTEXT_MESSAGES) {
@@ -332,8 +331,13 @@
             messageElement.className = `message ${role}`;
             
             const avatar = document.createElement('img');
-            avatar.src = role === 'user' ? 'user-avatar.png' : 'bot-avatar.png';
-            avatar.alt = role === 'user' ? '用户' : 'Claude';
+            // 使用SVG作为头像
+            if (role === 'user') {
+                avatar.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234a6cf7'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
+            } else {
+                avatar.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234a6cf7'%3E%3Cpath d='M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 18H5v-2h4v2zm0-4H5v-2h4v2zm0-4H5V8h4v2zm6 8h-4v-2h4v2zm0-4h-4v-2h4v2zm0-4h-4V8h4v2z'/%3E%3C/svg%3E";
+            }
+            avatar.alt = role === 'user' ? '用户' : 'GPT';
 
             const messageContent = document.createElement('div');
             messageContent.className = 'message-content';
