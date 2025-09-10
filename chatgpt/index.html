@@ -66,6 +66,21 @@
             background-color: #f5f7fa;
         }
         
+        .message-container {
+            display: flex;
+            max-width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        .ai-message-container {
+            align-items: flex-start;
+        }
+        
+        .user-message-container {
+            align-items: flex-end;
+            justify-content: flex-end;
+        }
+        
         .message {
             max-width: 85%;
             padding: 16px 20px;
@@ -84,21 +99,19 @@
         
         .user-message {
             background-color: #ffffff;
-            align-self: flex-start; /* 所有消息靠左显示 */
+            border-bottom-right-radius: 5px;
             border: 1px solid #e2e8f0;
         }
         
         .ai-message {
             background-color: #ffffff;
-            align-self: flex-start; /* 所有消息靠左显示 */
+            border-bottom-left-radius: 5px;
             border: 1px solid #e2e8f0;
         }
         
-        .message-header {
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .message-content {
+            color: #2d3748;
+            line-height: 1.6;
         }
         
         .user-icon, .ai-icon {
@@ -110,22 +123,20 @@
             justify-content: center;
             font-weight: bold;
             font-size: 0.9rem;
+            margin: 0 10px;
+            flex-shrink: 0;
         }
         
         .user-icon {
             background-color: #4b6cb7;
             color: white;
+            order: 2;
         }
         
         .ai-icon {
             background-color: #3182ce;
             color: white;
-        }
-        
-        .message-content {
-            color: #2d3748;
-            line-height: 1.6;
-            padding-left: 42px; /* 为头像留出空间 */
+            order: 1;
         }
         
         .input-area {
@@ -174,14 +185,14 @@
         }
         
         .typing-indicator {
-            display: inline-flex;
+            display: flex;
             align-items: center;
-            padding: 0;
+            padding: 10px 0;
         }
         
         .typing-indicator span {
-            height: 10px;
-            width: 10px;
+            height: 8px;
+            width: 8px;
             background-color: #a0aec0;
             border-radius: 50%;
             display: inline-block;
@@ -199,7 +210,7 @@
         
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
+            50% { transform: translateY(-5px); }
         }
         
         .welcome-message {
@@ -238,13 +249,9 @@
             }
             
             .message {
-                max-width: 90%;
+                max-width: 80%;
                 padding: 14px 16px;
                 font-size: 1rem;
-            }
-            
-            .message-content {
-                padding-left: 38px;
             }
             
             .input-area {
@@ -271,6 +278,12 @@
             
             .welcome-message p {
                 font-size: 1rem;
+            }
+            
+            .user-icon, .ai-icon {
+                width: 28px;
+                height: 28px;
+                font-size: 0.8rem;
             }
         }
     </style>
@@ -314,81 +327,96 @@
             messageInput.value = '';
             messageInput.focus();
             
-            // 添加AI等待消息（带加载动画）
-            const waitingMessage = addWaitingMessage();
+            // 添加AI消息容器（带加载动画）
+            const messageContainer = document.createElement('div');
+            messageContainer.classList.add('message-container', 'ai-message-container');
+            
+            const aiIcon = document.createElement('div');
+            aiIcon.classList.add('ai-icon');
+            aiIcon.textContent = 'AI';
+            
+            const aiMessage = document.createElement('div');
+            aiMessage.classList.add('message', 'ai-message');
+            
+            const typingIndicator = document.createElement('div');
+            typingIndicator.classList.add('typing-indicator');
+            typingIndicator.innerHTML = '<span></span><span></span><span></span>';
+            
+            aiMessage.appendChild(typingIndicator);
+            messageContainer.appendChild(aiIcon);
+            messageContainer.appendChild(aiMessage);
+            chatContainer.appendChild(messageContainer);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
             
             // 调用 GPT-5-mini 模型
             puter.ai.chat(message, { model: "gpt-5-mini" })
                 .then(response => {
-                    // 更新等待消息为实际回复
-                    updateWaitingMessage(waitingMessage, response);
+                    // 移除加载动画
+                    aiMessage.removeChild(typingIndicator);
+                    
+                    // 添加 AI 回复内容
+                    const contentDiv = document.createElement('div');
+                    contentDiv.classList.add('message-content');
+                    contentDiv.textContent = response;
+                    aiMessage.appendChild(contentDiv);
                 })
                 .catch(error => {
-                    updateWaitingMessage(waitingMessage, '抱歉，处理您的请求时出错了。请稍后再试。');
+                    // 移除加载动画
+                    aiMessage.removeChild(typingIndicator);
+                    
+                    // 添加错误消息
+                    const contentDiv = document.createElement('div');
+                    contentDiv.classList.add('message-content');
+                    contentDiv.textContent = '抱歉，处理您的请求时出错了。请稍后再试。';
+                    aiMessage.appendChild(contentDiv);
+                    
                     console.error('Error:', error);
                 });
         }
         
         // 添加消息到聊天容器
         function addMessage(role, content) {
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message');
+            const messageContainer = document.createElement('div');
+            messageContainer.classList.add('message-container');
             
             if (role === 'user') {
-                messageDiv.classList.add('user-message');
-                messageDiv.innerHTML = `
-                    <div class="message-header">
-                        <div class="user-icon">你</div>
-                    </div>
-                    <div class="message-content">${content}</div>
-                `;
+                messageContainer.classList.add('user-message-container');
+                
+                const userIcon = document.createElement('div');
+                userIcon.classList.add('user-icon');
+                userIcon.textContent = '你';
+                
+                const userMessage = document.createElement('div');
+                userMessage.classList.add('message', 'user-message');
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.classList.add('message-content');
+                contentDiv.textContent = content;
+                
+                userMessage.appendChild(contentDiv);
+                messageContainer.appendChild(userMessage);
+                messageContainer.appendChild(userIcon);
             } else {
-                messageDiv.classList.add('ai-message');
-                messageDiv.innerHTML = `
-                    <div class="message-header">
-                        <div class="ai-icon">AI</div>
-                    </div>
-                    <div class="message-content">${content}</div>
-                `;
+                messageContainer.classList.add('ai-message-container');
+                
+                const aiIcon = document.createElement('div');
+                aiIcon.classList.add('ai-icon');
+                aiIcon.textContent = 'AI';
+                
+                const aiMessage = document.createElement('div');
+                aiMessage.classList.add('message', 'ai-message');
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.classList.add('message-content');
+                contentDiv.textContent = content;
+                
+                aiMessage.appendChild(contentDiv);
+                messageContainer.appendChild(aiIcon);
+                messageContainer.appendChild(aiMessage);
             }
             
-            chatContainer.appendChild(messageDiv);
+            chatContainer.appendChild(messageContainer);
             chatContainer.scrollTop = chatContainer.scrollHeight;
-            return messageDiv;
-        }
-        
-        // 添加等待消息（带加载动画）
-        function addWaitingMessage() {
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message', 'ai-message', 'waiting-message');
-            messageDiv.innerHTML = `
-                <div class="message-header">
-                    <div class="ai-icon">AI</div>
-                </div>
-                <div class="message-content">
-                    <div class="typing-indicator">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
-                </div>
-            `;
-            
-            chatContainer.appendChild(messageDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-            return messageDiv;
-        }
-        
-        // 更新等待消息为实际内容
-        function updateWaitingMessage(waitingMessage, content) {
-            if (waitingMessage && waitingMessage.parentNode) {
-                waitingMessage.innerHTML = `
-                    <div class="message-header">
-                        <div class="ai-icon">AI</div>
-                    </div>
-                    <div class="message-content">${content}</div>
-                `;
-            }
         }
         
         // 事件监听
