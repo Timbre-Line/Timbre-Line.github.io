@@ -84,15 +84,13 @@
         
         .user-message {
             background-color: #ffffff;
-            align-self: flex-end;
-            border-bottom-right-radius: 5px;
+            align-self: flex-start; /* 所有消息靠左显示 */
             border: 1px solid #e2e8f0;
         }
         
         .ai-message {
             background-color: #ffffff;
-            align-self: flex-start;
-            border-bottom-left-radius: 5px;
+            align-self: flex-start; /* 所有消息靠左显示 */
             border: 1px solid #e2e8f0;
         }
         
@@ -176,14 +174,9 @@
         }
         
         .typing-indicator {
-            display: none;
-            background-color: #ffffff;
-            padding: 16px 20px;
-            border-radius: 18px;
-            align-self: flex-start;
-            margin-top: 5px;
-            margin-bottom: 5px;
-            border: 1px solid #e2e8f0;
+            display: inline-flex;
+            align-items: center;
+            padding: 0;
         }
         
         .typing-indicator span {
@@ -298,12 +291,6 @@
         </div>
     </div>
     
-    <div class="typing-indicator" id="typing-indicator">
-        <span></span>
-        <span></span>
-        <span></span>
-    </div>
-    
     <div class="input-area">
         <input type="text" id="message-input" placeholder="输入消息..." autocomplete="off">
         <button id="send-button">发送</button>
@@ -313,7 +300,6 @@
         const chatContainer = document.getElementById('chat-container');
         const messageInput = document.getElementById('message-input');
         const sendButton = document.getElementById('send-button');
-        const typingIndicator = document.getElementById('typing-indicator');
         
         // 添加欢迎消息
         addMessage('assistant', '您好！我是基于 GPT-5-mini 模型的 AI 助手。请问有什么可以帮您的吗？');
@@ -328,22 +314,17 @@
             messageInput.value = '';
             messageInput.focus();
             
-            // 显示"正在输入"指示器
-            typingIndicator.style.display = 'block';
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            // 添加AI等待消息（带加载动画）
+            const waitingMessage = addWaitingMessage();
             
             // 调用 GPT-5-mini 模型
             puter.ai.chat(message, { model: "gpt-5-mini" })
                 .then(response => {
-                    // 隐藏"正在输入"指示器
-                    typingIndicator.style.display = 'none';
-                    
-                    // 添加 AI 回复
-                    addMessage('assistant', response);
+                    // 更新等待消息为实际回复
+                    updateWaitingMessage(waitingMessage, response);
                 })
                 .catch(error => {
-                    typingIndicator.style.display = 'none';
-                    addMessage('assistant', '抱歉，处理您的请求时出错了。请稍后再试。');
+                    updateWaitingMessage(waitingMessage, '抱歉，处理您的请求时出错了。请稍后再试。');
                     console.error('Error:', error);
                 });
         }
@@ -373,6 +354,41 @@
             
             chatContainer.appendChild(messageDiv);
             chatContainer.scrollTop = chatContainer.scrollHeight;
+            return messageDiv;
+        }
+        
+        // 添加等待消息（带加载动画）
+        function addWaitingMessage() {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', 'ai-message', 'waiting-message');
+            messageDiv.innerHTML = `
+                <div class="message-header">
+                    <div class="ai-icon">AI</div>
+                </div>
+                <div class="message-content">
+                    <div class="typing-indicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            `;
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            return messageDiv;
+        }
+        
+        // 更新等待消息为实际内容
+        function updateWaitingMessage(waitingMessage, content) {
+            if (waitingMessage && waitingMessage.parentNode) {
+                waitingMessage.innerHTML = `
+                    <div class="message-header">
+                        <div class="ai-icon">AI</div>
+                    </div>
+                    <div class="message-content">${content}</div>
+                `;
+            }
         }
         
         // 事件监听
