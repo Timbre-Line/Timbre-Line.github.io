@@ -243,6 +243,26 @@
             overflow: hidden;
         }
         
+        /* 新增：模型名称样式 */
+        .model-label {
+            color: #718096;
+            font-size: 0.8rem;
+            margin-left: 10px;
+            align-self: center;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+        
+        .ai-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .ai-header:hover .model-label {
+            opacity: 1;
+        }
+        
         @media (max-width: 768px) {
             .header {
                 padding: 12px 15px;
@@ -294,6 +314,12 @@
             .welcome-message p {
                 font-size: 1rem;
             }
+            
+            /* 移动端模型名称样式 */
+            .model-label {
+                font-size: 0.7rem;
+                margin-left: 8px;
+            }
         }
     </style>
 </head>
@@ -325,8 +351,14 @@
         const sendButton = document.getElementById('send-button');
         const modelButtons = document.querySelectorAll('.model-button');
         const welcomeMessage = document.getElementById('welcome-message');
-        let currentModel = 'gpt-5-mini';
+        let currentModel = 'gpt-5-nano';
         let isFirstMessage = true;
+
+        const modelNames = {
+            'gpt-5': 'GPT-5',
+            'gpt-5-mini': 'GPT-5 Mini',
+            'gpt-5-nano': 'GPT-5 Nano'
+        };
 
         // 初始化模型选择
         modelButtons.forEach(button => {
@@ -393,8 +425,11 @@
                 messageContainer.classList.add('ai-message-container');
                 if (isTyping) {
                     messageContainer.innerHTML = `
-                        <div class="ai-icon">
-                            <img src="chatgpt-avatar.png" alt="AI">
+                        <div class="ai-header">
+                            <div class="ai-icon">
+                                <img src="chatgpt-avatar.png" alt="AI">
+                            </div>
+                            <span class="model-label">${modelNames[currentModel]}</span>
                         </div>
                         <div class="message ai-message">
                             <div class="message-content">
@@ -408,8 +443,11 @@
                     `;
                 } else {
                     messageContainer.innerHTML = `
-                        <div class="ai-icon">
-                            <img src="chatgpt-avatar.png" alt="AI">
+                        <div class="ai-header">
+                            <div class="ai-icon">
+                                <img src="chatgpt-avatar.png" alt="AI">
+                            </div>
+                            <span class="model-label">${modelNames[currentModel]}</span>
                         </div>
                         <div class="message ai-message">
                             <div class="message-content">${content}</div>
