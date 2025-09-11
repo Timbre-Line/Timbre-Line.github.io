@@ -66,39 +66,18 @@
         
         .model-selector select {
             padding: 8px 12px;
-            border-radius: 8px;
             border: 1px solid #e2e8f0;
+            border-radius: 8px;
             background-color: #f8fafc;
             font-size: 0.9rem;
             color: #2d3748;
             outline: none;
             cursor: pointer;
-            transition: border-color 0.3s, box-shadow 0.3s;
         }
         
         .model-selector select:focus {
             border-color: #4b6cb7;
-            box-shadow: 0 0 0 3px rgba(75, 108, 183, 0.15);
-        }
-        
-        .current-model-tag {
-            background-color: #edf2f7;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            color: #4a5568;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .current-model-tag::before {
-            content: "";
-            width: 10px;
-            height: 10px;
-            background-color: #48bb78;
-            border-radius: 50%;
-            display: inline-block;
+            box-shadow: 0 0 0 2px rgba(75, 108, 183, 0.2);
         }
         
         .chat-container {
@@ -288,11 +267,6 @@
                 font-size: 1.2rem;
             }
             
-            .model-selector {
-                width: 100%;
-                justify-content: center;
-            }
-            
             .chat-container {
                 padding: 15px;
                 gap: 20px;
@@ -341,10 +315,9 @@
     <div class="header">
         <div class="logo">
             <div class="logo-icon">AI</div>
-            <div class="logo-text">ChatGPT</div>
+            <div class="logo-text">GPT-5 Mini</div>
         </div>
         <div class="model-selector">
-            <div class="current-model-tag" id="current-model">GPT-5 Mini</div>
             <select id="model-select">
                 <option value="gpt-5">GPT-5</option>
                 <option value="gpt-5-mini" selected>GPT-5 Mini</option>
@@ -371,19 +344,8 @@
         const messageInput = document.getElementById('message-input');
         const sendButton = document.getElementById('send-button');
         const modelSelect = document.getElementById('model-select');
-        const currentModelTag = document.getElementById('current-model');
 
-        // 初始化
         addMessage('assistant', '你好！我是 ChatGPT。请问有什么可以帮你的吗？');
-        
-        // 模型切换处理
-        modelSelect.addEventListener('change', function() {
-            const modelName = this.options[this.selectedIndex].text;
-            currentModelTag.textContent = modelName;
-            
-            // 添加模型切换提示消息
-            addMessage('system', `已切换到 ${modelName} 模型`);
-        });
         
         // 发送消息函数
         function sendMessage() {
@@ -395,13 +357,13 @@
             messageInput.value = '';
             messageInput.focus();
             
-            // 添加AI消息容器（带加载指示器）
-            const aiMessageId = addMessage('assistant', '', true);
-            
             // 获取当前选择的模型
             const selectedModel = modelSelect.value;
             
-            // 调用选择的模型
+            // 添加AI消息容器（带加载指示器）
+            const aiMessageId = addMessage('assistant', '', true);
+            
+            // 调用 GPT-5 模型系列
             puter.ai.chat(message, { model: selectedModel })
                 .then(response => {
                     // 更新AI消息内容
@@ -427,16 +389,6 @@
                     </div>
                     <div class="message user-message">
                         <div class="message-content">${content}</div>
-                    </div>
-                `;
-            } else if (role === 'system') {
-                // 系统消息样式
-                messageContainer.classList.add('ai-message-container');
-                messageContainer.style.opacity = '0.7';
-                messageContainer.innerHTML = `
-                    <div style="width: 40px; flex-shrink: 0;"></div>
-                    <div class="message ai-message" style="background-color: #f1f5f9;">
-                        <div class="message-content" style="text-align: center; font-style: italic;">${content}</div>
                     </div>
                 `;
             } else {
