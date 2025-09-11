@@ -28,7 +28,7 @@
             border-bottom: 1px solid #eaeaea;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             z-index: 10;
         }
@@ -56,6 +56,49 @@
             font-size: 1.4rem;
             font-weight: 600;
             color: #2d3748;
+        }
+        
+        .model-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .model-selector select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            background-color: #f8fafc;
+            font-size: 0.9rem;
+            color: #2d3748;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .model-selector select:focus {
+            border-color: #4b6cb7;
+            box-shadow: 0 0 0 3px rgba(75, 108, 183, 0.15);
+        }
+        
+        .current-model-tag {
+            background-color: #edf2f7;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #4a5568;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .current-model-tag::before {
+            content: "";
+            width: 10px;
+            height: 10px;
+            background-color: #48bb78;
+            border-radius: 50%;
+            display: inline-block;
         }
         
         .chat-container {
@@ -237,10 +280,17 @@
         @media (max-width: 768px) {
             .header {
                 padding: 12px 15px;
+                flex-direction: column;
+                gap: 10px;
             }
             
             .logo-text {
                 font-size: 1.2rem;
+            }
+            
+            .model-selector {
+                width: 100%;
+                justify-content: center;
             }
             
             .chat-container {
@@ -291,7 +341,15 @@
     <div class="header">
         <div class="logo">
             <div class="logo-icon">AI</div>
-            <div class="logo-text">GPT-5 Mini</div>
+            <div class="logo-text">ChatGPT</div>
+        </div>
+        <div class="model-selector">
+            <div class="current-model-tag" id="current-model">GPT-5 Mini</div>
+            <select id="model-select">
+                <option value="gpt-5">GPT-5</option>
+                <option value="gpt-5-mini" selected>GPT-5 Mini</option>
+                <option value="gpt-5-nano">GPT-5 Nano</option>
+            </select>
         </div>
     </div>
     
@@ -312,8 +370,20 @@
         const chatContainer = document.getElementById('chat-container');
         const messageInput = document.getElementById('message-input');
         const sendButton = document.getElementById('send-button');
+        const modelSelect = document.getElementById('model-select');
+        const currentModelTag = document.getElementById('current-model');
 
+        // 初始化
         addMessage('assistant', '你好！我是 ChatGPT。请问有什么可以帮你的吗？');
+        
+        // 模型切换处理
+        modelSelect.addEventListener('change', function() {
+            const modelName = this.options[this.selectedIndex].text;
+            currentModelTag.textContent = modelName;
+            
+            // 添加模型切换提示消息
+            addMessage('system', `已切换到 ${modelName} 模型`);
+        });
         
         // 发送消息函数
         function sendMessage() {
@@ -328,8 +398,11 @@
             // 添加AI消息容器（带加载指示器）
             const aiMessageId = addMessage('assistant', '', true);
             
-            // 调用 GPT-5-mini 模型
-            puter.ai.chat(message, { model: "gpt-5-mini" })
+            // 获取当前选择的模型
+            const selectedModel = modelSelect.value;
+            
+            // 调用选择的模型
+            puter.ai.chat(message, { model: selectedModel })
                 .then(response => {
                     // 更新AI消息内容
                     updateMessage(aiMessageId, response);
@@ -350,10 +423,20 @@
                 messageContainer.classList.add('user-message-container');
                 messageContainer.innerHTML = `
                     <div class="user-icon">
-                        <img src="user-avatar.png" alt="User">
+                        
                     </div>
                     <div class="message user-message">
                         <div class="message-content">${content}</div>
+                    </div>
+                `;
+            } else if (role === 'system') {
+                // 系统消息样式
+                messageContainer.classList.add('ai-message-container');
+                messageContainer.style.opacity = '0.7';
+                messageContainer.innerHTML = `
+                    <div style="width: 40px; flex-shrink: 0;"></div>
+                    <div class="message ai-message" style="background-color: #f1f5f9;">
+                        <div class="message-content" style="text-align: center; font-style: italic;">${content}</div>
                     </div>
                 `;
             } else {
@@ -361,7 +444,7 @@
                 if (isTyping) {
                     messageContainer.innerHTML = `
                         <div class="ai-icon">
-                            <img src="chatgpt-avatar.png" alt="AI">
+                            
                         </div>
                         <div class="message ai-message">
                             <div class="message-content">
@@ -376,7 +459,7 @@
                 } else {
                     messageContainer.innerHTML = `
                         <div class="ai-icon">
-                            <img src="chatgpt-avatar.png" alt="AI">
+                            
                         </div>
                         <div class="message ai-message">
                             <div class="message-content">${content}</div>
