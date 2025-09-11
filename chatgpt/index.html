@@ -218,6 +218,7 @@
             color: #4a5568;
             max-width: 600px;
             margin: 0 auto;
+            transition: opacity 0.3s ease, transform 0.3s ease;
         }
         
         .welcome-message h2 {
@@ -231,6 +232,15 @@
             margin-bottom: 15px;
             line-height: 1.7;
             font-size: 1.1rem;
+        }
+        
+        .welcome-message.hidden {
+            opacity: 0;
+            transform: translateY(-20px);
+            height: 0;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
         }
         
         @media (max-width: 768px) {
@@ -297,7 +307,7 @@
     </div>
     
     <div class="chat-container" id="chat-container">
-        <div class="welcome-message">
+        <div class="welcome-message" id="welcome-message">
             <h2>Hi, I'm ChatGPT</h2>
             <p>与 ChatGPT 对话</p>
             <p>我们不会保留会话的任何信息</p>
@@ -314,7 +324,9 @@
         const messageInput = document.getElementById('message-input');
         const sendButton = document.getElementById('send-button');
         const modelButtons = document.querySelectorAll('.model-button');
+        const welcomeMessage = document.getElementById('welcome-message');
         let currentModel = 'gpt-5-mini';
+        let isFirstMessage = true;
 
         // 初始化模型选择
         modelButtons.forEach(button => {
@@ -329,6 +341,17 @@
         function sendMessage() {
             const message = messageInput.value.trim();
             if (message === '') return;
+            
+            // 如果是第一条消息，隐藏欢迎信息
+            if (isFirstMessage) {
+                welcomeMessage.classList.add('hidden');
+                isFirstMessage = false;
+                
+                // 添加一个小的延迟让动画完成
+                setTimeout(() => {
+                    welcomeMessage.style.display = 'none';
+                }, 300);
+            }
             
             // 添加用户消息
             addMessage('user', message);
