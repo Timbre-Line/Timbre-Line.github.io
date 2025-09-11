@@ -242,8 +242,7 @@
             margin: 0;
             overflow: hidden;
         }
-        
-        /* 新增：模型名称样式 */
+
         .model-label {
             color: #718096;
             font-size: 0.8rem;
@@ -314,8 +313,7 @@
             .welcome-message p {
                 font-size: 1rem;
             }
-            
-            /* 移动端模型名称样式 */
+
             .model-label {
                 font-size: 0.7rem;
                 margin-left: 8px;
@@ -351,7 +349,7 @@
         const sendButton = document.getElementById('send-button');
         const modelButtons = document.querySelectorAll('.model-button');
         const welcomeMessage = document.getElementById('welcome-message');
-        let currentModel = 'gpt-5-nano';
+        let currentModel = 'gpt-5-mini';
         let isFirstMessage = true;
 
         const modelNames = {
@@ -373,8 +371,7 @@
         function sendMessage() {
             const message = messageInput.value.trim();
             if (message === '') return;
-            
-            // 如果是第一条消息，隐藏欢迎信息
+
             if (isFirstMessage) {
                 welcomeMessage.classList.add('hidden');
                 isFirstMessage = false;
@@ -389,14 +386,11 @@
             addMessage('user', message);
             messageInput.value = '';
             messageInput.focus();
-            
-            // 添加AI消息容器（带加载指示器）
+
             const aiMessageId = addMessage('assistant', '', true);
-            
-            // 调用 GPT-5 模型
+
             puter.ai.chat(message, { model: currentModel })
                 .then(response => {
-                    // 更新AI消息内容
                     updateMessage(aiMessageId, response);
                 })
                 .catch(error => {
@@ -404,8 +398,7 @@
                     console.error('Error:', error);
                 });
         }
-        
-        // 添加消息到聊天容器
+
         function addMessage(role, content, isTyping = false) {
             const messageId = Date.now().toString();
             const messageContainer = document.createElement('div');
@@ -462,8 +455,7 @@
             
             return messageId;
         }
-        
-        // 更新消息内容
+
         function updateMessage(messageId, content) {
             const messageContainer = document.querySelector(`.message-container[data-id="${messageId}"]`);
             if (messageContainer) {
