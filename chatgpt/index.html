@@ -7,11 +7,9 @@
     <link rel="icon" href="chatgpt-avatar.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet">
     <script src="https://js.puter.com/v2/"></script>
-    <!-- 引入marked.js库 -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        /* 原有样式保持不变 */
         * {
+
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -135,52 +133,6 @@
         .message-content {
             color: #2d3748;
             line-height: 1.6;
-        }
-        
-        /* 添加Markdown样式 */
-        .message-content h1, .message-content h2, .message-content h3 {
-            margin-top: 1em;
-            margin-bottom: 0.5em;
-        }
-        
-        .message-content p {
-            margin-bottom: 1em;
-        }
-        
-        .message-content ul, .message-content ol {
-            margin-left: 1.5em;
-            margin-bottom: 1em;
-        }
-        
-        .message-content li {
-            margin-bottom: 0.5em;
-        }
-        
-        .message-content code {
-            background-color: #f1f5f9;
-            padding: 0.2em 0.4em;
-            border-radius: 4px;
-            font-family: monospace;
-        }
-        
-        .message-content pre {
-            background-color: #f1f5f9;
-            padding: 1em;
-            border-radius: 8px;
-            overflow-x: auto;
-            margin-bottom: 1em;
-        }
-        
-        .message-content pre code {
-            background: none;
-            padding: 0;
-        }
-        
-        .message-content blockquote {
-            border-left: 3px solid #e2e8f0;
-            padding-left: 1em;
-            margin-left: 0;
-            color: #4a5568;
         }
         
         .typing-indicator {
@@ -401,13 +353,6 @@
             'gpt-5-nano': 'GPT-5 Nano'
         };
 
-        // 配置marked.js
-        marked.setOptions({
-            breaks: true, // 在换行处添加<br>
-            gfm: true,   // 启用GitHub风格的Markdown
-            sanitize: true // 安全模式，防止XSS攻击
-        });
-
         // 初始化模型选择
         modelButtons.forEach(button => {
             button.addEventListener('click', () => {
@@ -436,9 +381,7 @@
 
             puter.ai.chat(message, { model: currentModel })
                 .then(response => {
-                    // 将Markdown转换为HTML
-                    const htmlResponse = marked.parse(response);
-                    updateMessage(aiMessageId, htmlResponse);
+                    updateMessage(aiMessageId, response);
                 })
                 .catch(error => {
                     updateMessage(aiMessageId, '抱歉，处理您的请求时出错了。请稍后再试。');
@@ -482,8 +425,6 @@
                         </div>
                     `;
                 } else {
-                    // 对于非typing状态的AI消息，也进行Markdown转换
-                    const htmlContent = marked.parse(content);
                     messageContainer.innerHTML = `
                         <div class="ai-header">
                             <div class="ai-icon">
@@ -492,7 +433,7 @@
                             <span class="model-label">${modelNames[currentModel]}</span>
                         </div>
                         <div class="message ai-message">
-                            <div class="message-content">${htmlContent}</div>
+                            <div class="message-content">${content}</div>
                         </div>
                     `;
                 }
