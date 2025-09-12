@@ -9,7 +9,6 @@
     <script src="https://js.puter.com/v2/"></script>
     <style>
         * {
-
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -40,22 +39,32 @@
             display: flex;
             gap: 10px;
             align-items: center;
+            position: relative;
+            width: 220px;
         }
         
-        .model-button {
-            padding: 6px 12px;
+        .model-select {
+            width: 100%;
+            padding: 10px 15px;
             border-radius: 20px;
             border: 1px solid #e2e8f0;
             background-color: #f8fafc;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%234b6cb7' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 14px;
             cursor: pointer;
+            outline: none;
             transition: all 0.2s;
         }
         
-        .model-button.active {
-            background-color: #4b6cb7;
-            color: white;
+        .model-select:focus {
             border-color: #4b6cb7;
+            box-shadow: 0 0 0 3px rgba(75, 108, 183, 0.15);
         }
         
         .chat-container {
@@ -262,9 +271,10 @@
                 padding: 12px 15px;
             }
             
-            .model-button {
-                padding: 5px 10px;
-                font-size: 0.8rem;
+            .model-select {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+                background-position: right 12px center;
             }
             
             .chat-container {
@@ -319,9 +329,11 @@
 <body>
     <div class="header">
         <div class="model-selector">
-            <button class="model-button" data-model="gpt-5">GPT-5</button>
-            <button class="model-button active" data-model="gpt-5-mini">GPT-5 Mini</button>
-            <button class="model-button" data-model="gpt-5-nano">GPT-5 Nano</button>
+            <select class="model-select" id="model-select">
+                <option value="gpt-5">GPT-5</option>
+                <option value="gpt-5-mini" selected>GPT-5 Mini</option>
+                <option value="gpt-5-nano">GPT-5 Nano</option>
+            </select>
         </div>
     </div>
     
@@ -342,7 +354,7 @@
         const chatContainer = document.getElementById('chat-container');
         const messageInput = document.getElementById('message-input');
         const sendButton = document.getElementById('send-button');
-        const modelButtons = document.querySelectorAll('.model-button');
+        const modelSelect = document.getElementById('model-select');
         const welcomeMessage = document.getElementById('welcome-message');
         let currentModel = 'gpt-5-mini';
         let isFirstMessage = true;
@@ -354,12 +366,8 @@
         };
 
         // 初始化模型选择
-        modelButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                modelButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-                currentModel = button.dataset.model;
-            });
+        modelSelect.addEventListener('change', () => {
+            currentModel = modelSelect.value;
         });
 
         // 发送消息函数
