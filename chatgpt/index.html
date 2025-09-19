@@ -180,8 +180,8 @@
         .input-area {
             display: flex;
             padding: 15px 20px;
-            background-color: white;
-            border-top: 1px solid #eaeaea;
+            background-color: transparent;
+            border-top: none;
             gap: 12px;
             align-items: center;
             justify-content: center;
@@ -237,7 +237,8 @@
             width: 20px;
             height: 20px;
             fill: white;
-            transform: rotate(90deg);
+            /* 使用向上箭头样式 */
+            transform: rotate(0deg);
         }
         
         .welcome-message {
@@ -379,7 +380,7 @@
             <input type="text" id="message-input" placeholder="输入消息..." autocomplete="off">
             <button id="send-button">
                 <svg class="arrow-icon" viewBox="0 0 24 24">
-                    <path d="M12 19V5M5 12l7-7 7 7"></path>
+                    <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"></path>
                 </svg>
             </button>
         </div>
