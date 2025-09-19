@@ -193,6 +193,7 @@
             width: 100%;
             gap: 12px;
             align-items: center;
+            position: relative;
         }
         
         #message-input {
@@ -204,6 +205,7 @@
             outline: none;
             transition: border-color 0.3s, box-shadow 0.3s;
             background-color: #f8fafc;
+            padding-right: 55px;
         }
         
         #message-input:focus {
@@ -216,13 +218,17 @@
             color: white;
             border: none;
             border-radius: 50%;
-            width: 48px;
-            height: 48px;
+            width: 42px;
+            height: 42px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: background-color 0.3s, transform 0.2s;
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
         }
         
         #send-button:hover {
@@ -230,15 +236,14 @@
         }
         
         #send-button:active {
-            transform: scale(0.98);
+            transform: translateY(-50%) scale(0.98);
         }
         
         .arrow-icon {
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             fill: white;
-            /* 使用向上箭头样式 */
-            transform: rotate(0deg);
+            transform: rotate(90deg);
         }
         
         .welcome-message {
@@ -319,11 +324,12 @@
             #message-input {
                 padding: 12px 16px;
                 font-size: 1rem;
+                padding-right: 48px;
             }
             
             #send-button {
-                width: 42px;
-                height: 42px;
+                width: 38px;
+                height: 38px;
             }
             
             .welcome-message {
