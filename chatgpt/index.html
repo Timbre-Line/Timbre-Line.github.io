@@ -401,6 +401,39 @@
             align-self: flex-start;
         }
         
+        .context-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: #718096;
+        }
+        
+        .token-count {
+            background-color: #e2e8f0;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+        }
+        
+        .clear-context-button {
+            background: none;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            color: #718096;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .clear-context-button:hover {
+            background-color: #f8fafc;
+            color: #2d3748;
+        }
+        
         @media (max-width: 768px) {
             .header {
                 padding: 12px 15px;
@@ -474,6 +507,10 @@
                 font-size: 0.7rem;
                 padding: 0 15px;
             }
+            
+            .context-indicator {
+                font-size: 0.75rem;
+            }
         }
     </style>
 </head>
@@ -525,6 +562,11 @@
                 </svg>
             </button>
         </div>
+        <div class="context-indicator">
+            <span>上下文:</span>
+            <span class="token-count" id="token-count">0/10000 tokens</span>
+            <button class="clear-context-button" id="clear-context-button">清除上下文</button>
+        </div>
         <div class="footer-note">
             向 ChatGPT 发送消息即表示，您同意我们的条款并已阅读我们的隐私政策。查看 Cookie 首选项。
         </div>
@@ -536,8 +578,23 @@
         const sendButton = document.getElementById('send-button');
         const modelSelect = document.getElementById('model-select');
         const welcomeMessage = document.getElementById('welcome-message');
+        const tokenCountElement = document.getElementById('token-count');
+        const clearContextButton = document.getElementById('clear-context-button');
+        
         let currentModel = 'gpt-5-mini';
         let isFirstMessage = true;
+        let conversationHistory = [];
+        let currentTokenCount = 0;
+        const MAX_TOKENS = 10000;
+
+        // 简单的token估算函数（基于字符数）
+        function estimateTokens(text) {
+            // 对于中英文混合文本，一个token大约对应1.5-2个中文字符或3-4个英文字符
+            // 这里使用一个简化的估算：每个中文字符约1.5个token，每个英文字符约0.5个token
+            let chineseChars = (text.match(/[\u4e00-\u9fa5]/g) || []).length;
+            let englishChars = text.length - chineseChars;
+            return Math.ceil(chineseChars * 1.5 + englishChars * 0.5);
+        }
 
         const modelNames = {
             'gpt-5': 'GPT-5',
@@ -571,11 +628,50 @@
             const randomIndex = Math.floor(Math.random() * welcomeMessages.length);
             welcomeMessage.querySelector('h2').textContent = welcomeMessages[randomIndex];
             messageInput.focus();
+            updateTokenCount();
         });
 
         modelSelect.addEventListener('change', () => {
             currentModel = modelSelect.value;
         });
+
+        clearContextButton.addEventListener('click', () => {
+            conversationHistory = [];
+            currentTokenCount = 0;
+            updateTokenCount();
+            alert('上下文已清除');
+        });
+
+        function updateTokenCount() {
+            tokenCountElement.textContent = `${currentTokenCount}/${MAX_TOKENS} tokens`;
+            
+            // 根据token使用情况改变颜色
+            if (currentTokenCount > MAX_TOKENS * 0.8) {
+                tokenCountElement.style.backgroundColor = '#fed7d7';
+                tokenCountElement.style.color = '#9b2c2c';
+            } else if (currentTokenCount > MAX_TOKENS * 0.6) {
+                tokenCountElement.style.backgroundColor = '#feebc8';
+                tokenCountElement.style.color = '#744210';
+            } else {
+                tokenCountElement.style.backgroundColor = '#e2e8f0';
+                tokenCountElement.style.color = '#4a5568';
+            }
+        }
+
+        function addToConversationHistory(role, content) {
+            const tokens = estimateTokens(content);
+            
+            // 如果添加这条消息会超过token限制，则从开头删除消息直到满足条件
+            while (currentTokenCount + tokens > MAX_TOKENS && conversationHistory.length > 0) {
+                const removedMessage = conversationHistory.shift();
+                currentTokenCount -= estimateTokens(removedMessage.content);
+            }
+            
+            // 添加新消息
+            conversationHistory.push({ role, content });
+            currentTokenCount += tokens;
+            updateTokenCount();
+        }
 
         async function sendMessage() {
             const message = messageInput.value.trim();
@@ -587,13 +683,25 @@
             }
 
             addMessage('user', message);
+            addToConversationHistory('user', message);
             messageInput.value = '';
             messageInput.focus();
 
             const aiMessageId = addMessage('assistant', '', true);
 
             try {
-                const response = await puter.ai.chat(message, { 
+                // 构建包含上下文的消息
+                let contextMessage = '';
+                if (conversationHistory.length > 1) {
+                    // 只取用户和AI的对话历史，不包括当前用户消息
+                    for (let i = 0; i < conversationHistory.length - 1; i++) {
+                        const msg = conversationHistory[i];
+                        contextMessage += `${msg.role === 'user' ? '用户' : 'AI'}: ${msg.content}\n`;
+                    }
+                }
+                contextMessage += `用户: ${message}`;
+
+                const response = await puter.ai.chat(contextMessage, { 
                     model: currentModel, 
                     stream: true 
                 });
@@ -611,6 +719,9 @@
                         chatContainer.scrollTop = chatContainer.scrollHeight;
                     }
                 }
+
+                // 将AI回复添加到对话历史
+                addToConversationHistory('assistant', fullResponse);
 
                 const copyButton = messageContainer.querySelector('.copy-button');
                 copyButton.style.display = 'block';
