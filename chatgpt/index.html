@@ -9,7 +9,6 @@
     <script src="https://js.puter.com/v2/"></script>
     <style>
         * {
-
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -54,7 +53,7 @@
             appearance: none;
             -webkit-appearance: none;
             -moz-appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%234b6cb7' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 15px center;
             background-size: 14px;
@@ -64,8 +63,8 @@
         }
         
         .model-select:focus {
-            border-color: #4b6cb7;
-            box-shadow: 0 0 0 3px rgba(75, 108, 183, 0.15);
+            border-color: #999;
+            box-shadow: 0 0 0 3px rgba(153, 153, 153, 0.15);
         }
         
         .chat-container {
@@ -210,8 +209,8 @@
         }
         
         #message-input:focus {
-            border-color: #4b6cb7;
-            box-shadow: 0 0 0 3px rgba(75, 108, 183, 0.15);
+            border-color: #999;
+            box-shadow: 0 0 0 3px rgba(153, 153, 153, 0.15);
         }
 
         #send-button {
@@ -225,9 +224,9 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
+            transition: background-color 0.3s;
             position: absolute;
-            right: 8px;
+            right: 6px;
             top: 50%;
             transform: translateY(-50%);
         }
@@ -237,7 +236,7 @@
         }
         
         #send-button:active {
-            transform: translateY(-50%) scale(0.98);
+            /* 移除了点击时上移效果 */
         }
         
         .arrow-icon {
@@ -331,6 +330,7 @@
             #send-button {
                 width: 38px;
                 height: 38px;
+                right: 5px;
             }
             
             .welcome-message {
