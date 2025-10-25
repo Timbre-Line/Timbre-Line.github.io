@@ -21,27 +21,64 @@
         }
         
         .header {
-            background-color: #f5f7fa;
+            background-color: #ffffff;
             padding: 15px 20px;
+            border-bottom: 1px solid #eaeaea;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             z-index: 10;
-            flex-direction: column;
-            gap: 10px;
         }
         
         .logo {
             display: flex;
             align-items: center;
             gap: 10px;
+        }
+        
+        .logo-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+            position: relative;
+        }
+        
+        .logo-button:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .logo-button::after {
+            content: "新聊天";
             position: absolute;
-            left: 20px;
+            bottom: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #000000;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 100;
+        }
+        
+        .logo-button:hover::after {
+            opacity: 1;
         }
         
         .logo-icon {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border-radius: 4px;
             overflow: hidden;
         }
@@ -53,8 +90,9 @@
         }
         
         .logo-text {
+            font-weight: bold;
             color: #2d3748;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
         }
         
         .model-selector {
@@ -103,6 +141,7 @@
             display: flex;
             max-width: 100%;
             flex-direction: column;
+            position: relative;
         }
         
         .ai-message-container {
@@ -148,6 +187,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            font-weight: bold;
             font-size: 1rem;
             flex-shrink: 0;
             margin-bottom: 5px;
@@ -221,7 +261,7 @@
         #message-input {
             flex: 1;
             padding: 14px 18px;
-            border: 1px solid #d1d5db;
+            border: 1px solid #e2e8f0;
             border-radius: 50px;
             font-size: 1.05rem;
             outline: none;
@@ -279,7 +319,8 @@
         .welcome-message h2 {
             margin-bottom: 20px;
             color: #2d3748;
-            font-size: 2rem;
+            font-size: 2.5rem;
+            font-weight: 600;
         }
         
         .welcome-message p {
@@ -321,22 +362,96 @@
             padding: 0 20px;
         }
         
+        /* 复制按钮样式 */
+        .copy-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            bottom: -30px;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+            padding: 0;
+            border-radius: 4px;
+        }
+        
+        .copy-button:hover {
+            opacity: 1;
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .user-message-container .copy-button {
+            right: 0;
+        }
+        
+        .ai-message-container .copy-button {
+            left: 0;
+        }
+        
+        .copy-button::after {
+            content: "复制";
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #000000;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        
+        .copy-button:hover::after {
+            opacity: 1;
+        }
+        
+        .copy-icon {
+            position: relative;
+            width: 14px;
+            height: 14px;
+        }
+        
+        .copy-icon .rect1 {
+            position: absolute;
+            width: 12px;
+            height: 10px;
+            border: 1.5px solid #666;
+            border-radius: 2px;
+            bottom: 0;
+            left: 0;
+        }
+        
+        .copy-icon .rect2 {
+            position: absolute;
+            width: 10px;
+            height: 8px;
+            border: 1.5px solid #666;
+            border-radius: 2px;
+            top: 0;
+            right: 0;
+        }
+        
         @media (max-width: 768px) {
             .header {
                 padding: 12px 15px;
             }
             
-            .logo {
-                left: 15px;
-            }
-            
             .logo-icon {
-                width: 28px;
-                height: 28px;
+                width: 24px;
+                height: 24px;
             }
             
             .logo-text {
-                font-size: 1.1rem;
+                font-size: 1rem;
             }
             
             .model-select {
@@ -382,7 +497,7 @@
             }
             
             .welcome-message h2 {
-                font-size: 1.8rem;
+                font-size: 2rem;
             }
             
             .welcome-message p {
@@ -398,16 +513,41 @@
                 font-size: 0.7rem;
                 padding: 0 15px;
             }
+            
+            .copy-button {
+                width: 22px;
+                height: 22px;
+                bottom: -28px;
+            }
+            
+            .copy-icon {
+                width: 12px;
+                height: 12px;
+            }
+            
+            .copy-icon .rect1 {
+                width: 10px;
+                height: 8px;
+                border-width: 1.2px;
+            }
+            
+            .copy-icon .rect2 {
+                width: 8px;
+                height: 6px;
+                border-width: 1.2px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="logo">
-            <div class="logo-icon">
-                <img src="chatgpt-avatar.png" alt="ChatGPT">
-            </div>
-            <div class="logo-text">ChatGPT</div>
+            <button class="logo-button" id="logo-button">
+                <div class="logo-icon">
+                    <img src="chatgpt-avatar.png" alt="ChatGPT">
+                </div>
+                <div class="logo-text">ChatGPT</div>
+            </button>
         </div>
         <div class="model-selector">
             <select class="model-select" id="model-select">
@@ -429,6 +569,7 @@
                 <option value="o4-mini">OpenAI o4-mini</option>
             </select>
         </div>
+        <div></div> <!-- 空div用于保持布局平衡 -->
     </div>
     
     <div class="chat-container" id="chat-container">
@@ -457,6 +598,7 @@
         const sendButton = document.getElementById('send-button');
         const modelSelect = document.getElementById('model-select');
         const welcomeMessage = document.getElementById('welcome-message');
+        const logoButton = document.getElementById('logo-button');
         let currentModel = 'gpt-5-mini';
         let isFirstMessage = true;
 
@@ -479,6 +621,10 @@
             'o4-mini': 'OpenAI o4-mini'
         };
 
+        logoButton.addEventListener('click', () => {
+            window.location.href = 'https://timbre-line.github.io/chatgpt/';
+        });
+
         modelSelect.addEventListener('change', () => {
             currentModel = modelSelect.value;
         });
@@ -492,7 +638,7 @@
                 isFirstMessage = false;
             }
 
-            addMessage('user', message);
+            const userMessageId = addMessage('user', message);
             messageInput.value = '';
             messageInput.focus();
 
@@ -517,6 +663,8 @@
                         chatContainer.scrollTop = chatContainer.scrollHeight;
                     }
                 }
+
+                addCopyButton(aiMessageId, fullResponse);
             } catch (error) {
                 const messageContainer = document.querySelector(`.message-container[data-id="${aiMessageId}"]`);
                 const contentElement = messageContainer.querySelector('.message-content');
@@ -540,6 +688,8 @@
                         <div class="message-content">${content}</div>
                     </div>
                 `;
+
+                addCopyButton(messageId, content);
             } else {
                 messageContainer.classList.add('ai-message-container');
                 if (isTyping) {
@@ -572,6 +722,8 @@
                             <div class="message-content">${content}</div>
                         </div>
                     `;
+
+                    addCopyButton(messageId, content);
                 }
             }
 
@@ -580,6 +732,43 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
 
             return messageId;
+        }
+        
+        function addCopyButton(messageId, content) {
+            const messageContainer = document.querySelector(`.message-container[data-id="${messageId}"]`);
+
+            if (messageContainer.querySelector('.copy-button')) {
+                return;
+            }
+            
+            const copyButton = document.createElement('button');
+            copyButton.className = 'copy-button';
+            copyButton.innerHTML = `
+                <div class="copy-icon">
+                    <div class="rect1"></div>
+                    <div class="rect2"></div>
+                </div>
+            `;
+
+            if (messageContainer.classList.contains('user-message-container')) {
+                copyButton.style.right = '0';
+            } else {
+                copyButton.style.left = '0';
+            }
+            
+            copyButton.addEventListener('click', () => {
+                navigator.clipboard.writeText(content).then(() => {
+                    const originalTitle = copyButton.getAttribute('title');
+                    copyButton.style.opacity = '1';
+                    setTimeout(() => {
+                        copyButton.style.opacity = '0.6';
+                    }, 1000);
+                }).catch(err => {
+                    console.error('复制失败:', err);
+                });
+            });
+            
+            messageContainer.appendChild(copyButton);
         }
 
         sendButton.addEventListener('click', sendMessage);
