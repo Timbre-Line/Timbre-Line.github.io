@@ -425,8 +425,8 @@
             currentModel = modelSelect.value;
         });
 
-        // 发送消息函数
-        function sendMessage() {
+        // 发送消息函数 - 修改为使用流式响应
+        async function sendMessage() {
             const message = messageInput.value.trim();
             if (message === '') return;
 
@@ -442,14 +442,26 @@
 
             const aiMessageId = addMessage('assistant', '', true);
 
-            puter.ai.chat(message, { model: currentModel })
-                .then(response => {
-                    updateMessage(aiMessageId, response);
-                })
-                .catch(error => {
-                    updateMessage(aiMessageId, '抱歉，处理您的请求时出错了。请稍后再试。');
-                    console.error('Error:', error);
+            try {
+                // 使用流式响应
+                const response = await puter.ai.chat(message, { 
+                    model: currentModel, 
+                    stream: true 
                 });
+                
+                let fullResponse = '';
+                
+                // 处理流式响应
+                for await (const part of response) {
+                    if (part?.text) {
+                        fullResponse += part.text;
+                        updateMessage(aiMessageId, fullResponse);
+                    }
+                }
+            } catch (error) {
+                updateMessage(aiMessageId, '抱歉，处理您的请求时出错了。请稍后再试。');
+                console.error('Error:', error);
+            }
         }
 
         function addMessage(role, content, isTyping = false) {
@@ -461,7 +473,7 @@
                 messageContainer.classList.add('user-message-container');
                 messageContainer.innerHTML = `
                     <div class="user-icon">
-                        <img src="user-avatar.png" alt="User">
+                        
                     </div>
                     <div class="message user-message">
                         <div class="message-content">${content}</div>
@@ -473,7 +485,7 @@
                     messageContainer.innerHTML = `
                         <div class="ai-header">
                             <div class="ai-icon">
-                                <img src="chatgpt-avatar.png" alt="AI">
+                                
                             </div>
                             <span class="model-label">${modelNames[currentModel]}</span>
                         </div>
@@ -491,7 +503,7 @@
                     messageContainer.innerHTML = `
                         <div class="ai-header">
                             <div class="ai-icon">
-                                <img src="chatgpt-avatar.png" alt="AI">
+                                
                             </div>
                             <span class="model-label">${modelNames[currentModel]}</span>
                         </div>
@@ -514,6 +526,13 @@
             if (messageContainer) {
                 const contentElement = messageContainer.querySelector('.message-content');
                 if (contentElement) {
+                    // 移除打字指示器（如果有）
+                    const typingIndicator = contentElement.querySelector('.typing-indicator');
+                    if (typingIndicator) {
+                        typingIndicator.remove();
+                    }
+                    
+                    // 更新内容
                     contentElement.innerHTML = content;
                 }
             }
