@@ -8,7 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet">
     <script src="https://js.puter.com/v2/"></script>
     <style>
-        * {
+        ▪ {
+
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -420,12 +421,10 @@
             'o4-mini': 'OpenAI o4-mini'
         };
 
-        // 初始化模型选择
         modelSelect.addEventListener('change', () => {
             currentModel = modelSelect.value;
         });
 
-        // 发送消息函数 - 修改为使用流式响应
         async function sendMessage() {
             const message = messageInput.value.trim();
             if (message === '') return;
@@ -434,8 +433,7 @@
                 welcomeMessage.classList.add('hidden');
                 isFirstMessage = false;
             }
-            
-            // 添加用户消息
+
             addMessage('user', message);
             messageInput.value = '';
             messageInput.focus();
@@ -443,23 +441,28 @@
             const aiMessageId = addMessage('assistant', '', true);
 
             try {
-                // 使用流式响应
                 const response = await puter.ai.chat(message, { 
                     model: currentModel, 
                     stream: true 
                 });
-                
+            
                 let fullResponse = '';
-                
-                // 处理流式响应
+                const messageContainer = document.querySelector(`.message-container[data-id="${aiMessageId}"]`);
+                const contentElement = messageContainer.querySelector('.message-content');
+
+                contentElement.innerHTML = '';
+
                 for await (const part of response) {
                     if (part?.text) {
                         fullResponse += part.text;
-                        updateMessage(aiMessageId, fullResponse);
+                        contentElement.innerHTML = fullResponse;
+                        chatContainer.scrollTop = chatContainer.scrollHeight;
                     }
                 }
             } catch (error) {
-                updateMessage(aiMessageId, '抱歉，处理您的请求时出错了。请稍后再试。');
+                const messageContainer = document.querySelector(`.message-container[data-id="${aiMessageId}"]`);
+                const contentElement = messageContainer.querySelector('.message-content');
+                contentElement.innerHTML = '抱歉，处理您的请求时出错了。请稍后再试。';
                 console.error('Error:', error);
             }
         }
@@ -468,12 +471,12 @@
             const messageId = Date.now().toString();
             const messageContainer = document.createElement('div');
             messageContainer.classList.add('message-container');
-            
+
             if (role === 'user') {
                 messageContainer.classList.add('user-message-container');
                 messageContainer.innerHTML = `
                     <div class="user-icon">
-                        
+                        <img src="user-avatar.png" alt="User">
                     </div>
                     <div class="message user-message">
                         <div class="message-content">${content}</div>
@@ -485,7 +488,7 @@
                     messageContainer.innerHTML = `
                         <div class="ai-header">
                             <div class="ai-icon">
-                                
+                                <img src="chatgpt-avatar.png" alt="AI">
                             </div>
                             <span class="model-label">${modelNames[currentModel]}</span>
                         </div>
@@ -503,7 +506,7 @@
                     messageContainer.innerHTML = `
                         <div class="ai-header">
                             <div class="ai-icon">
-                                
+                                <img src="chatgpt-avatar.png" alt="AI">
                             </div>
                             <span class="model-label">${modelNames[currentModel]}</span>
                         </div>
@@ -513,42 +516,22 @@
                     `;
                 }
             }
-            
+
             messageContainer.dataset.id = messageId;
             chatContainer.appendChild(messageContainer);
             chatContainer.scrollTop = chatContainer.scrollHeight;
-            
+
             return messageId;
         }
 
-        function updateMessage(messageId, content) {
-            const messageContainer = document.querySelector(`.message-container[data-id="${messageId}"]`);
-            if (messageContainer) {
-                const contentElement = messageContainer.querySelector('.message-content');
-                if (contentElement) {
-                    // 移除打字指示器（如果有）
-                    const typingIndicator = contentElement.querySelector('.typing-indicator');
-                    if (typingIndicator) {
-                        typingIndicator.remove();
-                    }
-                    
-                    // 更新内容
-                    contentElement.innerHTML = content;
-                }
-            }
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
-        
-        // 事件监听
         sendButton.addEventListener('click', sendMessage);
-        
+
         messageInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 sendMessage();
             }
         });
-        
-        // 页面加载后自动聚焦输入框
+
         window.addEventListener('load', () => {
             messageInput.focus();
         });
