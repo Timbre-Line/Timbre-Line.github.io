@@ -41,44 +41,30 @@
             background: none;
             border: none;
             cursor: pointer;
+            position: relative;
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 5px;
-            border-radius: 6px;
-            transition: background-color 0.2s;
-            position: relative;
-        }
-        
-        .logo-button:hover {
-            background-color: #f5f5f5;
-        }
-        
-        .logo-button::after {
-            content: "新聊天";
-            position: absolute;
-            bottom: -35px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #000000;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s;
-            z-index: 100;
+            justify-content: center;
         }
         
         .logo-button:hover::after {
-            opacity: 1;
+            content: "新聊天";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            margin-top: 5px;
         }
         
         .logo-icon {
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             border-radius: 4px;
             overflow: hidden;
         }
@@ -90,9 +76,8 @@
         }
         
         .logo-text {
-            font-weight: bold;
             color: #2d3748;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
         }
         
         .model-selector {
@@ -141,7 +126,6 @@
             display: flex;
             max-width: 100%;
             flex-direction: column;
-            position: relative;
         }
         
         .ai-message-container {
@@ -187,7 +171,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
             font-size: 1rem;
             flex-shrink: 0;
             margin-bottom: 5px;
@@ -361,83 +344,52 @@
             margin: 0 auto;
             padding: 0 20px;
         }
-        
-        /* 复制按钮样式 */
+
         .copy-button {
             background: none;
             border: none;
             cursor: pointer;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: absolute;
-            bottom: -30px;
-            opacity: 0.6;
+            padding: 4px;
+            margin-top: 4px;
+            opacity: 0.5;
             transition: opacity 0.2s;
-            padding: 0;
-            border-radius: 4px;
+            position: relative;
         }
         
         .copy-button:hover {
             opacity: 1;
-            background-color: rgba(0, 0, 0, 0.05);
-        }
-        
-        .user-message-container .copy-button {
-            right: 0;
-        }
-        
-        .ai-message-container .copy-button {
-            left: 0;
-        }
-        
-        .copy-button::after {
-            content: "复制";
-            position: absolute;
-            bottom: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #000000;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s;
         }
         
         .copy-button:hover::after {
-            opacity: 1;
+            content: "复制";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            margin-top: 5px;
         }
         
         .copy-icon {
-            position: relative;
-            width: 14px;
-            height: 14px;
+            width: 16px;
+            height: 16px;
         }
         
-        .copy-icon .rect1 {
-            position: absolute;
-            width: 12px;
-            height: 10px;
-            border: 1.5px solid #666;
-            border-radius: 2px;
-            bottom: 0;
-            left: 0;
+        .copy-icon rect {
+            fill: #666;
         }
         
-        .copy-icon .rect2 {
-            position: absolute;
-            width: 10px;
-            height: 8px;
-            border: 1.5px solid #666;
-            border-radius: 2px;
-            top: 0;
-            right: 0;
+        .user-message-container .copy-button {
+            align-self: flex-end;
+        }
+        
+        .ai-message-container .copy-button {
+            align-self: flex-start;
         }
         
         @media (max-width: 768px) {
@@ -446,12 +398,12 @@
             }
             
             .logo-icon {
-                width: 24px;
-                height: 24px;
+                width: 20px;
+                height: 20px;
             }
             
             .logo-text {
-                font-size: 1rem;
+                font-size: 1.1rem;
             }
             
             .model-select {
@@ -513,41 +465,18 @@
                 font-size: 0.7rem;
                 padding: 0 15px;
             }
-            
-            .copy-button {
-                width: 22px;
-                height: 22px;
-                bottom: -28px;
-            }
-            
-            .copy-icon {
-                width: 12px;
-                height: 12px;
-            }
-            
-            .copy-icon .rect1 {
-                width: 10px;
-                height: 8px;
-                border-width: 1.2px;
-            }
-            
-            .copy-icon .rect2 {
-                width: 8px;
-                height: 6px;
-                border-width: 1.2px;
-            }
         }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="logo">
-            <button class="logo-button" id="logo-button">
+            <button class="logo-button" onclick="window.location.href='https://timbre-line.github.io/chatgpt/'">
                 <div class="logo-icon">
                     <img src="chatgpt-avatar.png" alt="ChatGPT">
                 </div>
-                <div class="logo-text">ChatGPT</div>
             </button>
+            <div class="logo-text">ChatGPT</div>
         </div>
         <div class="model-selector">
             <select class="model-select" id="model-select">
@@ -598,7 +527,6 @@
         const sendButton = document.getElementById('send-button');
         const modelSelect = document.getElementById('model-select');
         const welcomeMessage = document.getElementById('welcome-message');
-        const logoButton = document.getElementById('logo-button');
         let currentModel = 'gpt-5-mini';
         let isFirstMessage = true;
 
@@ -621,10 +549,6 @@
             'o4-mini': 'OpenAI o4-mini'
         };
 
-        logoButton.addEventListener('click', () => {
-            window.location.href = 'https://timbre-line.github.io/chatgpt/';
-        });
-
         modelSelect.addEventListener('change', () => {
             currentModel = modelSelect.value;
         });
@@ -638,7 +562,7 @@
                 isFirstMessage = false;
             }
 
-            const userMessageId = addMessage('user', message);
+            addMessage('user', message);
             messageInput.value = '';
             messageInput.focus();
 
@@ -664,13 +588,23 @@
                     }
                 }
 
-                addCopyButton(aiMessageId, fullResponse);
+                // 流式输出完成后显示复制按钮
+                const copyButton = messageContainer.querySelector('.copy-button');
+                copyButton.style.display = 'block';
             } catch (error) {
                 const messageContainer = document.querySelector(`.message-container[data-id="${aiMessageId}"]`);
                 const contentElement = messageContainer.querySelector('.message-content');
                 contentElement.innerHTML = '抱歉，处理您的请求时出错了。请稍后再试。';
                 console.error('Error:', error);
             }
+        }
+
+        function copyMessageText(content) {
+            navigator.clipboard.writeText(content).then(() => {
+                // 复制成功，可以添加提示
+            }).catch(err => {
+                console.error('复制失败:', err);
+            });
         }
 
         function addMessage(role, content, isTyping = false) {
@@ -687,9 +621,13 @@
                     <div class="message user-message">
                         <div class="message-content">${content}</div>
                     </div>
+                    <button class="copy-button" onclick="copyMessageText('${content.replace(/'/g, "\\'")}')">
+                        <svg class="copy-icon" viewBox="0 0 16 16">
+                            <rect x="2" y="2" width="9" height="9" rx="2" ry="2"></rect>
+                            <rect x="5" y="5" width="9" height="9" rx="2" ry="2"></rect>
+                        </svg>
+                    </button>
                 `;
-
-                addCopyButton(messageId, content);
             } else {
                 messageContainer.classList.add('ai-message-container');
                 if (isTyping) {
@@ -709,6 +647,12 @@
                                 </div>
                             </div>
                         </div>
+                        <button class="copy-button" style="display: none;" onclick="copyMessageText(this.previousElementSibling.querySelector('.message-content').innerText)">
+                            <svg class="copy-icon" viewBox="0 0 16 16">
+                                <rect x="2" y="2" width="9" height="9" rx="2" ry="2"></rect>
+                                <rect x="5" y="5" width="9" height="9" rx="2" ry="2"></rect>
+                            </svg>
+                        </button>
                     `;
                 } else {
                     messageContainer.innerHTML = `
@@ -721,9 +665,13 @@
                         <div class="message ai-message">
                             <div class="message-content">${content}</div>
                         </div>
+                        <button class="copy-button" onclick="copyMessageText('${content.replace(/'/g, "\\'")}')">
+                            <svg class="copy-icon" viewBox="0 0 16 16">
+                                <rect x="2" y="2" width="9" height="9" rx="2" ry="2"></rect>
+                                <rect x="5" y="5" width="9" height="9" rx="2" ry="2"></rect>
+                            </svg>
+                        </button>
                     `;
-
-                    addCopyButton(messageId, content);
                 }
             }
 
@@ -732,43 +680,6 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
 
             return messageId;
-        }
-        
-        function addCopyButton(messageId, content) {
-            const messageContainer = document.querySelector(`.message-container[data-id="${messageId}"]`);
-
-            if (messageContainer.querySelector('.copy-button')) {
-                return;
-            }
-            
-            const copyButton = document.createElement('button');
-            copyButton.className = 'copy-button';
-            copyButton.innerHTML = `
-                <div class="copy-icon">
-                    <div class="rect1"></div>
-                    <div class="rect2"></div>
-                </div>
-            `;
-
-            if (messageContainer.classList.contains('user-message-container')) {
-                copyButton.style.right = '0';
-            } else {
-                copyButton.style.left = '0';
-            }
-            
-            copyButton.addEventListener('click', () => {
-                navigator.clipboard.writeText(content).then(() => {
-                    const originalTitle = copyButton.getAttribute('title');
-                    copyButton.style.opacity = '1';
-                    setTimeout(() => {
-                        copyButton.style.opacity = '0.6';
-                    }, 1000);
-                }).catch(err => {
-                    console.error('复制失败:', err);
-                });
-            });
-            
-            messageContainer.appendChild(copyButton);
         }
 
         sendButton.addEventListener('click', sendMessage);
