@@ -771,13 +771,27 @@
             currentTokenCount += tokens;
         }
 
-        function processMath(content) {
-            return content;
-        }
-
+        // 改进的数学公式渲染函数
         function rerenderMath() {
             if (window.MathJax && window.MathJax.typesetPromise) {
-                window.MathJax.typesetPromise();
+                // 延迟执行，确保DOM已完全更新
+                setTimeout(() => {
+                    window.MathJax.typesetPromise().catch(err => {
+                        console.warn('MathJax rendering error:', err);
+                    });
+                }, 100);
+            }
+        }
+
+        // 改进的完成时数学公式渲染函数
+        function rerenderMathOnCompletion() {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                // 延迟执行，确保DOM已完全更新
+                setTimeout(() => {
+                    window.MathJax.typesetPromise().catch(err => {
+                        console.warn('MathJax rendering error:', err);
+                    });
+                }, 300);
             }
         }
 
@@ -823,6 +837,7 @@
                         fullResponse += part.text;
                         contentElement.innerHTML = marked.parse(fullResponse);
 
+                        // 在流式输出中渲染数学公式
                         rerenderMath();
                         
                         chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -830,6 +845,9 @@
                 }
 
                 addToConversationHistory('assistant', fullResponse);
+
+                // 完成时再次渲染数学公式，确保所有公式正确显示
+                rerenderMathOnCompletion();
 
                 const copyButton = messageContainer.querySelector('.copy-button');
                 copyButton.style.display = 'block';
@@ -922,8 +940,8 @@
                         </button>
                     `;
                     
-                    // 对于非流式消息，也需要重新渲染数学公式
-                    setTimeout(rerenderMath, 100);
+                    // 对于非流式消息，延迟渲染数学公式
+                    setTimeout(rerenderMathOnCompletion, 100);
                 }
             }
 
