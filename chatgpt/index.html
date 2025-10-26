@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChatGPT</title>
     <link rel="icon" href="chatgpt-avatar.png" type="image/png">
-    <!-- 引入MathJax库以支持LaTeX数学公式 -->
     <script>
       window.MathJax = {
         tex: {
@@ -706,15 +705,11 @@
         let currentTokenCount = 0;
         const MAX_TOKENS = 10000;
 
-        // 配置Marked.js以支持LaTeX
         marked.setOptions({
             breaks: true,
             gfm: true,
-            // 防止Marked.js转义LaTeX中的特殊字符
             sanitize: false,
-            // 自定义渲染器以更好地处理LaTeX
             renderer: new marked.Renderer(),
-            // 防止Marked.js处理LaTeX分隔符
             highlight: function(code, lang) {
                 return code;
             }
@@ -776,16 +771,10 @@
             currentTokenCount += tokens;
         }
 
-        // 处理数学公式渲染
         function processMath(content) {
-            // 使用正则表达式匹配行内数学公式和块级数学公式
-            // 行内数学公式: $...$
-            // 块级数学公式: $$...$$ 或 \[...\]
-            // 这里我们不做处理，因为MathJax会自动处理这些分隔符
             return content;
         }
 
-        // 重新渲染所有数学公式
         function rerenderMath() {
             if (window.MathJax && window.MathJax.typesetPromise) {
                 window.MathJax.typesetPromise();
@@ -833,8 +822,7 @@
                     if (part?.text) {
                         fullResponse += part.text;
                         contentElement.innerHTML = marked.parse(fullResponse);
-                        
-                        // 每次更新后重新渲染数学公式
+
                         rerenderMath();
                         
                         chatContainer.scrollTop = chatContainer.scrollHeight;
