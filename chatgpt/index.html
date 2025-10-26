@@ -7,18 +7,6 @@
     <link rel="icon" href="chatgpt-avatar.png" type="image/png">
     <script src="https://js.puter.com/v2/"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script>
-      window.MathJax = {
-        tex: {
-          inlineMath: [['$', '$'], ['\\(', '\\)']],
-          displayMath: [['$$', '$$'], ['\\[', '\\]']]
-        },
-        svg: {
-          fontCache: 'global'
-        }
-      };
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
         * {
             margin: 0;
@@ -322,25 +310,6 @@
         
         .ai-message .message-content em {
             font-style: italic;
-        }
-        
-        /* MathJax 样式 */
-        .ai-message .message-content .mjx-chtml {
-            line-height: 1.2;
-        }
-        
-        .ai-message .message-content .MathJax {
-            font-size: 1.1em;
-        }
-        
-        .ai-message .message-content mjx-container[jax="CHTML"][display="true"] {
-            margin: 1em 0;
-            text-align: center;
-        }
-        
-        .ai-message .message-content mjx-container[jax="CHTML"] {
-            overflow-x: auto;
-            overflow-y: hidden;
         }
         
         .typing-indicator {
@@ -792,14 +761,6 @@
                     if (part?.text) {
                         fullResponse += part.text;
                         contentElement.innerHTML = marked.parse(fullResponse);
-                        
-                        // 重新渲染数学公式
-                        if (window.MathJax && window.MathJax.typesetPromise) {
-                            window.MathJax.typesetPromise([contentElement]).catch(err => {
-                                console.error('MathJax typeset error:', err);
-                            });
-                        }
-                        
                         chatContainer.scrollTop = chatContainer.scrollHeight;
                     }
                 }
@@ -896,15 +857,6 @@
                             </svg>
                         </button>
                     `;
-                    
-                    // 渲染数学公式
-                    if (window.MathJax && window.MathJax.typesetPromise) {
-                        setTimeout(() => {
-                            window.MathJax.typesetPromise([messageContainer.querySelector('.message-content')]).catch(err => {
-                                console.error('MathJax typeset error:', err);
-                            });
-                        }, 0);
-                    }
                 }
             }
 
