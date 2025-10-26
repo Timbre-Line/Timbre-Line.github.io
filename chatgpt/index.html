@@ -6,8 +6,19 @@
     <title>ChatGPT</title>
     <link rel="icon" href="chatgpt-avatar.png" type="image/png">
     <script src="https://js.puter.com/v2/"></script>
-    <!-- 引入Marked.js库用于Markdown解析 -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
         * {
             margin: 0;
@@ -311,6 +322,25 @@
         
         .ai-message .message-content em {
             font-style: italic;
+        }
+        
+        /* MathJax 样式 */
+        .ai-message .message-content .mjx-chtml {
+            line-height: 1.2;
+        }
+        
+        .ai-message .message-content .MathJax {
+            font-size: 1.1em;
+        }
+        
+        .ai-message .message-content mjx-container[jax="CHTML"][display="true"] {
+            margin: 1em 0;
+            text-align: center;
+        }
+        
+        .ai-message .message-content mjx-container[jax="CHTML"] {
+            overflow-x: auto;
+            overflow-y: hidden;
         }
         
         .typing-indicator {
@@ -660,10 +690,9 @@
         let currentTokenCount = 0;
         const MAX_TOKENS = 10000;
 
-        // 配置marked选项
         marked.setOptions({
-            breaks: true, // 在换行符处换行
-            gfm: true,    // 使用GitHub风格的Markdown
+            breaks: true,
+            gfm: true,
         });
 
         function estimateTokens(text) {
@@ -762,8 +791,15 @@
                 for await (const part of response) {
                     if (part?.text) {
                         fullResponse += part.text;
-                        // 使用marked将Markdown转换为HTML
                         contentElement.innerHTML = marked.parse(fullResponse);
+                        
+                        // 重新渲染数学公式
+                        if (window.MathJax && window.MathJax.typesetPromise) {
+                            window.MathJax.typesetPromise([contentElement]).catch(err => {
+                                console.error('MathJax typeset error:', err);
+                            });
+                        }
+                        
                         chatContainer.scrollTop = chatContainer.scrollHeight;
                     }
                 }
@@ -781,10 +817,8 @@
         }
 
         function copyMessageText(content) {
-            // 如果是AI消息，我们需要从HTML中提取纯文本
             let plainText = content;
             if (content.includes('<')) {
-                // 创建一个临时元素来提取纯文本
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = content;
                 plainText = tempDiv.textContent || tempDiv.innerText || '';
@@ -844,7 +878,6 @@
                         </button>
                     `;
                 } else {
-                    // 对于AI消息，使用marked将Markdown转换为HTML
                     const htmlContent = marked.parse(content);
                     messageContainer.innerHTML = `
                         <div class="ai-header">
@@ -863,6 +896,15 @@
                             </svg>
                         </button>
                     `;
+                    
+                    // 渲染数学公式
+                    if (window.MathJax && window.MathJax.typesetPromise) {
+                        setTimeout(() => {
+                            window.MathJax.typesetPromise([messageContainer.querySelector('.message-content')]).catch(err => {
+                                console.error('MathJax typeset error:', err);
+                            });
+                        }, 0);
+                    }
                 }
             }
 
