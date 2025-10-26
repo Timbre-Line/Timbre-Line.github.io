@@ -6,6 +6,8 @@
     <title>ChatGPT</title>
     <link rel="icon" href="chatgpt-avatar.png" type="image/png">
     <script src="https://js.puter.com/v2/"></script>
+    <!-- 引入Marked.js库用于Markdown解析 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -195,6 +197,120 @@
         .message-content {
             color: #2d3748;
             line-height: 1.6;
+        }
+        
+        /* Markdown 样式 */
+        .ai-message .message-content h1,
+        .ai-message .message-content h2,
+        .ai-message .message-content h3,
+        .ai-message .message-content h4,
+        .ai-message .message-content h5,
+        .ai-message .message-content h6 {
+            margin-top: 1em;
+            margin-bottom: 0.5em;
+            font-weight: bold;
+        }
+        
+        .ai-message .message-content h1 {
+            font-size: 1.5em;
+        }
+        
+        .ai-message .message-content h2 {
+            font-size: 1.4em;
+        }
+        
+        .ai-message .message-content h3 {
+            font-size: 1.3em;
+        }
+        
+        .ai-message .message-content h4 {
+            font-size: 1.2em;
+        }
+        
+        .ai-message .message-content h5 {
+            font-size: 1.1em;
+        }
+        
+        .ai-message .message-content h6 {
+            font-size: 1em;
+        }
+        
+        .ai-message .message-content p {
+            margin-bottom: 1em;
+        }
+        
+        .ai-message .message-content ul,
+        .ai-message .message-content ol {
+            margin-bottom: 1em;
+            padding-left: 2em;
+        }
+        
+        .ai-message .message-content li {
+            margin-bottom: 0.25em;
+        }
+        
+        .ai-message .message-content blockquote {
+            border-left: 4px solid #e2e8f0;
+            padding-left: 1em;
+            margin-left: 0;
+            margin-bottom: 1em;
+            color: #718096;
+        }
+        
+        .ai-message .message-content code {
+            background-color: #f7fafc;
+            padding: 0.1em 0.3em;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #e53e3e;
+        }
+        
+        .ai-message .message-content pre {
+            background-color: #f7fafc;
+            padding: 1em;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-bottom: 1em;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .ai-message .message-content pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            color: inherit;
+        }
+        
+        .ai-message .message-content table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 1em;
+        }
+        
+        .ai-message .message-content th,
+        .ai-message .message-content td {
+            border: 1px solid #e2e8f0;
+            padding: 0.5em;
+            text-align: left;
+        }
+        
+        .ai-message .message-content th {
+            background-color: #f7fafc;
+            font-weight: bold;
+        }
+        
+        .ai-message .message-content a {
+            color: #3182ce;
+            text-decoration: underline;
+        }
+        
+        .ai-message .message-content strong {
+            font-weight: bold;
+        }
+        
+        .ai-message .message-content em {
+            font-style: italic;
         }
         
         .typing-indicator {
@@ -544,6 +660,12 @@
         let currentTokenCount = 0;
         const MAX_TOKENS = 10000;
 
+        // 配置marked选项
+        marked.setOptions({
+            breaks: true, // 在换行符处换行
+            gfm: true,    // 使用GitHub风格的Markdown
+        });
+
         function estimateTokens(text) {
             let chineseChars = (text.match(/[\u4e00-\u9fa5]/g) || []).length;
             let englishChars = text.length - chineseChars;
@@ -640,7 +762,8 @@
                 for await (const part of response) {
                     if (part?.text) {
                         fullResponse += part.text;
-                        contentElement.innerHTML = fullResponse;
+                        // 使用marked将Markdown转换为HTML
+                        contentElement.innerHTML = marked.parse(fullResponse);
                         chatContainer.scrollTop = chatContainer.scrollHeight;
                     }
                 }
@@ -658,7 +781,16 @@
         }
 
         function copyMessageText(content) {
-            navigator.clipboard.writeText(content).then(() => {
+            // 如果是AI消息，我们需要从HTML中提取纯文本
+            let plainText = content;
+            if (content.includes('<')) {
+                // 创建一个临时元素来提取纯文本
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = content;
+                plainText = tempDiv.textContent || tempDiv.innerText || '';
+            }
+            
+            navigator.clipboard.writeText(plainText).then(() => {
             }).catch(err => {
                 console.error('复制失败:', err);
             });
@@ -712,6 +844,8 @@
                         </button>
                     `;
                 } else {
+                    // 对于AI消息，使用marked将Markdown转换为HTML
+                    const htmlContent = marked.parse(content);
                     messageContainer.innerHTML = `
                         <div class="ai-header">
                             <div class="ai-icon">
@@ -720,7 +854,7 @@
                             <span class="model-label">${modelNames[currentModel]}</span>
                         </div>
                         <div class="message ai-message">
-                            <div class="message-content">${content}</div>
+                            <div class="message-content">${htmlContent}</div>
                         </div>
                         <button class="copy-button" onclick="copyMessageText('${content.replace(/'/g, "\\'")}')">
                             <svg class="copy-icon" viewBox="0 0 16 16">
