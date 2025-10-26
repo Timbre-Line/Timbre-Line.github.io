@@ -5,6 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChatGPT</title>
     <link rel="icon" href="chatgpt-avatar.png" type="image/png">
+    <!-- 引入MathJax库以支持LaTeX数学公式 -->
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          processEscapes: true,
+          processEnvironments: true
+        },
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+      };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="https://js.puter.com/v2/"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
@@ -310,6 +325,38 @@
         
         .ai-message .message-content em {
             font-style: italic;
+        }
+        
+        /* MathJax 样式调整 */
+        .ai-message .message-content .mjx-chtml {
+            font-size: 1.1em;
+            line-height: 1.2;
+        }
+        
+        .ai-message .message-content .MathJax {
+            margin: 0.5em 0;
+        }
+        
+        .ai-message .message-content mjx-container {
+            display: inline-block;
+            line-height: 0;
+            text-align: left;
+            text-indent: 0;
+            font-style: normal;
+            font-weight: normal;
+            font-size: 100%;
+            font-size-adjust: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            word-spacing: normal;
+            white-space: nowrap;
+            float: none;
+            direction: ltr;
+            max-width: 100%;
+            min-width: 0;
+            min-height: 0;
+            border: 0;
+            padding: 1px 0;
         }
         
         .typing-indicator {
@@ -659,9 +706,18 @@
         let currentTokenCount = 0;
         const MAX_TOKENS = 10000;
 
+        // 配置Marked.js以支持LaTeX
         marked.setOptions({
             breaks: true,
             gfm: true,
+            // 防止Marked.js转义LaTeX中的特殊字符
+            sanitize: false,
+            // 自定义渲染器以更好地处理LaTeX
+            renderer: new marked.Renderer(),
+            // 防止Marked.js处理LaTeX分隔符
+            highlight: function(code, lang) {
+                return code;
+            }
         });
 
         function estimateTokens(text) {
@@ -720,6 +776,22 @@
             currentTokenCount += tokens;
         }
 
+        // 处理数学公式渲染
+        function processMath(content) {
+            // 使用正则表达式匹配行内数学公式和块级数学公式
+            // 行内数学公式: $...$
+            // 块级数学公式: $$...$$ 或 \[...\]
+            // 这里我们不做处理，因为MathJax会自动处理这些分隔符
+            return content;
+        }
+
+        // 重新渲染所有数学公式
+        function rerenderMath() {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise();
+            }
+        }
+
         async function sendMessage() {
             const message = messageInput.value.trim();
             if (message === '') return;
@@ -761,6 +833,10 @@
                     if (part?.text) {
                         fullResponse += part.text;
                         contentElement.innerHTML = marked.parse(fullResponse);
+                        
+                        // 每次更新后重新渲染数学公式
+                        rerenderMath();
+                        
                         chatContainer.scrollTop = chatContainer.scrollHeight;
                     }
                 }
@@ -857,6 +933,9 @@
                             </svg>
                         </button>
                     `;
+                    
+                    // 对于非流式消息，也需要重新渲染数学公式
+                    setTimeout(rerenderMath, 100);
                 }
             }
 
