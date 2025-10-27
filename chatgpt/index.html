@@ -11,16 +11,16 @@
       window.MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
-          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+          displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          processEscapes: true,
+          processEnvironments: true
         },
-        svg: {
-          fontCache: 'global'
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
     <style>
         * {
             margin: 0;
@@ -324,6 +324,22 @@
         
         .ai-message .message-content em {
             font-style: italic;
+        }
+        
+        /* MathJax 样式调整 */
+        .ai-message .message-content .MathJax {
+            font-size: 1em !important;
+        }
+        
+        .ai-message .message-content mjx-container {
+            display: inline-block;
+            margin: 0.2em 0 !important;
+        }
+        
+        .ai-message .message-content mjx-container[jax="CHTML"][display="true"] {
+            display: block !important;
+            margin: 1em 0 !important;
+            text-align: center;
         }
         
         .typing-indicator {
@@ -776,9 +792,9 @@
                         fullResponse += part.text;
                         contentElement.innerHTML = marked.parse(fullResponse);
                         
-                        // 在每次更新后尝试重新渲染数学公式
-                        if (window.MathJax && window.MathJax.typesetPromise) {
-                            window.MathJax.typesetPromise([contentElement]).catch((err) => console.log('MathJax typeset error:', err));
+                        // 渲染数学公式
+                        if (window.MathJax) {
+                            window.MathJax.typesetPromise([contentElement]).catch((err) => console.log('MathJax error:', err));
                         }
                         
                         chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -879,8 +895,8 @@
                     `;
                     
                     // 渲染数学公式
-                    if (window.MathJax && window.MathJax.typesetPromise) {
-                        window.MathJax.typesetPromise([messageContainer.querySelector('.message-content')]).catch((err) => console.log('MathJax typeset error:', err));
+                    if (window.MathJax) {
+                        window.MathJax.typesetPromise([messageContainer.querySelector('.message-content')]).catch((err) => console.log('MathJax error:', err));
                     }
                 }
             }
