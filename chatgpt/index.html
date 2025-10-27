@@ -5,22 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChatGPT</title>
     <link rel="icon" href="chatgpt-avatar.png" type="image/png">
+    <script src="https://js.puter.com/v2/"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
       window.MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
-          displayMath: [['$$', '$$'], ['\\[', '\\]']],
-          processEscapes: true,
-          processEnvironments: true
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
         },
-        options: {
-          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        svg: {
+          fontCache: 'global'
         }
       };
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script src="https://js.puter.com/v2/"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
     <style>
         * {
             margin: 0;
@@ -324,38 +324,6 @@
         
         .ai-message .message-content em {
             font-style: italic;
-        }
-        
-        /* MathJax 样式调整 */
-        .ai-message .message-content .mjx-chtml {
-            font-size: 1.1em;
-            line-height: 1.2;
-        }
-        
-        .ai-message .message-content .MathJax {
-            margin: 0.5em 0;
-        }
-        
-        .ai-message .message-content mjx-container {
-            display: inline-block;
-            line-height: 0;
-            text-align: left;
-            text-indent: 0;
-            font-style: normal;
-            font-weight: normal;
-            font-size: 100%;
-            font-size-adjust: none;
-            letter-spacing: normal;
-            word-wrap: normal;
-            word-spacing: normal;
-            white-space: nowrap;
-            float: none;
-            direction: ltr;
-            max-width: 100%;
-            min-width: 0;
-            min-height: 0;
-            border: 0;
-            padding: 1px 0;
         }
         
         .typing-indicator {
@@ -708,11 +676,6 @@
         marked.setOptions({
             breaks: true,
             gfm: true,
-            sanitize: false,
-            renderer: new marked.Renderer(),
-            highlight: function(code, lang) {
-                return code;
-            }
         });
 
         function estimateTokens(text) {
@@ -771,30 +734,6 @@
             currentTokenCount += tokens;
         }
 
-        // 改进的数学公式渲染函数
-        function rerenderMath() {
-            if (window.MathJax && window.MathJax.typesetPromise) {
-                // 延迟执行，确保DOM已完全更新
-                setTimeout(() => {
-                    window.MathJax.typesetPromise().catch(err => {
-                        console.warn('MathJax rendering error:', err);
-                    });
-                }, 100);
-            }
-        }
-
-        // 改进的完成时数学公式渲染函数
-        function rerenderMathOnCompletion() {
-            if (window.MathJax && window.MathJax.typesetPromise) {
-                // 延迟执行，确保DOM已完全更新
-                setTimeout(() => {
-                    window.MathJax.typesetPromise().catch(err => {
-                        console.warn('MathJax rendering error:', err);
-                    });
-                }, 300);
-            }
-        }
-
         async function sendMessage() {
             const message = messageInput.value.trim();
             if (message === '') return;
@@ -836,18 +775,17 @@
                     if (part?.text) {
                         fullResponse += part.text;
                         contentElement.innerHTML = marked.parse(fullResponse);
-
-                        // 在流式输出中渲染数学公式
-                        rerenderMath();
+                        
+                        // 在每次更新后尝试重新渲染数学公式
+                        if (window.MathJax && window.MathJax.typesetPromise) {
+                            window.MathJax.typesetPromise([contentElement]).catch((err) => console.log('MathJax typeset error:', err));
+                        }
                         
                         chatContainer.scrollTop = chatContainer.scrollHeight;
                     }
                 }
 
                 addToConversationHistory('assistant', fullResponse);
-
-                // 完成时再次渲染数学公式，确保所有公式正确显示
-                rerenderMathOnCompletion();
 
                 const copyButton = messageContainer.querySelector('.copy-button');
                 copyButton.style.display = 'block';
@@ -940,8 +878,10 @@
                         </button>
                     `;
                     
-                    // 对于非流式消息，延迟渲染数学公式
-                    setTimeout(rerenderMathOnCompletion, 100);
+                    // 渲染数学公式
+                    if (window.MathJax && window.MathJax.typesetPromise) {
+                        window.MathJax.typesetPromise([messageContainer.querySelector('.message-content')]).catch((err) => console.log('MathJax typeset error:', err));
+                    }
                 }
             }
 
