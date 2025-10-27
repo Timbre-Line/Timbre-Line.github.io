@@ -28,14 +28,14 @@
         }
         
         body {
-            background-color: #f5f7fa;
+            background-color: #fff;
             height: 100vh;
             display: flex;
             flex-direction: column;
         }
         
         .header {
-            background-color: #f5f7fa;
+            background-color: #fff;
             padding: 15px 20px;
             display: flex;
             align-items: center;
@@ -142,7 +142,7 @@
             display: flex;
             flex-direction: column;
             gap: 30px;
-            background-color: #f5f7fa;
+            background-color: #fff;
         }
         
         .message-container {
@@ -182,7 +182,7 @@
         }
         
         .ai-message {
-            background-color: #ffffff;
+            background-color: #fff;
             border-bottom-left-radius: 5px;
             border: 1px solid #e2e8f0;
         }
@@ -210,8 +210,7 @@
             color: #2d3748;
             line-height: 1.6;
         }
-        
-        /* Markdown 样式 */
+
         .ai-message .message-content h1,
         .ai-message .message-content h2,
         .ai-message .message-content h3,
@@ -397,7 +396,7 @@
         }
 
         #send-button {
-            background-color: #000000;
+            background-color: #000;
             color: white;
             border: none;
             border-radius: 50%;
@@ -428,7 +427,7 @@
         .welcome-message {
             text-align: center;
             padding: 20px;
-            color: #000000;
+            color: #000;
             max-width: 600px;
             margin: auto;
             display: flex;
@@ -439,7 +438,7 @@
         
         .welcome-message h2 {
             margin-bottom: 20px;
-            color: #000000;
+            color: #000;
             font-size: 2.5rem;
             font-weight: 600;
         }
@@ -603,6 +602,10 @@
                 font-size: 0.7rem;
                 padding: 0 15px;
             }
+        }
+
+        ::selection {
+            background-color: #b8dcff;
         }
     </style>
 </head>
