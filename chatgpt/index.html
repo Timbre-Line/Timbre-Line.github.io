@@ -5,8 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChatGPT</title>
     <link rel="icon" href="chatgpt-avatar.png" type="image/png">
+    <!-- KaTeX CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
     <script src="https://js.puter.com/v2/"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- KaTeX JS -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
     <style>
         * {
             margin: 0;
@@ -310,6 +315,21 @@
         
         .ai-message .message-content em {
             font-style: italic;
+        }
+        
+        /* KaTeX 样式调整 */
+        .ai-message .message-content .katex {
+            font-size: 1.1em;
+        }
+        
+        .ai-message .message-content .katex-display {
+            margin: 1em 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+        
+        .ai-message .message-content .katex-display > .katex {
+            max-width: 100%;
         }
         
         .typing-indicator {
@@ -659,10 +679,45 @@
         let currentTokenCount = 0;
         const MAX_TOKENS = 10000;
 
+        // 配置Marked以正确处理LaTeX公式
         marked.setOptions({
             breaks: true,
             gfm: true,
+            highlight: function(code, lang) {
+                return code;
+            }
         });
+
+        // 自定义渲染器，避免Marked处理数学公式
+        const renderer = new marked.Renderer();
+        
+        // 重写代码块渲染
+        renderer.code = function(code, language, isEscaped) {
+            // 如果是数学公式，直接返回原始内容
+            if (language === 'math') {
+                return code;
+            }
+            
+            // 否则使用默认渲染
+            if (!language) {
+                return '<pre><code>' + code + '</code></pre>';
+            }
+            
+            return '<pre><code class="' + this.options.langPrefix + language + '">' + code + '</code></pre>';
+        };
+        
+        // 重写行内代码渲染
+        renderer.codespan = function(text) {
+            // 检查是否是行内数学公式
+            if (text.includes('$') && text.match(/\$[^$]+\$/)) {
+                return text;
+            }
+            
+            return '<code>' + text + '</code>';
+        };
+        
+        // 应用自定义渲染器
+        marked.setOptions({ renderer });
 
         function estimateTokens(text) {
             let chineseChars = (text.match(/[\u4e00-\u9fa5]/g) || []).length;
@@ -702,6 +757,19 @@
             const randomIndex = Math.floor(Math.random() * welcomeMessages.length);
             welcomeMessage.querySelector('h2').textContent = welcomeMessages[randomIndex];
             messageInput.focus();
+            
+            // 初始化KaTeX自动渲染
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false},
+                        {left: '\\(', right: '\\)', display: false},
+                        {left: '\\[', right: '\\]', display: true}
+                    ],
+                    throwOnError: false
+                });
+            }
         });
 
         modelSelect.addEventListener('change', () => {
@@ -718,6 +786,21 @@
 
             conversationHistory.push({ role, content });
             currentTokenCount += tokens;
+        }
+
+        // 渲染数学公式
+        function renderMath(element) {
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(element, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false},
+                        {left: '\\(', right: '\\)', display: false},
+                        {left: '\\[', right: '\\]', display: true}
+                    ],
+                    throwOnError: false
+                });
+            }
         }
 
         async function sendMessage() {
@@ -761,6 +844,10 @@
                     if (part?.text) {
                         fullResponse += part.text;
                         contentElement.innerHTML = marked.parse(fullResponse);
+                        
+                        // 渲染数学公式
+                        renderMath(contentElement);
+                        
                         chatContainer.scrollTop = chatContainer.scrollHeight;
                     }
                 }
@@ -857,6 +944,11 @@
                             </svg>
                         </button>
                     `;
+                    
+                    // 渲染数学公式
+                    setTimeout(() => {
+                        renderMath(messageContainer.querySelector('.message-content'));
+                    }, 0);
                 }
             }
 
