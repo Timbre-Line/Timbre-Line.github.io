@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -416,15 +417,6 @@
         #send-button:hover {
             background-color: #333333;
         }
-
-        #send-button:disabled {
-            cursor: not-allowed;
-        }
-
-        #message-input:disabled {
-            background-color: #f0f0f0;
-            cursor: not-allowed;
-        }
         
         .arrow-icon {
             width: 24px;
@@ -747,20 +739,17 @@
 
         async function sendMessage() {
             const message = messageInput.value.trim();
-            if (message === '' || sendButton.disabled) return;
+            if (message === '') return;
 
             if (isFirstMessage) {
                 welcomeMessage.classList.add('hidden');
                 isFirstMessage = false;
             }
 
-            sendButton.disabled = true;
-            sendButton.style.backgroundColor = '#ccc';
-            messageInput.disabled = true;
-
             addMessage('user', message);
             addToConversationHistory('user', message);
             messageInput.value = '';
+            messageInput.focus();
 
             const aiMessageId = addMessage('assistant', '', true);
 
@@ -806,11 +795,6 @@
                 const contentElement = messageContainer.querySelector('.message-content');
                 contentElement.innerHTML = '抱歉，处理您的请求时出错了。请稍后再试。';
                 console.error('Error:', error);
-            } finally {
-                sendButton.disabled = false;
-                sendButton.style.backgroundColor = '#000';
-                messageInput.disabled = false;
-                messageInput.focus();
             }
         }
 
@@ -913,7 +897,7 @@
         sendButton.addEventListener('click', sendMessage);
 
         messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !sendButton.disabled) {
+            if (e.key === 'Enter') {
                 sendMessage();
             }
         });
