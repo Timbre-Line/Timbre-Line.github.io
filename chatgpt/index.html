@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -418,6 +417,15 @@
             background-color: #333333;
         }
         
+        #send-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        #send-button:disabled:hover {
+            background-color: #cccccc;
+        }
+        
         .arrow-icon {
             width: 24px;
             height: 24px;
@@ -675,6 +683,7 @@
         let conversationHistory = [];
         let currentTokenCount = 0;
         const MAX_TOKENS = 10000;
+        let isWaitingForResponse = false; // 新增：用于跟踪是否在等待AI回复
 
         marked.setOptions({
             breaks: true,
@@ -738,6 +747,9 @@
         }
 
         async function sendMessage() {
+            // 新增：如果正在等待AI回复，则直接返回
+            if (isWaitingForResponse) return;
+
             const message = messageInput.value.trim();
             if (message === '') return;
 
@@ -750,6 +762,10 @@
             addToConversationHistory('user', message);
             messageInput.value = '';
             messageInput.focus();
+
+            // 新增：禁用发送按钮并设置等待状态
+            isWaitingForResponse = true;
+            sendButton.disabled = true;
 
             const aiMessageId = addMessage('assistant', '', true);
 
@@ -795,6 +811,10 @@
                 const contentElement = messageContainer.querySelector('.message-content');
                 contentElement.innerHTML = '抱歉，处理您的请求时出错了。请稍后再试。';
                 console.error('Error:', error);
+            } finally {
+                // 新增：无论成功失败，都重新启用发送按钮
+                isWaitingForResponse = false;
+                sendButton.disabled = false;
             }
         }
 
