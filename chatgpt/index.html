@@ -94,45 +94,83 @@
             object-fit: cover;
         }
         
-        .logo-text {
+        .model-select-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+        
+        .model-select-button:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .model-prefix {
             color: #2d3748;
             font-size: 1.2rem;
+            font-weight: 500;
         }
         
-        .model-selector {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            position: relative;
-            width: 220px;
-            justify-content: center;
+        .model-version {
+            color: #718096;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        
+        .dropdown-arrow {
+            width: 16px;
+            height: 16px;
+            fill: #718096;
+            transition: transform 0.3s;
+        }
+        
+        .model-dropdown {
             position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        
-        .model-select {
-            width: 100%;
-            padding: 10px 15px;
-            border-radius: 20px;
+            top: 60px;
+            left: 70px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 8px 0;
+            min-width: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+            z-index: 100;
             border: 1px solid #e2e8f0;
-            background-color: #f8fafc;
-            font-size: 0.9rem;
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 15px center;
-            background-size: 14px;
-            cursor: pointer;
-            outline: none;
-            transition: all 0.2s;
         }
         
-        .model-select:focus {
-            border-color: #999;
-            box-shadow: 0 0 0 3px rgba(153, 153, 153, 0.15);
+        .model-dropdown.show {
+            display: block;
+        }
+        
+        .model-option {
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 0.95rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .model-option:hover {
+            background-color: #f7fafc;
+        }
+        
+        .model-option.selected {
+            background-color: #edf2f7;
+            font-weight: 500;
+        }
+        
+        .model-type {
+            color: #718096;
+            font-size: 0.85rem;
         }
         
         .chat-container {
@@ -548,14 +586,20 @@
                 height: 20px;
             }
             
-            .logo-text {
+            .model-prefix, .model-version {
                 font-size: 1.1rem;
             }
             
-            .model-select {
+            .model-dropdown {
+                top: 55px;
+                left: 60px;
+                min-width: 180px;
+                max-height: 350px;
+            }
+            
+            .model-option {
                 padding: 8px 12px;
-                font-size: 0.85rem;
-                background-position: right 12px center;
+                font-size: 0.9rem;
             }
             
             .chat-container {
@@ -626,32 +670,16 @@
                     <img src="chatgpt-avatar.png" alt="ChatGPT">
                 </div>
             </button>
-            <div class="logo-text">ChatGPT</div>
+            <button class="model-select-button" id="model-select-button">
+                <span class="model-prefix" id="model-prefix">ChatGPT</span>
+                <span class="model-version" id="model-version">5.2</span>
+                <svg class="dropdown-arrow" viewBox="0 0 24 24">
+                    <path d="M7 10l5 5 5-5z"></path>
+                </svg>
+            </button>
         </div>
-        <div class="model-selector">
-            <select class="model-select" id="model-select">
-                <option value="gpt-5.2" selected>GPT-5.2</option>
-                <option value="gpt-5.2-chat">GPT-5.2 Chat</option>
-                <option value="gpt-5.2-pro">GPT-5.2 Pro</option>
-                <option value="gpt-5.1">GPT-5.1</option>
-                <option value="gpt-5.1-chat-latest">GPT-5.1 Chat</option>
-                <option value="gpt-5">GPT-5</option>
-                <option value="gpt-5-mini">GPT-5 Mini</option>
-                <option value="gpt-5-nano">GPT-5 Nano</option>
-                <option value="gpt-5-chat-latest">GPT-5 Chat</option>
-                <option value="gpt-4.1">GPT-4.1</option>
-                <option value="gpt-4.1-mini">GPT-4.1 Mini</option>
-                <option value="gpt-4.1-nano">GPT-4.1 Nano</option>
-                <option value="gpt-4.5-preview">GPT-4.5 Preview</option>
-                <option value="gpt-4o">GPT-4o</option>
-                <option value="gpt-4o-mini">GPT-4o Mini</option>
-                <option value="o1">OpenAI o1</option>
-                <option value="o1-mini">OpenAI o1-mini</option>
-                <option value="o1-pro">OpenAI o1-pro</option>
-                <option value="o3">OpenAI o3</option>
-                <option value="o3-mini">OpenAI o3-mini</option>
-                <option value="o4-mini">OpenAI o4-mini</option>
-            </select>
+        <div class="model-dropdown" id="model-dropdown">
+            <!-- 模型选项将通过JavaScript动态生成 -->
         </div>
         <div></div>
     </div>
@@ -680,15 +708,18 @@
         const chatContainer = document.getElementById('chat-container');
         const messageInput = document.getElementById('message-input');
         const sendButton = document.getElementById('send-button');
-        const modelSelect = document.getElementById('model-select');
         const welcomeMessage = document.getElementById('welcome-message');
+        const modelSelectButton = document.getElementById('model-select-button');
+        const modelDropdown = document.getElementById('model-dropdown');
+        const modelPrefix = document.getElementById('model-prefix');
+        const modelVersion = document.getElementById('model-version');
         
         let currentModel = 'gpt-5.2';
         let isFirstMessage = true;
         let conversationHistory = [];
         let currentTokenCount = 0;
         const MAX_TOKENS = 10000;
-        let isWaitingForResponse = false; // 新增：用于跟踪是否在等待AI回复
+        let isWaitingForResponse = false;
 
         marked.setOptions({
             breaks: true,
@@ -701,28 +732,53 @@
             return Math.ceil(chineseChars * 1.5 + englishChars * 0.5);
         }
 
+        // 修改模型映射，显示简短版本
         const modelNames = {
-            'gpt-5.2': 'GPT-5.2',
-            'gpt-5.2-chat': 'GPT-5.2 Chat',
-            'gpt-5.2-pro': 'GPT-5.2 Pro',
-            'gpt-5.1': 'GPT-5.1',
-            'gpt-5.1-chat-latest': 'GPT-5 Chat',
-            'gpt-5': 'GPT-5',
-            'gpt-5-mini': 'GPT-5 Mini',
-            'gpt-5-nano': 'GPT-5 Nano',
-            'gpt-5-chat-latest': 'GPT-5 Chat',
-            'gpt-4.1': 'GPT-4.1',
-            'gpt-4.1-mini': 'GPT-4.1 Mini',
-            'gpt-4.1-nano': 'GPT-4.1 Nano',
-            'gpt-4.5-preview': 'GPT-4.5 Preview',
-            'gpt-4o': 'GPT-4o',
-            'gpt-4o-mini': 'GPT-4o Mini',
-            'o1': 'OpenAI o1',
-            'o1-mini': 'OpenAI o1-mini',
-            'o1-pro': 'OpenAI o1-pro',
-            'o3': 'OpenAI o3',
-            'o3-mini': 'OpenAI o3-mini',
-            'o4-mini': 'OpenAI o4-mini'
+            'gpt-5.2': '5.2',
+            'gpt-5.2-chat': '5.2 Chat',
+            'gpt-5.2-pro': '5.2 Pro',
+            'gpt-5.1': '5.1',
+            'gpt-5.1-chat-latest': '5.1 Chat',
+            'gpt-5': '5',
+            'gpt-5-mini': '5 Mini',
+            'gpt-5-nano': '5 Nano',
+            'gpt-5-chat-latest': '5 Chat',
+            'gpt-4.1': '4.1',
+            'gpt-4.1-mini': '4.1 Mini',
+            'gpt-4.1-nano': '4.1 Nano',
+            'gpt-4.5-preview': '4.5 Preview',
+            'gpt-4o': '4o',
+            'gpt-4o-mini': '4o Mini',
+            'o1': 'o1',
+            'o1-mini': 'o1-mini',
+            'o1-pro': 'o1-pro',
+            'o3': 'o3',
+            'o3-mini': 'o3-mini',
+            'o4-mini': 'o4-mini'
+        };
+
+        const modelTypes = {
+            'gpt-5.2': 'ChatGPT',
+            'gpt-5.2-chat': 'ChatGPT',
+            'gpt-5.2-pro': 'ChatGPT',
+            'gpt-5.1': 'ChatGPT',
+            'gpt-5.1-chat-latest': 'ChatGPT',
+            'gpt-5': 'ChatGPT',
+            'gpt-5-mini': 'ChatGPT',
+            'gpt-5-nano': 'ChatGPT',
+            'gpt-5-chat-latest': 'ChatGPT',
+            'gpt-4.1': 'ChatGPT',
+            'gpt-4.1-mini': 'ChatGPT',
+            'gpt-4.1-nano': 'ChatGPT',
+            'gpt-4.5-preview': 'ChatGPT',
+            'gpt-4o': 'ChatGPT',
+            'gpt-4o-mini': 'ChatGPT',
+            'o1': 'OpenAI',
+            'o1-mini': 'OpenAI',
+            'o1-pro': 'OpenAI',
+            'o3': 'OpenAI',
+            'o3-mini': 'OpenAI',
+            'o4-mini': 'OpenAI'
         };
 
         const welcomeMessages = [
@@ -738,10 +794,82 @@
             const randomIndex = Math.floor(Math.random() * welcomeMessages.length);
             welcomeMessage.querySelector('h2').textContent = welcomeMessages[randomIndex];
             messageInput.focus();
+            updateModelDisplay();
+            populateModelDropdown();
         });
 
-        modelSelect.addEventListener('change', () => {
-            currentModel = modelSelect.value;
+        function updateModelDisplay() {
+            modelPrefix.textContent = modelTypes[currentModel];
+            modelVersion.textContent = modelNames[currentModel];
+        }
+
+        function populateModelDropdown() {
+            modelDropdown.innerHTML = '';
+            
+            const models = Object.keys(modelNames);
+            
+            models.forEach(model => {
+                const option = document.createElement('div');
+                option.className = 'model-option';
+                if (model === currentModel) {
+                    option.classList.add('selected');
+                }
+                
+                option.innerHTML = `
+                    <div>
+                        <strong>${modelTypes[model]}</strong>
+                        <div class="model-type">${modelNames[model]}</div>
+                    </div>
+                    ${model === currentModel ? '<span style="color:#4a90e2;">✓</span>' : ''}
+                `;
+                
+                option.addEventListener('click', () => {
+                    currentModel = model;
+                    updateModelDisplay();
+                    closeModelDropdown();
+                    updateSelectedOption();
+                });
+                
+                modelDropdown.appendChild(option);
+            });
+        }
+
+        function updateSelectedOption() {
+            const options = modelDropdown.querySelectorAll('.model-option');
+            options.forEach(option => {
+                option.classList.remove('selected');
+                const modelValue = option.getAttribute('data-model');
+                if (modelValue === currentModel) {
+                    option.classList.add('selected');
+                }
+            });
+        }
+
+        function toggleModelDropdown() {
+            modelDropdown.classList.toggle('show');
+            const arrow = modelSelectButton.querySelector('.dropdown-arrow');
+            if (modelDropdown.classList.contains('show')) {
+                arrow.style.transform = 'rotate(180deg)';
+            } else {
+                arrow.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function closeModelDropdown() {
+            modelDropdown.classList.remove('show');
+            const arrow = modelSelectButton.querySelector('.dropdown-arrow');
+            arrow.style.transform = 'rotate(0deg)';
+        }
+
+        modelSelectButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleModelDropdown();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!modelSelectButton.contains(e.target) && !modelDropdown.contains(e.target)) {
+                closeModelDropdown();
+            }
         });
 
         function addToConversationHistory(role, content) {
@@ -874,7 +1002,7 @@
                             <div class="ai-icon">
                                 <img src="chatgpt-avatar.png" alt="AI">
                             </div>
-                            <span class="model-label">${modelNames[currentModel]}</span>
+                            <span class="model-label">${modelTypes[currentModel]} ${modelNames[currentModel]}</span>
                         </div>
                         <div class="message ai-message">
                             <div class="message-content">
@@ -899,7 +1027,7 @@
                             <div class="ai-icon">
                                 <img src="chatgpt-avatar.png" alt="AI">
                             </div>
-                            <span class="model-label">${modelNames[currentModel]}</span>
+                            <span class="model-label">${modelTypes[currentModel]} ${modelNames[currentModel]}</span>
                         </div>
                         <div class="message ai-message">
                             <div class="message-content">${htmlContent}</div>
