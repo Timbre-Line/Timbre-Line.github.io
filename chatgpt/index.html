@@ -126,7 +126,6 @@
             width: 16px;
             height: 16px;
             fill: #718096;
-            transition: transform 0.3s;
         }
         
         .model-dropdown {
@@ -732,7 +731,6 @@
             return Math.ceil(chineseChars * 1.5 + englishChars * 0.5);
         }
 
-        // 修改模型映射，显示简短版本
         const modelNames = {
             'gpt-5.2': '5.2',
             'gpt-5.2-chat': '5.2 Chat',
@@ -847,18 +845,10 @@
 
         function toggleModelDropdown() {
             modelDropdown.classList.toggle('show');
-            const arrow = modelSelectButton.querySelector('.dropdown-arrow');
-            if (modelDropdown.classList.contains('show')) {
-                arrow.style.transform = 'rotate(180deg)';
-            } else {
-                arrow.style.transform = 'rotate(0deg)';
-            }
         }
 
         function closeModelDropdown() {
             modelDropdown.classList.remove('show');
-            const arrow = modelSelectButton.querySelector('.dropdown-arrow');
-            arrow.style.transform = 'rotate(0deg)';
         }
 
         modelSelectButton.addEventListener('click', (e) => {
