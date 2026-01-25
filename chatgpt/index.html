@@ -7,31 +7,22 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         body {
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background: #fff;
             color: #000;
-            line-height: 1.6;
             width: 100vw;
             height: 100vh;
             overflow: hidden;
             display: flex;
             flex-direction: column;
         }
-        
         .header {
             display: flex;
             align-items: center;
-            padding: 15px;
+            padding: 12px 15px;
             background: #fff;
-            min-height: 60px;
         }
-        
-        @media (min-width: 768px) {
-            .header { padding: 15px 20px; min-height: auto; }
-        }
-        
         .model-select {
             width: 100%;
             max-width: 220px;
@@ -42,35 +33,6 @@
             font-size: 14px;
             height: 40px;
         }
-        
-        @media (max-width: 767px) {
-            .model-select { font-size: 16px; }
-        }
-        
-        .search-toggle {
-            margin-left: auto;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            border: 1px solid #d0d0d0;
-            border-radius: 8px;
-            background: #fff;
-            cursor: pointer;
-            font-size: 14px;
-            white-space: nowrap;
-            height: 40px;
-        }
-        
-        @media (max-width: 767px) {
-            .search-toggle { font-size: 16px; }
-        }
-        
-        .search-toggle.active {
-            background: #f0f0f0;
-            border-color: #666;
-        }
-        
         .chat-container {
             flex: 1;
             overflow-y: auto;
@@ -78,103 +40,30 @@
             background: #fff;
             display: flex;
             flex-direction: column;
-            -webkit-overflow-scrolling: touch;
         }
-        
-        @media (min-width: 768px) {
-            .chat-container { padding: 20px; }
-        }
-        
         .message {
             margin-bottom: 16px;
             padding: 16px;
             background: #f5f5f5;
             border-radius: 10px;
-            border: 1px solid #e0e0e0;
-            max-width: 90%;
-            position: relative;
+            max-width: 85%;
         }
-        
-        @media (min-width: 768px) {
-            .message { 
-                max-width: 85%;
-                padding: 16px 20px;
-                margin-bottom: 20px;
-            }
-        }
-        
         .message.user {
             align-self: flex-end;
-            margin-left: auto;
-            margin-right: 0;
+            background: #007AFF;
+            color: white;
         }
-        
-        @media (min-width: 768px) {
-            .message.user { margin-right: 20px; }
-        }
-        
         .message.ai {
             align-self: flex-start;
-            margin-right: auto;
-            margin-left: 0;
         }
-        
-        @media (min-width: 768px) {
-            .message.ai { margin-left: 20px; }
-        }
-        
-        .message-header {
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #666;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .model-badge {
-            background: #e8e8e8;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            color: #555;
-        }
-        
         .message-content {
-            color: #222;
-            line-height: 1.6;
+            font-size: 16px;
+            line-height: 1.5;
             word-wrap: break-word;
-            font-size: 15px;
         }
-        
-        @media (min-width: 768px) {
-            .message-content { font-size: 14px; }
+        .message.user .message-content {
+            font-size: 16px;
         }
-        
-        .message-content pre {
-            background: #e8e8e8;
-            padding: 12px;
-            border-radius: 6px;
-            overflow-x: auto;
-            margin: 12px 0;
-            border: 1px solid #ddd;
-        }
-        
-        .message-content code {
-            background: #e8e8e8;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 0.9em;
-        }
-        
-        .message-content pre code {
-            background: none;
-            padding: 0;
-        }
-        
-        /* 欢迎消息样式 */
         .welcome-message {
             text-align: center;
             padding: 40px 20px;
@@ -182,177 +71,70 @@
             font-size: 24px;
             font-weight: 500;
             margin: auto;
-            max-width: 600px;
-            line-height: 1.5;
         }
-        
-        @media (max-width: 767px) {
-            .welcome-message {
-                font-size: 20px;
-                padding: 30px 15px;
-            }
-        }
-        
         .bottom-section {
-            position: sticky;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 100;
             padding: 15px;
-            padding-bottom: calc(15px + env(safe-area-inset-bottom));
             background: #fff;
         }
-        
         @media (min-width: 768px) {
-            .bottom-section { 
-                padding: 20px;
-                padding-bottom: calc(20px + env(safe-area-inset-bottom));
-            }
+            .header { padding: 15px 20px; }
+            .chat-container { padding: 20px; }
+            .bottom-section { padding: 20px; }
+            .input-container { max-width: 70%; margin: 0 auto; }
         }
-        
         .input-container {
             position: relative;
-            margin: 0 auto;
-            width: 100%;
             display: flex;
             align-items: center;
         }
-        
-        @media (min-width: 768px) {
-            .input-container {
-                max-width: 70%;
-            }
-        }
-        
         .input-box {
             flex: 1;
             min-height: 48px;
             max-height: 132px;
-            padding: 14px 50px 14px 50px;
+            padding: 14px 50px;
             border: 1px solid #d0d0d0;
             border-radius: 24px;
             resize: none;
             font-size: 16px;
-            font-family: inherit;
-            line-height: 1.5;
             overflow-y: auto;
             background: #fff;
             color: #000;
-            -webkit-appearance: none;
-            transition: border-radius 0.2s ease;
-            /* 隐藏滚动条但保持滚动功能 */
-            scrollbar-width: none; /* Firefox */
+            scrollbar-width: none;
         }
-        
-        .input-box::-webkit-scrollbar {
-            display: none; /* Chrome, Safari, Edge */
-        }
-        
-        .input-box.multiline {
-            border-radius: 12px;
-        }
-        
-        @media (min-width: 768px) {
-            .input-box {
-                font-size: 14px;
-                min-height: 44px;
-                padding: 12px 50px 12px 50px;
-            }
-        }
-        
-        .input-box:focus {
-            outline: none;
-            border-color: #888;
-        }
-        
-        .search-toggle-small {
+        .input-box::-webkit-scrollbar { display: none; }
+        .input-box:focus { outline: none; border-color: #888; }
+        .search-toggle-small, .send-button {
             position: absolute;
-            left: 10px;
-            width: 36px;
-            height: 36px;
-            border: 1px solid #d0d0d0;
-            background: #fff;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-            z-index: 10;
-        }
-        
-        .search-toggle-small.active {
-            background: #f0f0f0;
-            border-color: #666;
-        }
-        
-        .search-toggle-small svg {
-            width: 18px;
-            height: 18px;
-        }
-        
-        .send-button {
-            position: absolute;
-            right: 10px;
             width: 36px;
             height: 36px;
             border: none;
-            background: #000;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 0;
-            transition: background-color 0.2s ease;
+            background: transparent;
         }
-        
-        .send-button svg {
-            width: 18px;
-            height: 18px;
-            stroke: #fff;
-            stroke-width: 2.5px;
-            fill: none;
+        .search-toggle-small {
+            left: 10px;
+            color: #666;
         }
-        
-        @media (min-width: 768px) {
-            .search-toggle-small, .send-button {
-                width: 32px;
-                height: 32px;
-            }
-            
-            .search-toggle-small svg, .send-button svg {
-                width: 16px;
-                height: 16px;
-            }
+        .search-toggle-small.active {
+            color: #007AFF;
         }
-        
-        .send-button:hover:not(:disabled) { 
-            background: #333; 
+        .send-button {
+            right: 10px;
+            background: #000;
+            color: white;
         }
-        
-        .send-button:disabled { 
-            background: #ccc; 
-            cursor: not-allowed; 
-        }
-        
+        .send-button:disabled { background: #ccc; cursor: not-allowed; }
         .footer {
             text-align: center;
             padding: 12px 15px 0;
             font-size: 12px;
             color: #666;
-            line-height: 1.4;
-            background: #fff;
         }
-        
-        @media (min-width: 768px) {
-            .footer {
-                padding: 10px 20px 0;
-                font-size: 11px;
-            }
-        }
-        
         .typing {
             display: inline-block;
             width: 10px;
@@ -362,28 +144,9 @@
             margin-right: 4px;
             animation: blink 1s infinite;
         }
-        
         @keyframes blink {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.3; }
-        }
-        
-        .chat-container::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        .chat-container::-webkit-scrollbar-track {
-            background: #fff;
-        }
-        
-        .chat-container::-webkit-scrollbar-thumb {
-            background: #c0c0c0;
-            border-radius: 4px;
-        }
-        
-        /* 隐藏右上角的搜索按钮 */
-        .header .search-toggle {
-            display: none;
         }
     </style>
 </head>
@@ -411,44 +174,18 @@
             <option value="o3-mini">OpenAI o3 mini</option>
             <option value="o4-mini">OpenAI o4 mini</option>
         </select>
-        
-        <!-- 隐藏右上角的搜索按钮 -->
-        <div class="search-toggle" id="searchToggle" style="display: none;">
-            <span>🔍</span>
-            <span>联网搜索</span>
-        </div>
     </div>
     
     <div class="chat-container" id="chatContainer">
-        <div class="welcome-message" id="welcomeMessage">
-            <!-- 欢迎消息将通过JavaScript动态生成 -->
-        </div>
+        <div class="welcome-message" id="welcomeMessage"></div>
     </div>
     
     <div class="bottom-section">
         <div class="input-container">
-            <button class="search-toggle-small" id="searchToggleSmall">
-                <svg viewBox="0 0 24 24">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-            </button>
-            
-            <textarea 
-                class="input-box" 
-                id="inputBox" 
-                placeholder="有问题，尽管问"
-                rows="1"
-            ></textarea>
-            
-            <button class="send-button" id="sendButton">
-                <svg viewBox="0 0 24 24">
-                    <polyline points="4 17 10 11 4 5"></polyline>
-                    <line x1="12" y1="19" x2="20" y2="19"></line>
-                </svg>
-            </button>
+            <button class="search-toggle-small" id="searchToggleSmall">🔍</button>
+            <textarea class="input-box" id="inputBox" placeholder="有问题，尽管问" rows="1"></textarea>
+            <button class="send-button" id="sendButton">↑</button>
         </div>
-        
         <div class="footer">
             向 AI 聊天机器人 ChatGPT 发送消息即表示，你同意我们的条款并已阅读我们的隐私政策。
         </div>
@@ -467,7 +204,6 @@
         let conversationContext = "";
         let hasUserSentMessage = false;
         
-        // 欢迎消息数组
         const welcomeMessages = [
             "有什么可以帮忙的？",
             "我们先从哪里开始呢？",
@@ -477,27 +213,15 @@
             "你在忙什么？"
         ];
         
-        // 随机选择欢迎消息
-        const randomWelcomeMessage = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
-        welcomeMessage.textContent = randomWelcomeMessage;
-        
+        welcomeMessage.textContent = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
         marked.setOptions({ breaks: true, gfm: true });
         
         function adjustInputHeight() {
             inputBox.style.height = 'auto';
-            const scrollHeight = inputBox.scrollHeight;
-            inputBox.style.height = Math.min(scrollHeight, 132) + 'px';
-            
-            // 根据行数调整边框圆角
-            if (scrollHeight > 48) {
-                inputBox.classList.add('multiline');
-            } else {
-                inputBox.classList.remove('multiline');
-            }
+            inputBox.style.height = Math.min(inputBox.scrollHeight, 132) + 'px';
         }
         
         function addMessage(content, isUser = false, isStreaming = false) {
-            // 如果是用户发送消息，隐藏欢迎消息
             if (isUser && !hasUserSentMessage) {
                 welcomeMessage.style.display = 'none';
                 hasUserSentMessage = true;
@@ -505,15 +229,6 @@
             
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user' : 'ai'}`;
-            
-            const messageHeader = document.createElement('div');
-            messageHeader.className = 'message-header';
-            
-            if (!isUser) {
-                messageHeader.innerHTML = `<span>Generated by</span><span class="model-badge">${modelSelect.value}</span>`;
-            } else {
-                messageHeader.style.display = 'none';
-            }
             
             const messageContent = document.createElement('div');
             messageContent.className = 'message-content';
@@ -527,7 +242,6 @@
                 messageContent.innerHTML = marked.parse(content);
             }
             
-            messageDiv.appendChild(messageHeader);
             messageDiv.appendChild(messageContent);
             chatContainer.appendChild(messageDiv);
             chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -543,7 +257,6 @@
             
             inputBox.value = '';
             adjustInputHeight();
-            
             addMessage(userInput, true);
             
             isThinking = true;
@@ -570,9 +283,7 @@
                 
                 conversationContext += "用户: " + userInput + "\nAI: " + fullResponse + "\n";
                 const lines = conversationContext.split('\n');
-                if (lines.length > 20) {
-                    conversationContext = lines.slice(-20).join('\n');
-                }
+                if (lines.length > 20) conversationContext = lines.slice(-20).join('\n');
                 
                 document.getElementById('streamingMessage').id = '';
             } catch (error) {
@@ -599,7 +310,6 @@
             searchToggleSmall.classList.toggle('active', webSearchEnabled);
         });
         
-        // 初始化调整输入框高度
         adjustInputHeight();
         inputBox.focus();
     </script>
