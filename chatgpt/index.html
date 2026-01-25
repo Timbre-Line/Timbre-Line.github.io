@@ -10,7 +10,7 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f0f0f0;
+            background: #fff;
             color: #000;
             line-height: 1.6;
             width: 100vw;
@@ -24,7 +24,6 @@
             display: flex;
             align-items: center;
             padding: 15px;
-            border-bottom: 1px solid #d0d0d0;
             background: #fff;
             min-height: 60px;
         }
@@ -76,7 +75,7 @@
             flex: 1;
             overflow-y: auto;
             padding: 15px;
-            background: #f0f0f0;
+            background: #fff;
             display: flex;
             flex-direction: column;
             -webkit-overflow-scrolling: touch;
@@ -179,9 +178,9 @@
         .welcome-message {
             text-align: center;
             padding: 40px 20px;
-            color: #666;
-            font-size: 18px;
-            font-weight: 400;
+            color: #000;
+            font-size: 24px;
+            font-weight: 500;
             margin: auto;
             max-width: 600px;
             line-height: 1.5;
@@ -189,7 +188,7 @@
         
         @media (max-width: 767px) {
             .welcome-message {
-                font-size: 16px;
+                font-size: 20px;
                 padding: 30px 15px;
             }
         }
@@ -200,35 +199,37 @@
             left: 0;
             right: 0;
             z-index: 100;
-            padding-bottom: env(safe-area-inset-bottom);
-            background: #f0f0f0;
-            border-top: 1px solid #d0d0d0;
+            padding: 15px;
+            padding-bottom: calc(15px + env(safe-area-inset-bottom));
+            background: #fff;
         }
         
         @media (min-width: 768px) {
             .bottom-section { 
-                padding: 0;
-                border-top: none;
+                padding: 20px;
+                padding-bottom: calc(20px + env(safe-area-inset-bottom));
             }
         }
         
-        .input-wrapper {
+        .input-container {
             position: relative;
             margin: 0 auto;
             width: 100%;
+            display: flex;
+            align-items: center;
         }
         
         @media (min-width: 768px) {
-            .input-wrapper {
+            .input-container {
                 max-width: 70%;
             }
         }
         
         .input-box {
-            width: 100%;
+            flex: 1;
             min-height: 48px;
             max-height: 132px;
-            padding: 14px 60px 14px 15px;
+            padding: 14px 50px 14px 50px;
             border: 1px solid #d0d0d0;
             border-radius: 24px;
             resize: none;
@@ -240,6 +241,12 @@
             color: #000;
             -webkit-appearance: none;
             transition: border-radius 0.2s ease;
+            /* 隐藏滚动条但保持滚动功能 */
+            scrollbar-width: none; /* Firefox */
+        }
+        
+        .input-box::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Edge */
         }
         
         .input-box.multiline {
@@ -250,7 +257,7 @@
             .input-box {
                 font-size: 14px;
                 min-height: 44px;
-                padding: 12px 60px 12px 15px;
+                padding: 12px 50px 12px 50px;
             }
         }
         
@@ -259,18 +266,41 @@
             border-color: #888;
         }
         
+        .search-toggle-small {
+            position: absolute;
+            left: 10px;
+            width: 36px;
+            height: 36px;
+            border: 1px solid #d0d0d0;
+            background: #fff;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            z-index: 10;
+        }
+        
+        .search-toggle-small.active {
+            background: #f0f0f0;
+            border-color: #666;
+        }
+        
+        .search-toggle-small svg {
+            width: 18px;
+            height: 18px;
+        }
+        
         .send-button {
             position: absolute;
-            right: 6px;
-            bottom: 6px;
+            right: 10px;
             width: 36px;
             height: 36px;
             border: none;
             background: #000;
             border-radius: 50%;
             cursor: pointer;
-            color: white;
-            font-size: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -278,19 +308,23 @@
             transition: background-color 0.2s ease;
         }
         
-        .send-button::before {
-            content: "↑";
-            color: white;
-            font-weight: bold;
+        .send-button svg {
+            width: 18px;
+            height: 18px;
+            stroke: #fff;
+            stroke-width: 2.5px;
+            fill: none;
         }
         
         @media (min-width: 768px) {
-            .send-button {
-                right: 6px;
-                bottom: 6px;
+            .search-toggle-small, .send-button {
                 width: 32px;
                 height: 32px;
-                font-size: 14px;
+            }
+            
+            .search-toggle-small svg, .send-button svg {
+                width: 16px;
+                height: 16px;
             }
         }
         
@@ -303,23 +337,18 @@
             cursor: not-allowed; 
         }
         
-        .send-button:disabled::before {
-            color: white;
-        }
-        
         .footer {
             text-align: center;
-            padding: 12px 15px;
+            padding: 12px 15px 0;
             font-size: 12px;
             color: #666;
             line-height: 1.4;
-            border-top: 1px solid #e0e0e0;
-            background: #f0f0f0;
+            background: #fff;
         }
         
         @media (min-width: 768px) {
             .footer {
-                padding: 10px 20px;
+                padding: 10px 20px 0;
                 font-size: 11px;
             }
         }
@@ -344,12 +373,17 @@
         }
         
         .chat-container::-webkit-scrollbar-track {
-            background: #f0f0f0;
+            background: #fff;
         }
         
         .chat-container::-webkit-scrollbar-thumb {
             background: #c0c0c0;
             border-radius: 4px;
+        }
+        
+        /* 隐藏右上角的搜索按钮 */
+        .header .search-toggle {
+            display: none;
         }
     </style>
 </head>
@@ -378,7 +412,8 @@
             <option value="o4-mini">OpenAI o4 mini</option>
         </select>
         
-        <div class="search-toggle" id="searchToggle">
+        <!-- 隐藏右上角的搜索按钮 -->
+        <div class="search-toggle" id="searchToggle" style="display: none;">
             <span>🔍</span>
             <span>联网搜索</span>
         </div>
@@ -391,14 +426,27 @@
     </div>
     
     <div class="bottom-section">
-        <div class="input-wrapper">
+        <div class="input-container">
+            <button class="search-toggle-small" id="searchToggleSmall">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </button>
+            
             <textarea 
                 class="input-box" 
                 id="inputBox" 
-                placeholder="输入消息... (Enter发送, Shift+Enter换行)"
+                placeholder="有问题，尽管问"
                 rows="1"
             ></textarea>
-            <button class="send-button" id="sendButton"></button>
+            
+            <button class="send-button" id="sendButton">
+                <svg viewBox="0 0 24 24">
+                    <polyline points="4 17 10 11 4 5"></polyline>
+                    <line x1="12" y1="19" x2="20" y2="19"></line>
+                </svg>
+            </button>
         </div>
         
         <div class="footer">
@@ -411,7 +459,7 @@
         const inputBox = document.getElementById('inputBox');
         const sendButton = document.getElementById('sendButton');
         const modelSelect = document.getElementById('modelSelect');
-        const searchToggle = document.getElementById('searchToggle');
+        const searchToggleSmall = document.getElementById('searchToggleSmall');
         const welcomeMessage = document.getElementById('welcomeMessage');
         
         let isThinking = false;
@@ -546,9 +594,9 @@
         });
         
         sendButton.addEventListener('click', sendMessage);
-        searchToggle.addEventListener('click', () => {
+        searchToggleSmall.addEventListener('click', () => {
             webSearchEnabled = !webSearchEnabled;
-            searchToggle.classList.toggle('active', webSearchEnabled);
+            searchToggleSmall.classList.toggle('active', webSearchEnabled);
         });
         
         // 初始化调整输入框高度
