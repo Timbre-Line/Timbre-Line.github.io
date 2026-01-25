@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html>
 <head>
     <title>ChatGPT</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://js.puter.com/v2/"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
@@ -176,19 +175,52 @@
             padding: 0;
         }
         
-        .input-container {
+        /* 欢迎消息样式 */
+        .welcome-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+            font-size: 18px;
+            font-weight: 400;
+            margin: auto;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+        
+        @media (max-width: 767px) {
+            .welcome-message {
+                font-size: 16px;
+                padding: 30px 15px;
+            }
+        }
+        
+        .bottom-section {
             position: sticky;
             bottom: 0;
             left: 0;
             right: 0;
             z-index: 100;
             padding-bottom: env(safe-area-inset-bottom);
+            background: #f0f0f0;
+            border-top: 1px solid #d0d0d0;
         }
         
         @media (min-width: 768px) {
-            .input-container { 
-                padding: 15px 20px;
-                min-height: auto;
+            .bottom-section { 
+                padding: 0;
+                border-top: none;
+            }
+        }
+        
+        .input-wrapper {
+            position: relative;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        @media (min-width: 768px) {
+            .input-wrapper {
+                max-width: 70%;
             }
         }
         
@@ -196,9 +228,9 @@
             width: 100%;
             min-height: 48px;
             max-height: 132px;
-            padding: 14px 50px 14px 15px;
+            padding: 14px 60px 14px 15px;
             border: 1px solid #d0d0d0;
-            border-radius: 8px;
+            border-radius: 24px;
             resize: none;
             font-size: 16px;
             font-family: inherit;
@@ -207,13 +239,18 @@
             background: #fff;
             color: #000;
             -webkit-appearance: none;
+            transition: border-radius 0.2s ease;
+        }
+        
+        .input-box.multiline {
+            border-radius: 12px;
         }
         
         @media (min-width: 768px) {
             .input-box {
                 font-size: 14px;
                 min-height: 44px;
-                padding: 12px 50px 12px 15px;
+                padding: 12px 60px 12px 15px;
             }
         }
         
@@ -224,33 +261,68 @@
         
         .send-button {
             position: absolute;
-            right: 25px;
-            bottom: 25px;
+            right: 6px;
+            bottom: 6px;
             width: 36px;
             height: 36px;
             border: none;
-            background: #666;
-            border-radius: 8px;
+            background: #000;
+            border-radius: 50%;
             cursor: pointer;
             color: white;
-            font-size: 16px;
+            font-size: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 0;
+            transition: background-color 0.2s ease;
+        }
+        
+        .send-button::before {
+            content: "↑";
+            color: white;
+            font-weight: bold;
         }
         
         @media (min-width: 768px) {
             .send-button {
-                right: 32px;
-                bottom: 27px;
+                right: 6px;
+                bottom: 6px;
                 width: 32px;
                 height: 32px;
                 font-size: 14px;
             }
         }
         
-        .send-button:hover:not(:disabled) { background: #555; }
-        .send-button:disabled { background: #ccc; cursor: not-allowed; }
+        .send-button:hover:not(:disabled) { 
+            background: #333; 
+        }
+        
+        .send-button:disabled { 
+            background: #ccc; 
+            cursor: not-allowed; 
+        }
+        
+        .send-button:disabled::before {
+            color: white;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 12px 15px;
+            font-size: 12px;
+            color: #666;
+            line-height: 1.4;
+            border-top: 1px solid #e0e0e0;
+            background: #f0f0f0;
+        }
+        
+        @media (min-width: 768px) {
+            .footer {
+                padding: 10px 20px;
+                font-size: 11px;
+            }
+        }
         
         .typing {
             display: inline-block;
@@ -312,16 +384,26 @@
         </div>
     </div>
     
-    <div class="chat-container" id="chatContainer"></div>
+    <div class="chat-container" id="chatContainer">
+        <div class="welcome-message" id="welcomeMessage">
+            <!-- 欢迎消息将通过JavaScript动态生成 -->
+        </div>
+    </div>
     
-    <div class="input-container">
-        <textarea 
-            class="input-box" 
-            id="inputBox" 
-            placeholder="输入消息... (Enter发送, Shift+Enter换行)"
-            rows="1"
-        ></textarea>
-        <button class="send-button" id="sendButton">→</button>
+    <div class="bottom-section">
+        <div class="input-wrapper">
+            <textarea 
+                class="input-box" 
+                id="inputBox" 
+                placeholder="输入消息... (Enter发送, Shift+Enter换行)"
+                rows="1"
+            ></textarea>
+            <button class="send-button" id="sendButton"></button>
+        </div>
+        
+        <div class="footer">
+            向 AI 聊天机器人 ChatGPT 发送消息即表示，你同意我们的条款并已阅读我们的隐私政策。
+        </div>
     </div>
 
     <script>
@@ -330,19 +412,49 @@
         const sendButton = document.getElementById('sendButton');
         const modelSelect = document.getElementById('modelSelect');
         const searchToggle = document.getElementById('searchToggle');
+        const welcomeMessage = document.getElementById('welcomeMessage');
         
         let isThinking = false;
         let webSearchEnabled = false;
         let conversationContext = "";
+        let hasUserSentMessage = false;
+        
+        // 欢迎消息数组
+        const welcomeMessages = [
+            "有什么可以帮忙的？",
+            "我们先从哪里开始呢？",
+            "准备好了，随时开始",
+            "今天有什么计划？",
+            "您今天在想什么？",
+            "你在忙什么？"
+        ];
+        
+        // 随机选择欢迎消息
+        const randomWelcomeMessage = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
+        welcomeMessage.textContent = randomWelcomeMessage;
         
         marked.setOptions({ breaks: true, gfm: true });
         
         function adjustInputHeight() {
             inputBox.style.height = 'auto';
-            inputBox.style.height = Math.min(inputBox.scrollHeight, 132) + 'px';
+            const scrollHeight = inputBox.scrollHeight;
+            inputBox.style.height = Math.min(scrollHeight, 132) + 'px';
+            
+            // 根据行数调整边框圆角
+            if (scrollHeight > 48) {
+                inputBox.classList.add('multiline');
+            } else {
+                inputBox.classList.remove('multiline');
+            }
         }
         
         function addMessage(content, isUser = false, isStreaming = false) {
+            // 如果是用户发送消息，隐藏欢迎消息
+            if (isUser && !hasUserSentMessage) {
+                welcomeMessage.style.display = 'none';
+                hasUserSentMessage = true;
+            }
+            
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user' : 'ai'}`;
             
@@ -439,6 +551,7 @@
             searchToggle.classList.toggle('active', webSearchEnabled);
         });
         
+        // 初始化调整输入框高度
         adjustInputHeight();
         inputBox.focus();
     </script>
