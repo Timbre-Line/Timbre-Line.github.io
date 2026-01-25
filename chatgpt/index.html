@@ -44,7 +44,7 @@
         .new-chat-btn::after {
             content: "新聊天";
             position: absolute;
-            top: -30px;
+            bottom: -30px;
             left: 50%;
             transform: translateX(-50%);
             background: #000;
@@ -81,6 +81,24 @@
             outline: none;
             border-color: #888;
             box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+        }
+        /* 下拉框选项样式 */
+        .model-select option {
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+        .model-select option:hover {
+            background-color: #f0f0f0;
+        }
+        .model-select option:checked {
+            background-color: #e3f2fd;
+            color: #1565c0;
+            font-weight: 500;
+        }
+        /* 下拉框列表样式（仅适用于部分浏览器） */
+        .model-select:focus option:checked {
+            background-color: #e3f2fd !important;
+            color: #1565c0 !important;
         }
         .chat-container {
             flex: 1;
