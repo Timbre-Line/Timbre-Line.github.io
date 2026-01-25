@@ -5,6 +5,7 @@
     <script src="https://js.puter.com/v2/"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
+        /* 样式保持不变 */
         * {
             margin: 0;
             padding: 0;
@@ -282,6 +283,8 @@
         
         let isThinking = false;
         let webSearchEnabled = false;
+        // 新增：上下文消息历史，最多维护10轮对话（20条消息）
+        let messageHistory = [];
         
         marked.setOptions({ breaks: true, gfm: true });
         
@@ -341,15 +344,23 @@
             const streamingContent = addMessage('', false, true);
             
             try {
+                // 新增：将用户消息添加到历史
+                messageHistory.push({ role: 'user', content: userInput });
+                
+                // 维护最多10轮对话（20条消息）
+                if (messageHistory.length > 20) {
+                    messageHistory = messageHistory.slice(-20);
+                }
+                
                 const options = {
                     stream: true,
                     model: modelSelect.value,
-                    messages: [{ role: 'user', content: userInput }]
+                    messages: messageHistory // 使用历史消息
                 };
                 
                 if (webSearchEnabled) options.tools = [{ type: "web_search" }];
                 
-                const response = await puter.ai.chat(userInput, options);
+                const response = await puter.ai.chat(options);
                 let fullResponse = '';
                 
                 streamingContent.innerHTML = '';
@@ -361,10 +372,20 @@
                     }
                 }
                 
+                // 新增：将AI回复添加到历史
+                messageHistory.push({ role: 'assistant', content: fullResponse });
+                
+                // 再次检查历史长度
+                if (messageHistory.length > 20) {
+                    messageHistory = messageHistory.slice(-20);
+                }
+                
                 document.getElementById('streamingMessage').id = '';
                 
             } catch (error) {
                 streamingContent.innerHTML = `错误: ${error.message}`;
+                // 新增：如果出错，从历史中移除用户消息（因为AI没有成功回复）
+                messageHistory.pop();
             } finally {
                 isThinking = false;
                 sendButton.disabled = false;
