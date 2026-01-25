@@ -90,11 +90,12 @@
             align-items: flex-end;
             background: #fff;
         }
+        /* 修改1: 调整输入框内边距，避免文字被遮挡 */
         .input-box {
             flex: 1;
             min-height: 48px;
             max-height: 132px;
-            padding: 14px 50px;
+            padding: 14px 45px; /* 从50px调整为45px，让文字更靠近边缘 */
             border: 1px solid #d0d0d0;
             border-radius: 24px;
             resize: none;
@@ -133,9 +134,11 @@
             font-size: 14px;
             gap: 4px;
         }
+        /* 修改2: 联网搜索按钮开启时的样式 */
         .web-search-toggle.active {
-            background: #666;
-            color: white;
+            background: #e3f2fd; /* 浅蓝色背景 */
+            color: #1565c0; /* 深蓝色文字 */
+            border-color: #1565c0;
         }
         .send-button {
             right: 10px;
