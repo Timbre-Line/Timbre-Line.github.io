@@ -1,11 +1,629 @@
-<html>
-<body>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT 对话网站</title>
     <script src="https://js.puter.com/v2/"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+        
+        body {
+            background-color: #000;
+            color: #fff;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            border-bottom: 1px solid #333;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+        
+        .subtitle {
+            color: #aaa;
+            margin-bottom: 20px;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        
+        select, button, .checkbox-group {
+            padding: 10px 15px;
+            background-color: #222;
+            color: #fff;
+            border: 1px solid #444;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        button {
+            cursor: pointer;
+            background-color: #10a37f;
+            border-color: #10a37f;
+            transition: all 0.2s;
+        }
+        
+        button:hover {
+            background-color: #0d8c6d;
+        }
+        
+        button:disabled {
+            background-color: #555;
+            border-color: #555;
+            cursor: not-allowed;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 60vh;
+            background-color: #111;
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 85%;
+        }
+        
+        .user-message {
+            background-color: #2d2d2d;
+            margin-left: auto;
+        }
+        
+        .assistant-message {
+            background-color: #1a1a1a;
+            margin-right: auto;
+        }
+        
+        .message-header {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #10a37f;
+        }
+        
+        .user-message .message-header {
+            color: #fff;
+        }
+        
+        .message-content {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .streaming {
+            border-left: 3px solid #10a37f;
+        }
+        
+        .input-area {
+            display: flex;
+            border-top: 1px solid #333;
+            background-color: #111;
+        }
+        
+        textarea {
+            flex: 1;
+            padding: 15px;
+            background-color: #000;
+            color: #fff;
+            border: none;
+            resize: none;
+            font-size: 16px;
+            min-height: 60px;
+            max-height: 200px;
+        }
+        
+        textarea:focus {
+            outline: none;
+        }
+        
+        .send-btn {
+            width: 60px;
+            background-color: #10a37f;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .send-btn:hover {
+            background-color: #0d8c6d;
+        }
+        
+        .send-btn:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+        
+        .token-info {
+            text-align: right;
+            color: #aaa;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        .loading {
+            color: #aaa;
+            font-style: italic;
+        }
+        
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            select, button, .checkbox-group {
+                width: 100%;
+            }
+            
+            .message {
+                max-width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>ChatGPT 对话网站</h1>
+        <p class="subtitle">支持多种GPT模型、流式回复、网页搜索和上下文对话（最长20000 tokens）</p>
+        
+        <div class="controls">
+            <select id="model-select">
+                <!-- GPT系列模型 -->
+                <optgroup label="GPT系列模型">
+                    <option value="gpt-5.2">GPT-5.2</option>
+                    <option value="gpt-5.2-chat">GPT-5.2-CHAT</option>
+                    <option value="gpt-5.1">GPT-5.1</option>
+                    <option value="gpt-5.1-chat-latest">GPT-5.1-CHAT-LATEST</option>
+                    <option value="gpt-5.1-codex">GPT-5.1-CODEX</option>
+                    <option value="gpt-5.1-codex-max">GPT-5.1-CODEX-MAX</option>
+                    <option value="gpt-5.1-codex-mini">GPT-5.1-CODEX-MINI</option>
+                    <option value="gpt-5">GPT-5</option>
+                    <option value="gpt-5-mini">GPT-5-MINI</option>
+                    <option value="gpt-5-nano" selected>GPT-5-NANO</option>
+                    <option value="gpt-5-chat-latest">GPT-5-CHAT-LATEST</option>
+                    <option value="gpt-4.1">GPT-4.1</option>
+                    <option value="gpt-4.1-mini">GPT-4.1-MINI</option>
+                    <option value="gpt-4.1-nano">GPT-4.1-NANO</option>
+                    <option value="gpt-4.5-preview">GPT-4.5-PREVIEW</option>
+                    <option value="gpt-4o">GPT-4O</option>
+                    <option value="gpt-4o-mini">GPT-4O-MINI</option>
+                </optgroup>
+                <!-- O系列模型 -->
+                <optgroup label="OpenAI O系列模型">
+                    <option value="o1">OpenAI O1</option>
+                    <option value="o1-mini">OpenAI O1-MINI</option>
+                    <option value="o1-pro">OpenAI O1-PRO</option>
+                    <option value="o3">OpenAI O3</option>
+                    <option value="o3-mini">OpenAI O3-MINI</option>
+                    <option value="o4-mini">OpenAI O4-MINI</option>
+                </optgroup>
+            </select>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="stream-checkbox" checked>
+                <label for="stream-checkbox">流式回复</label>
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="websearch-checkbox">
+                <label for="websearch-checkbox">网页搜索</label>
+            </div>
+            
+            <button id="clear-btn">清空对话</button>
+            <button id="example-btn">示例对话</button>
+        </div>
+        
+        <div class="token-info">
+            上下文长度: <span id="token-count">0</span> / 20000 tokens
+        </div>
+    </header>
+    
+    <div class="chat-container">
+        <div class="messages" id="messages">
+            <div class="message assistant-message">
+                <div class="message-header">助手</div>
+                <div class="message-content">您好！我是AI助手，支持多种GPT模型。请选择模型并开始对话。</div>
+            </div>
+        </div>
+        
+        <div class="input-area">
+            <textarea id="user-input" placeholder="输入您的问题... (按Shift+Enter换行，Enter发送)" rows="1"></textarea>
+            <button class="send-btn" id="send-btn">➤</button>
+        </div>
+    </div>
+
     <script>
-        puter.ai.chat("What are the benefits of exercise?", { model: "gpt-5-nano" })
-            .then(response => {
-                puter.print(response);
+        // 状态管理
+        const state = {
+            messages: [],
+            currentModel: 'gpt-5-nano',
+            useStreaming: true,
+            useWebSearch: false,
+            isProcessing: false,
+            estimatedTokens: 0
+        };
+
+        // DOM元素
+        const modelSelect = document.getElementById('model-select');
+        const streamCheckbox = document.getElementById('stream-checkbox');
+        const websearchCheckbox = document.getElementById('websearch-checkbox');
+        const clearBtn = document.getElementById('clear-btn');
+        const exampleBtn = document.getElementById('example-btn');
+        const messagesContainer = document.getElementById('messages');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const tokenCountElement = document.getElementById('token-count');
+
+        // 初始化
+        function init() {
+            // 事件监听
+            modelSelect.addEventListener('change', (e) => {
+                state.currentModel = e.target.value;
             });
+            
+            streamCheckbox.addEventListener('change', (e) => {
+                state.useStreaming = e.target.checked;
+            });
+            
+            websearchCheckbox.addEventListener('change', (e) => {
+                state.useWebSearch = e.target.checked;
+            });
+            
+            clearBtn.addEventListener('click', clearConversation);
+            exampleBtn.addEventListener('click', runExample);
+            
+            sendBtn.addEventListener('click', sendMessage);
+            
+            userInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+                
+                // 自动调整文本框高度
+                if (e.key === 'Enter' && e.shiftKey) {
+                    setTimeout(() => {
+                        userInput.style.height = 'auto';
+                        userInput.style.height = userInput.scrollHeight + 'px';
+                    }, 0);
+                }
+            });
+            
+            // 加载初始消息
+            loadInitialMessage();
+            
+            // 更新token计数
+            updateTokenCount();
+        }
+
+        // 加载初始消息
+        function loadInitialMessage() {
+            const initialMessage = {
+                role: 'assistant',
+                content: '您好！我是AI助手，支持多种GPT模型。请选择模型并开始对话。',
+                model: 'gpt-5-nano'
+            };
+            state.messages.push(initialMessage);
+        }
+
+        // 发送消息
+        async function sendMessage() {
+            const inputText = userInput.value.trim();
+            if (!inputText || state.isProcessing) return;
+            
+            // 添加用户消息到界面
+            addMessageToUI('user', inputText);
+            
+            // 添加到状态
+            state.messages.push({
+                role: 'user',
+                content: inputText
+            });
+            
+            // 清空输入框
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            
+            // 禁用输入
+            setProcessingState(true);
+            
+            // 添加等待中的助手消息到界面
+            const messageId = addMessageToUI('assistant', '', true);
+            
+            try {
+                // 准备请求参数
+                const options = {
+                    model: state.currentModel
+                };
+                
+                // 添加流式回复选项
+                if (state.useStreaming) {
+                    options.stream = true;
+                }
+                
+                // 添加网页搜索选项
+                if (state.useWebSearch) {
+                    options.tools = [{ type: "web_search" }];
+                }
+                
+                // 构建对话历史（简化版，实际中应计算token数）
+                let prompt = inputText;
+                if (state.messages.length > 2) {
+                    // 只保留最近的几条消息以控制token数
+                    const recentMessages = state.messages.slice(-6);
+                    prompt = recentMessages.map(msg => `${msg.role}: ${msg.content}`).join('\n\n');
+                }
+                
+                // 发送请求
+                if (state.useStreaming) {
+                    await streamResponse(prompt, messageId, options);
+                } else {
+                    await normalResponse(prompt, messageId, options);
+                }
+                
+                // 更新token计数（简化估算：假设1个汉字≈2个token，1个英文字符≈0.25个token）
+                updateTokenCount();
+            } catch (error) {
+                console.error('请求出错:', error);
+                updateMessageContent(messageId, `请求出错: ${error.message || '未知错误'}`);
+            } finally {
+                setProcessingState(false);
+            }
+        }
+
+        // 流式回复
+        async function streamResponse(prompt, messageId, options) {
+            const response = await puter.ai.chat(prompt, options);
+            let fullResponse = '';
+            
+            for await (const part of response) {
+                if (part?.text) {
+                    fullResponse += part.text;
+                    updateMessageContent(messageId, fullResponse);
+                }
+            }
+            
+            // 添加到状态
+            state.messages.push({
+                role: 'assistant',
+                content: fullResponse,
+                model: state.currentModel
+            });
+            
+            // 移除流式样式
+            const messageElement = document.getElementById(`msg-${messageId}`);
+            if (messageElement) {
+                messageElement.classList.remove('streaming');
+            }
+        }
+
+        // 普通回复
+        async function normalResponse(prompt, messageId, options) {
+            const response = await puter.ai.chat(prompt, options);
+            
+            // 添加到状态
+            state.messages.push({
+                role: 'assistant',
+                content: response,
+                model: state.currentModel
+            });
+            
+            updateMessageContent(messageId, response);
+        }
+
+        // 添加消息到UI
+        function addMessageToUI(role, content, isLoading = false) {
+            const messageId = Date.now();
+            const messageElement = document.createElement('div');
+            messageElement.id = `msg-${messageId}`;
+            messageElement.className = `message ${role}-message ${isLoading ? 'streaming' : ''}`;
+            
+            // 根据角色显示不同的标题
+            let headerText = role === 'user' ? '用户' : '助手';
+            if (role === 'assistant' && !isLoading) {
+                // 获取模型显示名称
+                headerText += ` (${getModelDisplayName(state.currentModel)})`;
+            }
+            
+            messageElement.innerHTML = `
+                <div class="message-header">${headerText}</div>
+                <div class="message-content">${isLoading ? '<span class="loading">思考中...</span>' : escapeHtml(content)}</div>
+            `;
+            
+            messagesContainer.appendChild(messageElement);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            return messageId;
+        }
+
+        // 更新消息内容
+        function updateMessageContent(messageId, content) {
+            const messageElement = document.getElementById(`msg-${messageId}`);
+            if (messageElement) {
+                const contentElement = messageElement.querySelector('.message-content');
+                if (contentElement) {
+                    contentElement.innerHTML = escapeHtml(content);
+                }
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        }
+
+        // 清空对话
+        function clearConversation() {
+            state.messages = [];
+            messagesContainer.innerHTML = '';
+            loadInitialMessage();
+            updateTokenCount();
+        }
+
+        // 运行示例
+        async function runExample() {
+            // 添加示例用户消息
+            const exampleMessage = "用一段话解释相对论的基本思想";
+            addMessageToUI('user', exampleMessage);
+            
+            // 添加到状态
+            state.messages.push({
+                role: 'user',
+                content: exampleMessage
+            });
+            
+            // 禁用输入
+            setProcessingState(true);
+            
+            // 添加等待中的助手消息
+            const messageId = addMessageToUI('assistant', '', true);
+            
+            try {
+                // 使用流式回复示例
+                const response = await puter.ai.chat(
+                    exampleMessage, 
+                    {stream: true, model: "gpt-5-nano"}
+                );
+                
+                let fullResponse = '';
+                for await (const part of response) {
+                    if (part?.text) {
+                        fullResponse += part.text;
+                        updateMessageContent(messageId, fullResponse);
+                    }
+                }
+                
+                // 添加到状态
+                state.messages.push({
+                    role: 'assistant',
+                    content: fullResponse,
+                    model: 'gpt-5-nano'
+                });
+                
+                // 移除流式样式
+                const messageElement = document.getElementById(`msg-${messageId}`);
+                if (messageElement) {
+                    messageElement.classList.remove('streaming');
+                }
+                
+                updateTokenCount();
+            } catch (error) {
+                console.error('示例请求出错:', error);
+                updateMessageContent(messageId, `示例请求出错: ${error.message || '未知错误'}`);
+            } finally {
+                setProcessingState(false);
+            }
+        }
+
+        // 获取模型显示名称
+        function getModelDisplayName(model) {
+            // GPT系列模型显示为大写
+            if (model.startsWith('gpt-')) {
+                return model.toUpperCase();
+            }
+            // O系列模型前面加上OpenAI
+            else if (model.startsWith('o')) {
+                return `OpenAI ${model.toUpperCase()}`;
+            }
+            return model;
+        }
+
+        // 更新token计数
+        function updateTokenCount() {
+            // 简化估算：假设1个汉字≈2个token，1个英文字符≈0.25个token
+            let totalTokens = 0;
+            
+            for (const message of state.messages) {
+                const content = message.content || '';
+                let messageTokens = 0;
+                
+                // 计算中文字符
+                const chineseChars = content.match(/[\u4e00-\u9fa5]/g);
+                if (chineseChars) {
+                    messageTokens += chineseChars.length * 2;
+                }
+                
+                // 计算其他字符
+                const otherChars = content.replace(/[\u4e00-\u9fa5]/g, '').length;
+                messageTokens += otherChars * 0.25;
+                
+                totalTokens += Math.ceil(messageTokens);
+            }
+            
+            state.estimatedTokens = totalTokens;
+            tokenCountElement.textContent = totalTokens;
+            
+            // 如果超过限制，显示警告色
+            if (totalTokens > 20000) {
+                tokenCountElement.style.color = '#ff6b6b';
+            } else if (totalTokens > 18000) {
+                tokenCountElement.style.color = '#ffa726';
+            } else {
+                tokenCountElement.style.color = '#aaa';
+            }
+        }
+
+        // 设置处理状态
+        function setProcessingState(isProcessing) {
+            state.isProcessing = isProcessing;
+            sendBtn.disabled = isProcessing;
+            userInput.disabled = isProcessing;
+            sendBtn.textContent = isProcessing ? '...' : '➤';
+        }
+
+        // 转义HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
