@@ -105,7 +105,6 @@
         }
         
         .message.user {
-            border-left: 3px solid #666;
             align-self: flex-end;
             margin-left: auto;
             margin-right: 0;
@@ -116,7 +115,6 @@
         }
         
         .message.ai {
-            border-left: 3px solid #888;
             align-self: flex-start;
             margin-right: auto;
             margin-left: 0;
@@ -178,10 +176,12 @@
         }
         
         .input-container {
-            border-top: 1px solid #d0d0d0;
-            background: #fff;
-            padding: 15px;
-            min-height: 80px;
+            position: sticky;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding-bottom: env(safe-area-inset-bottom);
         }
         
         @media (min-width: 768px) {
