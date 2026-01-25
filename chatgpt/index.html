@@ -24,33 +24,33 @@
             display: flex;
             align-items: center;
             gap: 15px;
-            position: relative;
         }
         .new-chat-btn {
             width: 40px;
             height: 40px;
             border-radius: 8px;
-            background: #f0f0f0;
+            background: transparent;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             position: relative;
-            border: none;
+            border: 1px solid #d0d0d0;
             transition: background-color 0.2s;
         }
         .new-chat-btn:hover {
-            background: #e0e0e0;
+            background: #f5f5f5;
         }
         .new-chat-btn::after {
             content: "新聊天";
             position: absolute;
-            top: calc(100% + 8px);
+            top: 100%;
+            margin-top: 8px;
             left: 50%;
             transform: translateX(-50%);
-            background: #333;
+            background: #000;
             color: white;
-            padding: 6px 12px;
+            padding: 6px 10px;
             border-radius: 4px;
             font-size: 12px;
             white-space: nowrap;
@@ -77,7 +77,8 @@
             height: 40px;
             cursor: pointer;
             appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+            color: #000;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23000' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 12px center;
             background-size: 12px;
@@ -87,36 +88,19 @@
             border-color: #888;
             box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
         }
-        .custom-select {
-            display: none;
+        .model-select-wrapper::before {
+            content: "模型";
             position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: #666;
+            pointer-events: none;
             background: white;
-            border: 1px solid #d0d0d0;
-            border-radius: 8px;
-            max-height: 300px;
-            overflow-y: auto;
-            z-index: 1001;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .custom-select.visible {
-            display: block;
-        }
-        .custom-option {
-            padding: 10px 12px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.2s;
-        }
-        .custom-option:hover {
-            background-color: #f5f5f5;
-        }
-        .custom-option.selected {
-            background-color: #e3f2fd;
-            color: #1565c0;
-            font-weight: 500;
+            padding: 0 4px;
+            top: -6px;
+            left: 8px;
         }
         .chat-container {
             flex: 1;
@@ -255,7 +239,7 @@
             <img src="icon.png" alt="新聊天" width="20" height="20">
         </button>
         <div class="model-select-wrapper">
-            <select class="model-select" id="modelSelect" style="display: none;">
+            <select class="model-select" id="modelSelect">
                 <option value="gpt-5.2-chat">GPT-5.2 Instant</option>
                 <option value="gpt-5.2">GPT-5.2 Thinking</option>
                 <option value="gpt-5.1-chat-latest">GPT-5.1 Instant</option>
@@ -276,7 +260,6 @@
                 <option value="o3-mini">OpenAI o3-mini</option>
                 <option value="o4-mini">OpenAI o4-mini</option>
             </select>
-            <div class="custom-select" id="customSelect"></div>
         </div>
     </div>
     
@@ -305,7 +288,6 @@
         const webSearchToggle = document.getElementById('webSearchToggle');
         const welcomeMessage = document.getElementById('welcomeMessage');
         const newChatBtn = document.getElementById('newChatBtn');
-        const customSelect = document.getElementById('customSelect');
         
         let isThinking = false;
         let webSearchEnabled = false;
@@ -323,60 +305,6 @@
         
         welcomeMessage.textContent = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
         marked.setOptions({ breaks: true, gfm: true });
-        
-        // 初始化自定义下拉框
-        function initCustomSelect() {
-            const options = modelSelect.options;
-            const selectedIndex = modelSelect.selectedIndex;
-            
-            customSelect.innerHTML = '';
-            
-            for (let i = 0; i < options.length; i++) {
-                const option = document.createElement('div');
-                option.className = `custom-option ${i === selectedIndex ? 'selected' : ''}`;
-                option.textContent = options[i].textContent;
-                option.dataset.value = options[i].value;
-                option.dataset.index = i;
-                
-                option.addEventListener('click', () => {
-                    modelSelect.selectedIndex = i;
-                    modelSelect.value = options[i].value;
-                    updateCustomSelectDisplay();
-                    customSelect.classList.remove('visible');
-                });
-                
-                customSelect.appendChild(option);
-            }
-            
-            updateCustomSelectDisplay();
-        }
-        
-        function updateCustomSelectDisplay() {
-            const selectedOption = modelSelect.options[modelSelect.selectedIndex];
-            // 设置占位文本显示当前选中项
-            modelSelect.style.display = 'block';
-            customSelect.parentElement.style.width = modelSelect.offsetWidth + 'px';
-            modelSelect.style.display = 'none';
-            
-            // 更新自定义选项的选中状态
-            const customOptions = customSelect.querySelectorAll('.custom-option');
-            customOptions.forEach((opt, idx) => {
-                opt.classList.toggle('selected', idx === modelSelect.selectedIndex);
-            });
-        }
-        
-        // 点击其他地方关闭下拉框
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.model-select-wrapper')) {
-                customSelect.classList.remove('visible');
-            }
-        });
-        
-        // 点击选择框显示自定义下拉
-        modelSelect.addEventListener('click', (e) => {
-            customSelect.classList.toggle('visible');
-            e.stopPropagation();
-        });
         
         function addMessage(content, isUser = false, isStreaming = false) {
             if (isUser && !hasUserSentMessage) {
@@ -484,9 +412,6 @@
         newChatBtn.addEventListener('click', () => {
             window.location.href = window.location.href.split('?')[0];
         });
-        
-        // 初始化自定义下拉框
-        initCustomSelect();
         
         inputBox.focus();
     </script>
