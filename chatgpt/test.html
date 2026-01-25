@@ -6,14 +6,10 @@
     <script src="https://js.puter.com/v2/"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background: #f0f0f0;
             color: #000;
             line-height: 1.6;
@@ -27,37 +23,29 @@
         .header {
             display: flex;
             align-items: center;
-            padding: 12px 15px;
+            padding: 15px;
             border-bottom: 1px solid #d0d0d0;
             background: #fff;
-            flex-shrink: 0;
             min-height: 60px;
         }
         
         @media (min-width: 768px) {
-            .header {
-                padding: 15px 20px;
-                min-height: auto;
-            }
+            .header { padding: 15px 20px; min-height: auto; }
         }
         
         .model-select {
             width: 100%;
             max-width: 220px;
-            padding: 10px 12px;
+            padding: 10px;
             border: 1px solid #d0d0d0;
             border-radius: 8px;
             background: #fff;
             font-size: 14px;
-            color: #333;
             height: 40px;
         }
         
         @media (max-width: 767px) {
-            .model-select {
-                font-size: 16px; /* 移动端增加字体大小 */
-                padding: 12px;
-            }
+            .model-select { font-size: 16px; }
         }
         
         .search-toggle {
@@ -71,16 +59,12 @@
             background: #fff;
             cursor: pointer;
             font-size: 14px;
-            color: #333;
             white-space: nowrap;
             height: 40px;
         }
         
         @media (max-width: 767px) {
-            .search-toggle {
-                font-size: 16px;
-                padding: 10px 16px;
-            }
+            .search-toggle { font-size: 16px; }
         }
         
         .search-toggle.active {
@@ -95,28 +79,25 @@
             background: #f0f0f0;
             display: flex;
             flex-direction: column;
-            -webkit-overflow-scrolling: touch; /* 移动端平滑滚动 */
+            -webkit-overflow-scrolling: touch;
         }
         
         @media (min-width: 768px) {
-            .chat-container {
-                padding: 20px;
-            }
+            .chat-container { padding: 20px; }
         }
         
         .message {
             margin-bottom: 16px;
             padding: 16px;
-            background: #f5f5f5; /* 改为浅灰色背景 */
+            background: #f5f5f5;
             border-radius: 10px;
             border: 1px solid #e0e0e0;
             max-width: 90%;
             position: relative;
-            /* 移除阴影 */
         }
         
         @media (min-width: 768px) {
-            .message {
+            .message { 
                 max-width: 85%;
                 padding: 16px 20px;
                 margin-bottom: 20px;
@@ -128,13 +109,10 @@
             align-self: flex-end;
             margin-left: auto;
             margin-right: 0;
-            border-right: none;
         }
         
         @media (min-width: 768px) {
-            .message.user {
-                margin-right: 20px;
-            }
+            .message.user { margin-right: 20px; }
         }
         
         .message.ai {
@@ -145,9 +123,7 @@
         }
         
         @media (min-width: 768px) {
-            .message.ai {
-                margin-left: 20px;
-            }
+            .message.ai { margin-left: 20px; }
         }
         
         .message-header {
@@ -160,36 +136,23 @@
             gap: 8px;
         }
         
-        @media (min-width: 768px) {
-            .message-header {
-                font-size: 13px;
-            }
-        }
-        
         .model-badge {
             background: #e8e8e8;
             padding: 2px 8px;
             border-radius: 4px;
             font-size: 12px;
             color: #555;
-            font-weight: normal;
         }
         
         .message-content {
             color: #222;
             line-height: 1.6;
             word-wrap: break-word;
-            font-size: 15px; /* 移动端增加字体大小 */
+            font-size: 15px;
         }
         
         @media (min-width: 768px) {
-            .message-content {
-                font-size: 14px;
-            }
-        }
-        
-        .message-content p {
-            margin-bottom: 8px;
+            .message-content { font-size: 14px; }
         }
         
         .message-content pre {
@@ -205,9 +168,8 @@
             background: #e8e8e8;
             padding: 2px 6px;
             border-radius: 4px;
-            font-family: 'Courier New', monospace;
+            font-family: monospace;
             font-size: 0.9em;
-            color: #333;
         }
         
         .message-content pre code {
@@ -216,16 +178,14 @@
         }
         
         .input-container {
-            position: relative;
             border-top: 1px solid #d0d0d0;
             background: #fff;
             padding: 15px;
-            flex-shrink: 0;
-            min-height: 80px; /* 移动端增加高度 */
+            min-height: 80px;
         }
         
         @media (min-width: 768px) {
-            .input-container {
+            .input-container { 
                 padding: 15px 20px;
                 min-height: auto;
             }
@@ -233,19 +193,19 @@
         
         .input-box {
             width: 100%;
-            min-height: 48px; /* 移动端增加最小高度 */
+            min-height: 48px;
             max-height: 132px;
             padding: 14px 50px 14px 15px;
             border: 1px solid #d0d0d0;
             border-radius: 8px;
             resize: none;
-            font-size: 16px; /* 移动端增加字体大小 */
+            font-size: 16px;
             font-family: inherit;
             line-height: 1.5;
             overflow-y: auto;
             background: #fff;
             color: #000;
-            -webkit-appearance: none; /* 移除iOS默认样式 */
+            -webkit-appearance: none;
         }
         
         @media (min-width: 768px) {
@@ -259,14 +219,13 @@
         .input-box:focus {
             outline: none;
             border-color: #888;
-            background: #fff;
         }
         
         .send-button {
             position: absolute;
             right: 25px;
             bottom: 25px;
-            width: 36px; /* 移动端增大按钮 */
+            width: 36px;
             height: 36px;
             border: none;
             background: #666;
@@ -277,7 +236,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background-color 0.2s;
         }
         
         @media (min-width: 768px) {
@@ -287,18 +245,11 @@
                 width: 32px;
                 height: 32px;
                 font-size: 14px;
-                border-radius: 6px;
             }
         }
         
-        .send-button:hover:not(:disabled) {
-            background: #555;
-        }
-        
-        .send-button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
+        .send-button:hover:not(:disabled) { background: #555; }
+        .send-button:disabled { background: #ccc; cursor: not-allowed; }
         
         .typing {
             display: inline-block;
@@ -326,39 +277,6 @@
         .chat-container::-webkit-scrollbar-thumb {
             background: #c0c0c0;
             border-radius: 4px;
-        }
-        
-        .chat-container::-webkit-scrollbar-thumb:hover {
-            background: #a0a0a0;
-        }
-        
-        /* 移动端优化 */
-        @media (max-width: 767px) {
-            body {
-                font-size: 16px; /* 移动端基础字体大小 */
-            }
-            
-            .message {
-                margin-bottom: 12px;
-            }
-            
-            .input-box::-webkit-input-placeholder {
-                font-size: 16px; /* 移动端placeholder字体大小 */
-            }
-        }
-        
-        /* 平板设备优化 */
-        @media (min-width: 768px) and (max-width: 1024px) {
-            .message {
-                max-width: 88%;
-            }
-        }
-        
-        /* 防止移动端输入框获取焦点时页面缩放 */
-        @media (max-width: 767px) {
-            input, textarea {
-                font-size: 16px !important;
-            }
         }
     </style>
 </head>
@@ -475,17 +393,11 @@
             
             try {
                 const fullPrompt = conversationContext + "用户: " + userInput + "\nAI: ";
-                
-                const options = {
-                    stream: true,
-                    model: modelSelect.value
-                };
-                
+                const options = { stream: true, model: modelSelect.value };
                 if (webSearchEnabled) options.tools = [{ type: "web_search" }];
                 
                 const response = await puter.ai.chat(fullPrompt, options);
                 let fullResponse = '';
-                
                 streamingContent.innerHTML = '';
                 
                 for await (const part of response) {
@@ -496,14 +408,12 @@
                 }
                 
                 conversationContext += "用户: " + userInput + "\nAI: " + fullResponse + "\n";
-                
                 const lines = conversationContext.split('\n');
                 if (lines.length > 20) {
                     conversationContext = lines.slice(-20).join('\n');
                 }
                 
                 document.getElementById('streamingMessage').id = '';
-                
             } catch (error) {
                 streamingContent.innerHTML = `错误: ${error.message}`;
             } finally {
@@ -515,7 +425,6 @@
         }
         
         inputBox.addEventListener('input', adjustInputHeight);
-        
         inputBox.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey && !isThinking) {
                 e.preventDefault();
@@ -531,21 +440,6 @@
         
         adjustInputHeight();
         inputBox.focus();
-        
-        // 移动端防止键盘弹出时页面布局错乱
-        if ('visualViewport' in window) {
-            let cachedHeight = window.innerHeight;
-            
-            window.addEventListener('resize', () => {
-                const newHeight = window.innerHeight;
-                if (cachedHeight !== newHeight) {
-                    cachedHeight = newHeight;
-                    setTimeout(() => {
-                        chatContainer.scrollTop = chatContainer.scrollHeight;
-                    }, 100);
-                }
-            });
-        }
     </script>
 </body>
 </html>
