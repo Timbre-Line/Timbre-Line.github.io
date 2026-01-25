@@ -3,6 +3,7 @@
 <head>
     <title>ChatGPT</title>
     <script src="https://js.puter.com/v2/"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -12,20 +13,23 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: #fff;
+            background: #fafafa;
             color: #000;
-            line-height: 1.5;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+            line-height: 1.6;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
         
         .header {
             display: flex;
             gap: 15px;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #e5e5e5;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #fff;
+            flex-shrink: 0;
             flex-wrap: wrap;
         }
         
@@ -33,10 +37,11 @@
             flex: 1;
             min-width: 200px;
             padding: 8px 12px;
-            border: 1px solid #d9d9e3;
-            border-radius: 8px;
+            border: 1px solid #d0d0d0;
+            border-radius: 6px;
             background: #fff;
             font-size: 14px;
+            color: #333;
         }
         
         .search-toggle {
@@ -44,50 +49,125 @@
             align-items: center;
             gap: 8px;
             padding: 8px 16px;
-            border: 1px solid #d9d9e3;
-            border-radius: 8px;
+            border: 1px solid #d0d0d0;
+            border-radius: 6px;
             background: #fff;
             cursor: pointer;
             font-size: 14px;
+            color: #333;
         }
         
         .search-toggle.active {
-            background: #f7f7f8;
-            border-color: #10a37f;
+            background: #f0f0f0;
+            border-color: #666;
         }
         
         .chat-container {
-            height: calc(100vh - 180px);
-            min-height: 400px;
+            flex: 1;
             overflow-y: auto;
-            margin-bottom: 15px;
-            padding: 15px;
-            border: 1px solid #e5e5e5;
-            border-radius: 8px;
+            padding: 20px;
             background: #fafafa;
+            width: 100%;
+            max-width: 100vw;
         }
         
         .message {
             margin-bottom: 20px;
-            padding: 16px;
+            padding: 16px 20px;
             background: #fff;
-            border-radius: 8px;
-            border: 1px solid #e5e5e5;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+            width: 95%;
+            max-width: 95%;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
         
         .message.user {
-            background: #f7f7f8;
+            background: #fff;
+            border-left: 3px solid #666;
         }
         
         .message.ai {
             background: #fff;
+            border-left: 3px solid #888;
+        }
+        
+        .message-header {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #444;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .model-badge {
+            background: #e0e0e0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #555;
+        }
+        
+        .message-content {
+            color: #222;
+            line-height: 1.6;
+            word-wrap: break-word;
+        }
+        
+        .message-content p {
+            margin-bottom: 8px;
+        }
+        
+        .message-content pre {
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 12px 0;
+            border: 1px solid #ddd;
+        }
+        
+        .message-content code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #333;
+        }
+        
+        .message-content pre code {
+            background: none;
+            padding: 0;
+        }
+        
+        .message-content ul, 
+        .message-content ol {
+            margin-left: 20px;
+            margin-bottom: 12px;
+        }
+        
+        .message-content li {
+            margin-bottom: 4px;
+        }
+        
+        .message-content blockquote {
+            border-left: 3px solid #ccc;
+            margin: 12px 0;
+            padding-left: 12px;
+            color: #555;
         }
         
         .input-container {
             position: relative;
-            border: 1px solid #d9d9e3;
-            border-radius: 8px;
+            border-top: 1px solid #e0e0e0;
             background: #fff;
+            padding: 15px 20px;
+            flex-shrink: 0;
         }
         
         .input-box {
@@ -95,7 +175,7 @@
             min-height: 44px;
             max-height: 132px;
             padding: 12px 50px 12px 15px;
-            border: none;
+            border: 1px solid #d0d0d0;
             border-radius: 8px;
             resize: none;
             font-size: 14px;
@@ -108,41 +188,42 @@
         
         .input-box:focus {
             outline: none;
-            background: #fafafa;
+            border-color: #888;
+            background: #fff;
         }
         
         .send-button {
             position: absolute;
-            right: 12px;
-            bottom: 12px;
-            width: 24px;
-            height: 24px;
+            right: 32px;
+            bottom: 27px;
+            width: 32px;
+            height: 32px;
             border: none;
-            background: #10a37f;
-            border-radius: 4px;
+            background: #666;
+            border-radius: 6px;
             cursor: pointer;
             color: white;
-            font-size: 12px;
+            font-size: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: background-color 0.2s;
+        }
+        
+        .send-button:hover:not(:disabled) {
+            background: #555;
         }
         
         .send-button:disabled {
-            background: #d9d9e3;
+            background: #ccc;
             cursor: not-allowed;
-        }
-        
-        .loading {
-            opacity: 0.6;
-            pointer-events: none;
         }
         
         .typing {
             display: inline-block;
             width: 10px;
             height: 10px;
-            background: #10a37f;
+            background: #888;
             border-radius: 50%;
             margin-right: 4px;
             animation: blink 1s infinite;
@@ -151,6 +232,24 @@
         @keyframes blink {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.3; }
+        }
+        
+        /* 滚动条样式 */
+        .chat-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .chat-container::-webkit-scrollbar-track {
+            background: #f0f0f0;
+        }
+        
+        .chat-container::-webkit-scrollbar-thumb {
+            background: #c0c0c0;
+            border-radius: 4px;
+        }
+        
+        .chat-container::-webkit-scrollbar-thumb:hover {
+            background: #a0a0a0;
         }
     </style>
 </head>
@@ -186,9 +285,7 @@
     </div>
     
     <div class="chat-container" id="chatContainer">
-        <div class="message ai">
-            <strong>AI:</strong> 您好！请选择模型并开始对话。
-        </div>
+        <!-- 移除欢迎消息 -->
     </div>
     
     <div class="input-container">
@@ -212,15 +309,13 @@
         let webSearchEnabled = false;
         let conversationHistory = [];
         
-        // 格式化模型显示名称
-        function formatModelName(modelId) {
-            if (modelId.startsWith('gpt-')) {
-                return 'GPT-' + modelId.slice(4).replace('-', ' ');
-            } else if (modelId.startsWith('o')) {
-                return 'OpenAI ' + modelId.replace('-', ' ');
-            }
-            return modelId;
-        }
+        // 配置marked以支持换行和基本Markdown
+        marked.setOptions({
+            breaks: true,
+            gfm: true,
+            headerIds: false,
+            mangle: false
+        });
         
         // 调整输入框高度
         function adjustInputHeight() {
@@ -236,8 +331,41 @@
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user' : 'ai'}`;
             
-            const prefix = isUser ? '用户' : 'AI';
-            messageDiv.innerHTML = `<strong>${prefix}:</strong> ${content}`;
+            const messageHeader = document.createElement('div');
+            messageHeader.className = 'message-header';
+            
+            if (isUser) {
+                messageHeader.textContent = '用户';
+            } else {
+                const modelName = formatModelName(modelSelect.value);
+                messageHeader.innerHTML = `
+                    <span>${modelName}</span>
+                    <span class="model-badge">${modelSelect.value}</span>
+                `;
+            }
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            
+            // 使用marked渲染Markdown内容
+            if (!isUser) {
+                messageContent.innerHTML = marked.parse(content);
+            } else {
+                // 用户消息也支持简单的换行和Markdown
+                const escapedContent = content
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+                
+                // 将换行符转换为<br>
+                const formattedContent = escapedContent.replace(/\n/g, '<br>');
+                messageContent.innerHTML = formattedContent;
+            }
+            
+            messageDiv.appendChild(messageHeader);
+            messageDiv.appendChild(messageContent);
             
             chatContainer.appendChild(messageDiv);
             chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -247,12 +375,37 @@
             }
         }
         
+        // 格式化模型显示名称
+        function formatModelName(modelId) {
+            if (modelId.startsWith('gpt-')) {
+                return 'GPT-' + modelId.slice(4).replace('-', ' ');
+            } else if (modelId.startsWith('o')) {
+                return 'OpenAI ' + modelId.replace('-', ' ');
+            }
+            return modelId;
+        }
+        
         // 显示正在输入动画
         function showTyping() {
             const typingDiv = document.createElement('div');
             typingDiv.className = 'message ai';
             typingDiv.id = 'typingIndicator';
-            typingDiv.innerHTML = `<strong>AI:</strong> <span class="typing"></span>思考中...`;
+            
+            const header = document.createElement('div');
+            header.className = 'message-header';
+            const modelName = formatModelName(modelSelect.value);
+            header.innerHTML = `
+                <span>${modelName}</span>
+                <span class="model-badge">${modelSelect.value}</span>
+            `;
+            
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            content.innerHTML = '<span class="typing"></span>思考中...';
+            
+            typingDiv.appendChild(header);
+            typingDiv.appendChild(content);
+            
             chatContainer.appendChild(typingDiv);
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
@@ -324,7 +477,10 @@
                         const messages = chatContainer.querySelectorAll('.message.ai');
                         const lastMessage = messages[messages.length - 1];
                         if (lastMessage && !lastMessage.id) {
-                            lastMessage.innerHTML = `<strong>AI:</strong> ${fullResponse}`;
+                            const contentDiv = lastMessage.querySelector('.message-content');
+                            if (contentDiv) {
+                                contentDiv.innerHTML = marked.parse(fullResponse);
+                            }
                         }
                     }
                 }
@@ -356,7 +512,6 @@
                 e.preventDefault();
                 sendMessage();
             }
-            // Shift+Enter 已默认行为（换行）
         });
         
         sendButton.addEventListener('click', sendMessage);
