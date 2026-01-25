@@ -50,19 +50,17 @@
         }
         .message.user {
             align-self: flex-end;
-            background: #007AFF;
-            color: white;
+            background: #e0e0e0;
+            color: #000;
         }
         .message.ai {
             align-self: flex-start;
+            background: #f5f5f5;
         }
         .message-content {
             font-size: 16px;
             line-height: 1.5;
             word-wrap: break-word;
-        }
-        .message.user .message-content {
-            font-size: 16px;
         }
         .welcome-message {
             text-align: center;
@@ -75,12 +73,6 @@
         .bottom-section {
             padding: 15px;
             background: #fff;
-        }
-        @media (min-width: 768px) {
-            .header { padding: 15px 20px; }
-            .chat-container { padding: 20px; }
-            .bottom-section { padding: 20px; }
-            .input-container { max-width: 70%; margin: 0 auto; }
         }
         .input-container {
             position: relative;
@@ -103,7 +95,7 @@
         }
         .input-box::-webkit-scrollbar { display: none; }
         .input-box:focus { outline: none; border-color: #888; }
-        .search-toggle-small, .send-button {
+        .web-search-toggle, .send-button {
             position: absolute;
             width: 36px;
             height: 36px;
@@ -114,14 +106,16 @@
             align-items: center;
             justify-content: center;
             padding: 0;
-            background: transparent;
+            background: #fff;
+            font-size: 18px;
         }
-        .search-toggle-small {
+        .web-search-toggle {
             left: 10px;
-            color: #666;
+            border: 1px solid #d0d0d0;
         }
-        .search-toggle-small.active {
-            color: #007AFF;
+        .web-search-toggle.active {
+            background: #666;
+            color: white;
         }
         .send-button {
             right: 10px;
@@ -182,7 +176,7 @@
     
     <div class="bottom-section">
         <div class="input-container">
-            <button class="search-toggle-small" id="searchToggleSmall">🔍</button>
+            <button class="web-search-toggle" id="webSearchToggle">🌐</button>
             <textarea class="input-box" id="inputBox" placeholder="有问题，尽管问" rows="1"></textarea>
             <button class="send-button" id="sendButton">↑</button>
         </div>
@@ -196,7 +190,7 @@
         const inputBox = document.getElementById('inputBox');
         const sendButton = document.getElementById('sendButton');
         const modelSelect = document.getElementById('modelSelect');
-        const searchToggleSmall = document.getElementById('searchToggleSmall');
+        const webSearchToggle = document.getElementById('webSearchToggle');
         const welcomeMessage = document.getElementById('welcomeMessage');
         
         let isThinking = false;
@@ -305,9 +299,9 @@
         });
         
         sendButton.addEventListener('click', sendMessage);
-        searchToggleSmall.addEventListener('click', () => {
+        webSearchToggle.addEventListener('click', () => {
             webSearchEnabled = !webSearchEnabled;
-            searchToggleSmall.classList.toggle('active', webSearchEnabled);
+            webSearchToggle.classList.toggle('active', webSearchEnabled);
         });
         
         adjustInputHeight();
