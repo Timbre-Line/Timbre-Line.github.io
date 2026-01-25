@@ -25,17 +25,15 @@
         
         .header {
             display: flex;
-            gap: 15px;
+            align-items: center;
             padding: 15px 20px;
             border-bottom: 1px solid #e0e0e0;
             background: #fff;
             flex-shrink: 0;
-            flex-wrap: wrap;
         }
         
         .model-select {
-            flex: 1;
-            min-width: 200px;
+            width: 220px;
             padding: 8px 12px;
             border: 1px solid #d0d0d0;
             border-radius: 6px;
@@ -45,6 +43,7 @@
         }
         
         .search-toggle {
+            margin-left: auto;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -67,8 +66,6 @@
             overflow-y: auto;
             padding: 20px;
             background: #fafafa;
-            width: 100%;
-            max-width: 100vw;
         }
         
         .message {
@@ -85,12 +82,10 @@
         }
         
         .message.user {
-            background: #fff;
             border-left: 3px solid #666;
         }
         
         .message.ai {
-            background: #fff;
             border-left: 3px solid #888;
         }
         
@@ -143,23 +138,6 @@
         .message-content pre code {
             background: none;
             padding: 0;
-        }
-        
-        .message-content ul, 
-        .message-content ol {
-            margin-left: 20px;
-            margin-bottom: 12px;
-        }
-        
-        .message-content li {
-            margin-bottom: 4px;
-        }
-        
-        .message-content blockquote {
-            border-left: 3px solid #ccc;
-            margin: 12px 0;
-            padding-left: 12px;
-            color: #555;
         }
         
         .input-container {
@@ -234,7 +212,6 @@
             50% { opacity: 0.3; }
         }
         
-        /* 滚动条样式 */
         .chat-container::-webkit-scrollbar {
             width: 8px;
         }
@@ -260,22 +237,6 @@
             <option value="gpt-5.2-chat">GPT-5.2 chat</option>
             <option value="gpt-5.1">GPT-5.1</option>
             <option value="gpt-5.1-chat-latest">GPT-5.1 chat latest</option>
-            <option value="gpt-5">GPT-5</option>
-            <option value="gpt-5-mini">GPT-5 mini</option>
-            <option value="gpt-5-nano">GPT-5 nano</option>
-            <option value="gpt-5-chat-latest">GPT-5 chat latest</option>
-            <option value="gpt-4.1">GPT-4.1</option>
-            <option value="gpt-4.1-mini">GPT-4.1 mini</option>
-            <option value="gpt-4.1-nano">GPT-4.1 nano</option>
-            <option value="gpt-4.5-preview">GPT-4.5 preview</option>
-            <option value="gpt-4o">GPT-4o</option>
-            <option value="gpt-4o-mini">GPT-4o mini</option>
-            <option value="o1">OpenAI o1</option>
-            <option value="o1-mini">OpenAI o1 mini</option>
-            <option value="o1-pro">OpenAI o1 pro</option>
-            <option value="o3">OpenAI o3</option>
-            <option value="o3-mini">OpenAI o3 mini</option>
-            <option value="o4-mini">OpenAI o4 mini</option>
         </select>
         
         <div class="search-toggle" id="searchToggle">
@@ -284,9 +245,7 @@
         </div>
     </div>
     
-    <div class="chat-container" id="chatContainer">
-        <!-- 移除欢迎消息 -->
-    </div>
+    <div class="chat-container" id="chatContainer"></div>
     
     <div class="input-container">
         <textarea 
@@ -307,27 +266,15 @@
         
         let isThinking = false;
         let webSearchEnabled = false;
-        let conversationHistory = [];
         
-        // 配置marked以支持换行和基本Markdown
-        marked.setOptions({
-            breaks: true,
-            gfm: true,
-            headerIds: false,
-            mangle: false
-        });
+        marked.setOptions({ breaks: true, gfm: true });
         
-        // 调整输入框高度
         function adjustInputHeight() {
-            const textarea = inputBox;
-            textarea.style.height = 'auto';
-            const maxHeight = 5 * 20; // 5行高度（每行约20px）
-            const newHeight = Math.min(textarea.scrollHeight, maxHeight);
-            textarea.style.height = newHeight + 'px';
+            inputBox.style.height = 'auto';
+            inputBox.style.height = Math.min(inputBox.scrollHeight, 132) + 'px';
         }
         
-        // 添加消息到聊天
-        function addMessage(content, isUser = false) {
+        function addMessage(content, isUser = false, isStreaming = false) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user' : 'ai'}`;
             
@@ -337,166 +284,72 @@
             if (isUser) {
                 messageHeader.textContent = '用户';
             } else {
-                const modelName = formatModelName(modelSelect.value);
-                messageHeader.innerHTML = `
-                    <span>${modelName}</span>
-                    <span class="model-badge">${modelSelect.value}</span>
-                `;
+                messageHeader.innerHTML = `<span>AI</span><span class="model-badge">${modelSelect.value}</span>`;
             }
             
             const messageContent = document.createElement('div');
             messageContent.className = 'message-content';
             
-            // 使用marked渲染Markdown内容
-            if (!isUser) {
-                messageContent.innerHTML = marked.parse(content);
+            if (isUser) {
+                messageContent.innerHTML = content.replace(/\n/g, '<br>');
+            } else if (isStreaming) {
+                messageContent.innerHTML = '<span class="typing"></span>思考中...';
+                messageDiv.id = 'streamingMessage';
             } else {
-                // 用户消息也支持简单的换行和Markdown
-                const escapedContent = content
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;')
-                    .replace(/'/g, '&#039;');
-                
-                // 将换行符转换为<br>
-                const formattedContent = escapedContent.replace(/\n/g, '<br>');
-                messageContent.innerHTML = formattedContent;
+                messageContent.innerHTML = marked.parse(content);
             }
             
             messageDiv.appendChild(messageHeader);
             messageDiv.appendChild(messageContent);
-            
             chatContainer.appendChild(messageDiv);
             chatContainer.scrollTop = chatContainer.scrollHeight;
             
-            if (!isUser) {
-                conversationHistory.push({ role: 'assistant', content });
-            }
+            return messageContent;
         }
         
-        // 格式化模型显示名称
-        function formatModelName(modelId) {
-            if (modelId.startsWith('gpt-')) {
-                return 'GPT-' + modelId.slice(4).replace('-', ' ');
-            } else if (modelId.startsWith('o')) {
-                return 'OpenAI ' + modelId.replace('-', ' ');
-            }
-            return modelId;
-        }
-        
-        // 显示正在输入动画
-        function showTyping() {
-            const typingDiv = document.createElement('div');
-            typingDiv.className = 'message ai';
-            typingDiv.id = 'typingIndicator';
-            
-            const header = document.createElement('div');
-            header.className = 'message-header';
-            const modelName = formatModelName(modelSelect.value);
-            header.innerHTML = `
-                <span>${modelName}</span>
-                <span class="model-badge">${modelSelect.value}</span>
-            `;
-            
-            const content = document.createElement('div');
-            content.className = 'message-content';
-            content.innerHTML = '<span class="typing"></span>思考中...';
-            
-            typingDiv.appendChild(header);
-            typingDiv.appendChild(content);
-            
-            chatContainer.appendChild(typingDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
-        
-        // 隐藏正在输入动画
-        function hideTyping() {
-            const typingIndicator = document.getElementById('typingIndicator');
-            if (typingIndicator) {
-                typingIndicator.remove();
-            }
-        }
-        
-        // 发送消息
         async function sendMessage() {
             if (isThinking) return;
             
             const userInput = inputBox.value.trim();
             if (!userInput) return;
             
-            // 清空输入框并重置高度
             inputBox.value = '';
             adjustInputHeight();
             
-            // 添加用户消息到聊天
             addMessage(userInput, true);
             
-            // 添加到历史记录
-            conversationHistory.push({ role: 'user', content: userInput });
-            
-            // 限制历史记录长度（简单按条数限制）
-            if (conversationHistory.length > 10) {
-                conversationHistory = conversationHistory.slice(-10);
-            }
-            
-            // 设置思考状态
             isThinking = true;
             sendButton.disabled = true;
             inputBox.disabled = true;
             
-            // 显示正在输入
-            showTyping();
+            const streamingContent = addMessage('', false, true);
             
             try {
-                // 准备选项
                 const options = {
                     stream: true,
                     model: modelSelect.value,
-                    messages: conversationHistory
+                    messages: [{ role: 'user', content: userInput }]
                 };
                 
-                // 如果启用了联网搜索，添加工具
-                if (webSearchEnabled) {
-                    options.tools = [{ type: "web_search" }];
-                }
+                if (webSearchEnabled) options.tools = [{ type: "web_search" }];
                 
-                // 发送请求
                 const response = await puter.ai.chat(userInput, options);
-                
-                // 隐藏正在输入指示器
-                hideTyping();
-                
-                // 流式接收回复
                 let fullResponse = '';
+                
+                streamingContent.innerHTML = '';
+                
                 for await (const part of response) {
                     if (part?.text) {
                         fullResponse += part.text;
-                        
-                        // 更新最后一条消息
-                        const messages = chatContainer.querySelectorAll('.message.ai');
-                        const lastMessage = messages[messages.length - 1];
-                        if (lastMessage && !lastMessage.id) {
-                            const contentDiv = lastMessage.querySelector('.message-content');
-                            if (contentDiv) {
-                                contentDiv.innerHTML = marked.parse(fullResponse);
-                            }
-                        }
+                        streamingContent.innerHTML = marked.parse(fullResponse);
                     }
                 }
                 
-                // 确保消息完全显示
-                if (fullResponse) {
-                    hideTyping();
-                    addMessage(fullResponse, false);
-                }
+                document.getElementById('streamingMessage').id = '';
                 
             } catch (error) {
-                hideTyping();
-                addMessage(`错误: ${error.message}`, false);
-                console.error('Chat error:', error);
+                streamingContent.innerHTML = `错误: ${error.message}`;
             } finally {
-                // 重置状态
                 isThinking = false;
                 sendButton.disabled = false;
                 inputBox.disabled = false;
@@ -504,7 +357,6 @@
             }
         }
         
-        // 事件监听器
         inputBox.addEventListener('input', adjustInputHeight);
         
         inputBox.addEventListener('keydown', (e) => {
@@ -515,18 +367,11 @@
         });
         
         sendButton.addEventListener('click', sendMessage);
-        
         searchToggle.addEventListener('click', () => {
             webSearchEnabled = !webSearchEnabled;
             searchToggle.classList.toggle('active', webSearchEnabled);
         });
         
-        // 页面加载时设置模型显示名称
-        Array.from(modelSelect.options).forEach(option => {
-            option.textContent = formatModelName(option.value);
-        });
-        
-        // 初始调整输入框高度
         adjustInputHeight();
         inputBox.focus();
     </script>
