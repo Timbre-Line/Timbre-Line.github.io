@@ -77,7 +77,6 @@
             background: #fff;
             border-top: 1px solid #eee;
         }
-        /* 调整搜索按钮位置 */
         .web-search-toggle {
             border: 1px solid #d0d0d0;
             border-radius: 18px;
@@ -90,7 +89,7 @@
             gap: 4px;
             height: 36px;
             white-space: nowrap;
-            margin-bottom: 8px; /* 与输入框间距 */
+            margin-bottom: 8px;
         }
         .web-search-toggle.active {
             background: #e3f2fd;
@@ -104,13 +103,13 @@
             display: flex;
             align-items: flex-start;
             background: #fff;
-            position: relative; /* 为发送按钮定位 */
+            position: relative;
         }
         .input-box {
             flex: 1;
             min-height: 48px;
             max-height: 132px;
-            padding: 10px 50px 10px 15px; /* 右侧增加内边距给发送按钮 */
+            padding: 10px 50px 10px 15px;
             border: 1px solid #d0d0d0;
             border-radius: 24px;
             resize: none;
@@ -124,7 +123,6 @@
         }
         .input-box::-webkit-scrollbar { display: none; }
         .input-box:focus { outline: none; border-color: #888; }
-        /* 发送按钮定位到输入框内部 */
         .send-button {
             position: absolute;
             right: 10px;
@@ -167,26 +165,25 @@
 <body>
     <div class="header">
         <select class="model-select" id="modelSelect">
-            <option value="gpt-5.2">GPT-5.2</option>
-            <option value="gpt-5.2-chat">GPT-5.2 chat</option>
-            <option value="gpt-5.1">GPT-5.1</option>
-            <option value="gpt-5.1-chat-latest">GPT-5.1 chat latest</option>
+            <option value="gpt-5.2-chat">GPT-5.2 Instant</option>
+            <option value="gpt-5.2">GPT-5.2 Thinking</option>
+            <option value="gpt-5.1-chat-latest">GPT-5.1 Instant</option>
+            <option value="gpt-5.1">GPT-5.1 Thinking</option>
+            <option value="gpt-5-nano">GPT-5 Nano</option>
+            <option value="gpt-5-mini">GPT-5 Mini</option>
             <option value="gpt-5">GPT-5</option>
-            <option value="gpt-5-mini">GPT-5 mini</option>
-            <option value="gpt-5-nano">GPT-5 nano</option>
-            <option value="gpt-5-chat-latest">GPT-5 chat latest</option>
+            <option value="gpt-4.5-preview">GPT-4.5 Preview</option>
+            <option value="gpt-4.1-nano">GPT-4.1 Nano</option>
+            <option value="gpt-4.1-mini">GPT-4.1 Mini</option>
             <option value="gpt-4.1">GPT-4.1</option>
-            <option value="gpt-4.1-mini">GPT-4.1 mini</option>
-            <option value="gpt-4.1-nano">GPT-4.1 nano</option>
-            <option value="gpt-4.5-preview">GPT-4.5 preview</option>
             <option value="gpt-4o">GPT-4o</option>
-            <option value="gpt-4o-mini">GPT-4o mini</option>
+            <option value="gpt-4o-mini">GPT-4o Mini</option>
             <option value="o1">OpenAI o1</option>
-            <option value="o1-mini">OpenAI o1 mini</option>
-            <option value="o1-pro">OpenAI o1 pro</option>
+            <option value="o1-mini">OpenAI o1-mini</option>
+            <option value="o1-pro">OpenAI o1-pro</option>
             <option value="o3">OpenAI o3</option>
-            <option value="o3-mini">OpenAI o3 mini</option>
-            <option value="o4-mini">OpenAI o4 mini</option>
+            <option value="o3-mini">OpenAI o3-mini</option>
+            <option value="o4-mini">OpenAI o4-mini</option>
         </select>
     </div>
     
@@ -195,12 +192,10 @@
     </div>
     
     <div class="bottom-section">
-        <!-- 搜索按钮移到上方 -->
         <button class="web-search-toggle" id="webSearchToggle">🌐联网搜索</button>
         <div class="input-wrapper">
             <div class="input-container">
                 <textarea class="input-box" id="inputBox" placeholder="有问题，尽管问" rows="2"></textarea>
-                <!-- 发送按钮在输入框内部 -->
                 <button class="send-button" id="sendButton">↑</button>
             </div>
         </div>
