@@ -24,12 +24,13 @@
             display: flex;
             align-items: center;
             gap: 15px;
+            position: relative;
         }
         .new-chat-btn {
             width: 40px;
             height: 40px;
             border-radius: 8px;
-            background: #000;
+            background: #f0f0f0;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -39,31 +40,36 @@
             transition: background-color 0.2s;
         }
         .new-chat-btn:hover {
-            background: #333;
+            background: #e0e0e0;
         }
         .new-chat-btn::after {
             content: "新聊天";
             position: absolute;
-            bottom: -30px;
+            top: calc(100% + 8px);
             left: 50%;
             transform: translateX(-50%);
-            background: #000;
+            background: #333;
             color: white;
-            padding: 4px 8px;
+            padding: 6px 12px;
             border-radius: 4px;
             font-size: 12px;
             white-space: nowrap;
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.2s;
+            z-index: 1000;
         }
         .new-chat-btn:hover::after {
             opacity: 1;
         }
-        .model-select {
+        .model-select-wrapper {
+            position: relative;
             width: 100%;
             max-width: 180px;
-            padding: 10px 12px;
+        }
+        .model-select {
+            width: 100%;
+            padding: 10px 35px 10px 12px;
             border: 1px solid #d0d0d0;
             border-radius: 8px;
             background: #fff;
@@ -75,30 +81,42 @@
             background-repeat: no-repeat;
             background-position: right 12px center;
             background-size: 12px;
-            padding-right: 30px;
         }
         .model-select:focus {
             outline: none;
             border-color: #888;
             box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
         }
-        /* 下拉框选项样式 */
-        .model-select option {
-            padding: 8px 12px;
+        .custom-select {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1001;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .custom-select.visible {
+            display: block;
+        }
+        .custom-option {
+            padding: 10px 12px;
+            cursor: pointer;
             font-size: 14px;
+            transition: background-color 0.2s;
         }
-        .model-select option:hover {
-            background-color: #f0f0f0;
+        .custom-option:hover {
+            background-color: #f5f5f5;
         }
-        .model-select option:checked {
+        .custom-option.selected {
             background-color: #e3f2fd;
             color: #1565c0;
             font-weight: 500;
-        }
-        /* 下拉框列表样式（仅适用于部分浏览器） */
-        .model-select:focus option:checked {
-            background-color: #e3f2fd !important;
-            color: #1565c0 !important;
         }
         .chat-container {
             flex: 1;
@@ -236,27 +254,30 @@
         <button class="new-chat-btn" id="newChatBtn">
             <img src="icon.png" alt="新聊天" width="20" height="20">
         </button>
-        <select class="model-select" id="modelSelect">
-            <option value="gpt-5.2-chat">GPT-5.2 Instant</option>
-            <option value="gpt-5.2">GPT-5.2 Thinking</option>
-            <option value="gpt-5.1-chat-latest">GPT-5.1 Instant</option>
-            <option value="gpt-5.1">GPT-5.1 Thinking</option>
-            <option value="gpt-5-nano">GPT-5 Nano</option>
-            <option value="gpt-5-mini">GPT-5 Mini</option>
-            <option value="gpt-5">GPT-5</option>
-            <option value="gpt-4.5-preview">GPT-4.5 Preview</option>
-            <option value="gpt-4.1-nano">GPT-4.1 Nano</option>
-            <option value="gpt-4.1-mini">GPT-4.1 Mini</option>
-            <option value="gpt-4.1">GPT-4.1</option>
-            <option value="gpt-4o">GPT-4o</option>
-            <option value="gpt-4o-mini">GPT-4o Mini</option>
-            <option value="o1">OpenAI o1</option>
-            <option value="o1-mini">OpenAI o1-mini</option>
-            <option value="o1-pro">OpenAI o1-pro</option>
-            <option value="o3">OpenAI o3</option>
-            <option value="o3-mini">OpenAI o3-mini</option>
-            <option value="o4-mini">OpenAI o4-mini</option>
-        </select>
+        <div class="model-select-wrapper">
+            <select class="model-select" id="modelSelect" style="display: none;">
+                <option value="gpt-5.2-chat">GPT-5.2 Instant</option>
+                <option value="gpt-5.2">GPT-5.2 Thinking</option>
+                <option value="gpt-5.1-chat-latest">GPT-5.1 Instant</option>
+                <option value="gpt-5.1">GPT-5.1 Thinking</option>
+                <option value="gpt-5-nano">GPT-5 Nano</option>
+                <option value="gpt-5-mini">GPT-5 Mini</option>
+                <option value="gpt-5">GPT-5</option>
+                <option value="gpt-4.5-preview">GPT-4.5 Preview</option>
+                <option value="gpt-4.1-nano">GPT-4.1 Nano</option>
+                <option value="gpt-4.1-mini">GPT-4.1 Mini</option>
+                <option value="gpt-4.1">GPT-4.1</option>
+                <option value="gpt-4o">GPT-4o</option>
+                <option value="gpt-4o-mini">GPT-4o Mini</option>
+                <option value="o1">OpenAI o1</option>
+                <option value="o1-mini">OpenAI o1-mini</option>
+                <option value="o1-pro">OpenAI o1-pro</option>
+                <option value="o3">OpenAI o3</option>
+                <option value="o3-mini">OpenAI o3-mini</option>
+                <option value="o4-mini">OpenAI o4-mini</option>
+            </select>
+            <div class="custom-select" id="customSelect"></div>
+        </div>
     </div>
     
     <div class="chat-container" id="chatContainer">
@@ -284,6 +305,7 @@
         const webSearchToggle = document.getElementById('webSearchToggle');
         const welcomeMessage = document.getElementById('welcomeMessage');
         const newChatBtn = document.getElementById('newChatBtn');
+        const customSelect = document.getElementById('customSelect');
         
         let isThinking = false;
         let webSearchEnabled = false;
@@ -301,6 +323,60 @@
         
         welcomeMessage.textContent = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
         marked.setOptions({ breaks: true, gfm: true });
+        
+        // 初始化自定义下拉框
+        function initCustomSelect() {
+            const options = modelSelect.options;
+            const selectedIndex = modelSelect.selectedIndex;
+            
+            customSelect.innerHTML = '';
+            
+            for (let i = 0; i < options.length; i++) {
+                const option = document.createElement('div');
+                option.className = `custom-option ${i === selectedIndex ? 'selected' : ''}`;
+                option.textContent = options[i].textContent;
+                option.dataset.value = options[i].value;
+                option.dataset.index = i;
+                
+                option.addEventListener('click', () => {
+                    modelSelect.selectedIndex = i;
+                    modelSelect.value = options[i].value;
+                    updateCustomSelectDisplay();
+                    customSelect.classList.remove('visible');
+                });
+                
+                customSelect.appendChild(option);
+            }
+            
+            updateCustomSelectDisplay();
+        }
+        
+        function updateCustomSelectDisplay() {
+            const selectedOption = modelSelect.options[modelSelect.selectedIndex];
+            // 设置占位文本显示当前选中项
+            modelSelect.style.display = 'block';
+            customSelect.parentElement.style.width = modelSelect.offsetWidth + 'px';
+            modelSelect.style.display = 'none';
+            
+            // 更新自定义选项的选中状态
+            const customOptions = customSelect.querySelectorAll('.custom-option');
+            customOptions.forEach((opt, idx) => {
+                opt.classList.toggle('selected', idx === modelSelect.selectedIndex);
+            });
+        }
+        
+        // 点击其他地方关闭下拉框
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.model-select-wrapper')) {
+                customSelect.classList.remove('visible');
+            }
+        });
+        
+        // 点击选择框显示自定义下拉
+        modelSelect.addEventListener('click', (e) => {
+            customSelect.classList.toggle('visible');
+            e.stopPropagation();
+        });
         
         function addMessage(content, isUser = false, isStreaming = false) {
             if (isUser && !hasUserSentMessage) {
@@ -408,6 +484,9 @@
         newChatBtn.addEventListener('click', () => {
             window.location.href = window.location.href.split('?')[0];
         });
+        
+        // 初始化自定义下拉框
+        initCustomSelect();
         
         inputBox.focus();
     </script>
