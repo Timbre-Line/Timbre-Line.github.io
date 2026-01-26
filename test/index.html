@@ -3,7 +3,7 @@
     <script src="https://js.puter.com/v2/"></script>
     <script>
         puter.ai.chat("Explain quantum computing in simple terms", {
-            model: "openai/o1"
+            model: "openai/o1-mini"
         }).then(response => {
             document.body.innerHTML = response.message.content;
         });
