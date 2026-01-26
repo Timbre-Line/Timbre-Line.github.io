@@ -1,26 +1,33 @@
 <html>
 <body>
-    <div id="result">加载中...</div>
+    <h3>备用方案：使用其他模型</h3>
     
     <script src="https://js.puter.com/v2/"></script>
     <script>
-        // 方法1：最可靠的写法（推荐）
-        puter.ai.chat("Explain quantum computing in simple terms", {
-            model: "openrouter:openai/o1-mini"
-        })
-        .then(response => {
-            console.log("响应类型:", typeof response);
-            console.log("完整响应:", response);
-            
-            // response 是直接字符串，不是对象！
-            document.getElementById('result').innerHTML = 
-                `<h3>o1-mini 回答：</h3><p>${response}</p>`;
-        })
-        .catch(error => {
-            console.error("错误详情:", error);
-            document.getElementById('result').innerHTML = 
-                `<p style="color:red">错误：${error.message}</p>`;
-        });
+        // 尝试多个模型
+        const models = [
+            "gpt-4o-mini",      // 最稳定的
+            "gpt-5-nano",       // 最简单的
+            "gpt-4o",           // 标准的
+            "openrouter:openai/o1-mini"  // 最后尝试
+        ];
+        
+        async function tryModels() {
+            for (let model of models) {
+                try {
+                    console.log(`尝试模型: ${model}`);
+                    const response = await puter.ai.chat("Hello", { model });
+                    document.body.innerHTML = 
+                        `<b>使用 ${model}:</b><br>${response}`;
+                    return; // 成功就停止
+                } catch (error) {
+                    console.log(`${model} 失败:`, error.message);
+                }
+            }
+            document.body.innerHTML = "所有模型都失败了";
+        }
+        
+        tryModels();
     </script>
 </body>
 </html>
