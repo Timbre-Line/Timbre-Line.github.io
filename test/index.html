@@ -12,6 +12,7 @@
         .testing { border-left-color: #ffc107; background: #fff3cd; }
         button { margin: 10px 5px; padding: 10px 20px; }
         #progress { margin: 20px 0; }
+        kbd { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 3px; padding: 2px 5px; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -70,12 +71,12 @@
             div.innerHTML = `
                 <strong>${modelName}</strong>
                 <span class="status">测试中...</span>
-                <div class="details" style="font-size: 12px; margin-top: 5px;"></div>
+                <div class="details" style="font-size: 12px; margin-top: 5px; color: #666;"></div>
             `;
             return div;
         }
         
-        // 更新测试结果
+        // 更新测试结果 - 修复处理响应数据的问题
         function updateTestResult(modelName, type, data, duration = null) {
             const resultId = `result-${modelName.replace(/[:\/.-]/g, '_')}`;
             const div = document.getElementById(resultId);
@@ -87,12 +88,38 @@
             if (type === 'success') {
                 div.className = 'model-result success';
                 statusSpan.innerHTML = `✅ 成功 (${duration}ms)`;
-                detailsDiv.innerHTML = `<em>响应:</em> ${data.substring(0, 100)}...`;
+                
+                // 安全地处理响应数据
+                let responseText = '';
+                if (typeof data === 'string') {
+                    responseText = data;
+                } else if (data?.message?.content) {
+                    responseText = data.message.content;
+                } else if (data?.content) {
+                    responseText = data.content;
+                } else {
+                    responseText = JSON.stringify(data).substring(0, 200);
+                }
+                
+                detailsDiv.innerHTML = `<em>响应:</em> ${responseText.substring(0, 150)}${responseText.length > 150 ? '...' : ''}`;
+                
             } else if (type === 'error') {
                 div.className = 'model-result error';
                 statusSpan.innerHTML = '❌ 失败';
-                const errorMsg = data.error?.message || data.message || JSON.stringify(data);
-                detailsDiv.innerHTML = `<em>错误:</em> ${errorMsg.substring(0, 200)}`;
+                
+                let errorMsg = '';
+                if (typeof data === 'string') {
+                    errorMsg = data;
+                } else if (data?.error?.message) {
+                    errorMsg = data.error.message;
+                } else if (data?.message) {
+                    errorMsg = data.message;
+                } else {
+                    errorMsg = JSON.stringify(data).substring(0, 200);
+                }
+                
+                detailsDiv.innerHTML = `<em>错误:</em> ${errorMsg.substring(0, 200)}${errorMsg.length > 200 ? '...' : ''}`;
+                
             } else if (type === 'timeout') {
                 div.className = 'model-result timeout';
                 statusSpan.innerHTML = '⏰ 超时';
@@ -100,7 +127,7 @@
             }
         }
         
-        // 测试单个模型（带超时控制）
+        // 测试单个模型（带超时控制）- 简化版本
         async function testModelWithTimeout(modelName) {
             return new Promise(async (resolve) => {
                 let timeout = false;
@@ -113,16 +140,28 @@
                 }, TIMEOUT_MS);
                 
                 try {
+                    console.log(`开始测试: ${modelName}`);
                     const startTime = Date.now();
+                    
+                    // 使用简单的测试问题
                     const response = await puter.ai.chat("2+2=?", {
                         model: modelName,
-                        max_tokens: 5,
+                        max_tokens: 10,
                         temperature: 0
                     });
+                    
                     const endTime = Date.now();
                     
                     if (!timeout) {
                         clearTimeout(timeoutId);
+                        
+                        // 调试：查看响应结构
+                        console.log(`${modelName} 响应:`, response);
+                        console.log(`响应类型:`, typeof response);
+                        if (response && typeof response === 'object') {
+                            console.log(`响应键:`, Object.keys(response));
+                        }
+                        
                         updateTestResult(modelName, 'success', response, endTime - startTime);
                         resolve({ 
                             model: modelName, 
@@ -134,6 +173,7 @@
                 } catch (error) {
                     if (!timeout) {
                         clearTimeout(timeoutId);
+                        console.error(`${modelName} 错误:`, error);
                         updateTestResult(modelName, 'error', error);
                         resolve({ 
                             model: modelName, 
@@ -171,7 +211,6 @@
                 resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 
                 // 测试当前模型
-                console.log(`测试 ${model}...`);
                 await testModelWithTimeout(model);
                 
                 // 等待1秒再测试下一个，避免速率限制
@@ -216,26 +255,46 @@
                 <p><strong>❌ 失败:</strong> ${errorCount} 个</p>
                 <p><strong>⏰ 超时:</strong> ${timeoutCount} 个</p>
                 
-                <h4>关键发现:</h4>
-                <ul>
-                    <li><code>o1-mini</code> 和 <code>o1-mini-2024-09-12</code> 不存在</li>
-                    <li><code>o1-pro</code> 可能也不存在</li>
-                    <li><code>o1</code>、<code>o3-mini</code>、<code>o4-mini</code> 应该可用</li>
-                </ul>
+                <h4>可用模型:</h4>
+                <div id="available-models" style="margin-bottom: 10px;"></div>
                 
-                <p><em>注：如果模型超时，可能是网络问题或模型响应过慢</em></p>
+                <h4>不可用模型:</h4>
+                <div id="unavailable-models"></div>
             `;
             
             outputDiv.appendChild(summaryDiv);
             
+            // 收集可用和不可用模型
+            const availableModels = [];
+            const unavailableModels = [];
+            
+            openRouterOModels.forEach(model => {
+                const resultDiv = document.getElementById(`result-${model.replace(/[:\/.-]/g, '_')}`);
+                if (resultDiv && resultDiv.classList.contains('success')) {
+                    availableModels.push(model);
+                } else {
+                    unavailableModels.push(model);
+                }
+            });
+            
+            document.getElementById('available-models').innerHTML = 
+                availableModels.map(m => `<code>${m}</code>`).join('<br>') || '无';
+            
+            document.getElementById('unavailable-models').innerHTML = 
+                unavailableModels.map(m => `<code>${m}</code>`).join('<br>') || '无';
+            
             // 保存结果到控制台
-            console.log('测试完成！');
+            console.log('=== 测试完成 ===');
             console.log(`成功: ${successCount}, 失败: ${errorCount}, 超时: ${timeoutCount}`);
+            console.log('可用模型:', availableModels);
+            console.log('不可用模型:', unavailableModels);
         }
         
         // 页面加载时自动开始测试
         window.onload = function() {
+            // 先快速测试一下基础功能
             setTimeout(() => {
+                console.log("开始自动测试...");
                 startSequentialTest();
             }, 1000);
         };
@@ -243,6 +302,7 @@
         // 添加键盘快捷键
         document.addEventListener('keydown', function(e) {
             if (e.key === 's' || e.key === 'S') {
+                e.preventDefault();
                 if (!isTesting) {
                     startSequentialTest();
                 } else {
@@ -250,15 +310,34 @@
                 }
             }
         });
+        
+        // 添加一个简单的帮助信息
+        console.log(`
+=== OpenRouter o系列模型测试 ===
+1. 点击"开始顺序测试"按钮或按S键开始
+2. 每个模型最多等待60秒
+3. 成功: 显示响应时间
+4. 失败: 显示错误信息
+5. 超时: 60秒无响应
+        `);
     </script>
     
     <div style="margin-top: 20px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
-        <p><strong>提示：</strong></p>
+        <p><strong>使用说明：</strong></p>
         <ul>
-            <li>按 <kbd>S</kbd> 键开始/停止测试</li>
+            <li>点击 <kbd>开始顺序测试</kbd> 或按 <kbd>S</kbd> 键开始测试</li>
+            <li>点击 <kbd>停止测试</kbd> 或再按 <kbd>S</kbd> 键停止测试</li>
             <li>每个模型测试最多等待60秒</li>
-            <li>成功会显示响应时间，失败会显示错误信息</li>
-            <li>超时可能是因为网络问题或模型响应过慢</li>
+            <li>✅ 成功：显示响应时间和部分响应内容</li>
+            <li>❌ 失败：显示错误信息</li>
+            <li>⏰ 超时：60秒无响应</li>
+        </ul>
+        <p><strong>预期结果：</strong></p>
+        <ul>
+            <li><code>openrouter:openai/o1</code> - 应该成功 ✅</li>
+            <li><code>openrouter:openai/o1-mini</code> - 应该失败 ❌（不存在）</li>
+            <li><code>openrouter:openai/o3-mini</code> - 应该成功 ✅</li>
+            <li><code>openrouter:openai/o4-mini</code> - 可能成功但较慢 ✅</li>
         </ul>
     </div>
 </body>
