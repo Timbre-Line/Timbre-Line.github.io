@@ -2,103 +2,242 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>详细错误调试</title>
+    <title>OpenRouter OpenAI o1-mini 变体测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; }
+        .model-test { margin: 10px 0; padding: 10px; border-left: 5px solid #ccc; }
+        .success { border-left-color: #28a745; background: #d4edda; }
+        .error { border-left-color: #dc3545; background: #f8d7da; }
+        .testing { border-left-color: #ffc107; background: #fff3cd; }
+        .detail { font-size: 12px; color: #666; margin-top: 5px; }
+        button { margin: 5px; padding: 5px 10px; }
+        h4 { margin: 15px 0 10px 0; }
+    </style>
 </head>
 <body>
-    <h2>o1-mini 详细错误分析</h2>
-    <div id="debug"></div>
+    <h1>OpenRouter OpenAI o1-mini 变体测试</h1>
+    <p>测试时间: <span id="timestamp"></span></p>
+    
+    <div id="controls">
+        <button onclick="runAllTests()">测试所有 o1-mini 变体</button>
+        <button onclick="runQuickTest()">快速测试</button>
+    </div>
+    
+    <div id="results">
+        <h3>测试结果:</h3>
+        <div id="test-output"></div>
+    </div>
     
     <script src="https://js.puter.com/v2/"></script>
     <script>
-        const debug = document.getElementById('debug');
+        document.getElementById('timestamp').textContent = new Date().toLocaleString();
         
-        async function testWithDetails() {
-            debug.innerHTML = "<p>测试中...</p>";
+        // 从您的列表中提取所有 o1-mini 相关模型
+        const o1MiniVariants = [
+            // openrouter:openai/o1-mini 及其变体
+            "openrouter:openai/o1-mini",
+            "openrouter:openai/o1-mini-2024-09-12",
             
-            // 测试 o1-mini 并捕获完整错误
-            try {
-                const response = await puter.ai.chat("1+1=?", {
-                    model: "o1-mini",
-                    max_tokens: 10
-                });
-                debug.innerHTML = `<p style="color:green">✅ 成功: ${response}</p>`;
-            } catch (error) {
-                // 详细显示错误对象的所有属性
-                debug.innerHTML = `
-                    <h3 style="color:red">❌ o1-mini 错误详情：</h3>
-                    <pre>${JSON.stringify(error, null, 2)}</pre>
-                    <p><strong>错误类型：</strong> ${error?.constructor?.name || '未知'}</p>
-                    <p><strong>错误消息：</strong> ${error?.message || '无消息'}</p>
-                    <p><strong>错误状态：</strong> ${error?.status || '无状态'}</p>
-                    <p><strong>错误代码：</strong> ${error?.code || '无代码'}</p>
-                    <p><strong>堆栈：</strong><br>${error?.stack || '无堆栈'}</p>
-                `;
-                
-                console.error("完整错误对象:", error);
-                
-                // 尝试其他可能的模型名称
-                await testAlternatives();
+            // 对比测试：其他 o 系列模型
+            "openrouter:openai/o1",
+            "openrouter:openai/o1-pro",
+            "openrouter:openai/o3-mini",
+            "openrouter:openai/o3-mini-high",
+            "openrouter:openai/o4-mini",
+            "openrouter:openai/o4-mini-high",
+            
+            // 基础测试：已知可用的
+            "openrouter:openai/gpt-4o-mini",
+            "openrouter:openai/gpt-5-nano"
+        ];
+        
+        // 之前测试过的直接模型名（对比）
+        const directModels = [
+            "o1",
+            "o1-mini", 
+            "o3-mini",
+            "gpt-4o-mini"
+        ];
+        
+        const outputDiv = document.getElementById('test-output');
+        
+        // 创建测试条目
+        function createTestEntry(modelName, type = 'openrouter') {
+            const div = document.createElement('div');
+            div.className = 'model-test testing';
+            div.id = `test-${modelName.replace(/[:.-]/g, '_')}`;
+            div.innerHTML = `
+                <strong>${modelName}</strong>
+                <span class="status">测试中...</span>
+                <div class="detail"></div>
+            `;
+            outputDiv.appendChild(div);
+            return div;
+        }
+        
+        // 更新测试结果
+        function updateTestEntry(div, success, data, duration) {
+            div.className = success ? 'model-test success' : 'model-test error';
+            
+            const statusSpan = div.querySelector('.status');
+            const detailDiv = div.querySelector('.detail');
+            
+            if (success) {
+                statusSpan.innerHTML = `✅ 成功 (${duration}ms)`;
+                detailDiv.innerHTML = `<em>响应:</em> ${data}`;
+            } else {
+                statusSpan.innerHTML = '❌ 失败';
+                if (data && typeof data === 'object') {
+                    const errorMsg = data.error?.message || data.message || JSON.stringify(data);
+                    detailDiv.innerHTML = `<em>错误:</em> ${errorMsg}`;
+                } else {
+                    detailDiv.innerHTML = `<em>错误:</em> ${data}`;
+                }
             }
         }
         
-        async function testAlternatives() {
-            debug.innerHTML += "<h3>尝试替代方案：</h3>";
+        // 测试单个模型
+        async function testModel(modelName, isDirect = false) {
+            const div = createTestEntry(modelName, isDirect ? 'direct' : 'openrouter');
             
-            const alternatives = [
-                "o1-mini-2025",
-                "openai/o1-mini", 
-                "gpt-o1-mini",
-                "o1-mini-latest",
-                "o1-mini-preview"
+            try {
+                const startTime = Date.now();
+                
+                // 使用一个需要推理的问题
+                const question = "小明有5个苹果，给了小红2个，又买了3个，现在有几个苹果？请只回答数字。";
+                
+                const response = await puter.ai.chat(question, {
+                    model: modelName,
+                    max_tokens: 10,
+                    temperature: 0
+                });
+                
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+                
+                updateTestEntry(div, true, response, duration);
+                return { success: true, model: modelName, response, duration };
+                
+            } catch (error) {
+                updateTestEntry(div, false, error);
+                return { success: false, model: modelName, error };
+            }
+        }
+        
+        // 测试所有变体
+        async function runAllTests() {
+            outputDiv.innerHTML = '<h4>OpenRouter 格式测试:</h4>';
+            
+            const results = [];
+            
+            // 先测试 openrouter 格式
+            for (const model of o1MiniVariants) {
+                const result = await testModel(model, false);
+                results.push(result);
+                await new Promise(resolve => setTimeout(resolve, 1500)); // 避免速率限制
+            }
+            
+            // 再测试直接格式
+            outputDiv.innerHTML += '<h4>直接模型名测试:</h4>';
+            for (const model of directModels) {
+                const result = await testModel(model, true);
+                results.push(result);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+            
+            // 分析结果
+            analyzeResults(results);
+        }
+        
+        // 快速测试关键模型
+        async function runQuickTest() {
+            outputDiv.innerHTML = '<h4>快速测试:</h4>';
+            
+            const quickModels = [
+                "openrouter:openai/o1-mini",
+                "openrouter:openai/o1-mini-2024-09-12", 
+                "openrouter:openai/o1",
+                "o1-mini",
+                "o1"
             ];
             
-            for (const alt of alternatives) {
-                try {
-                    const response = await puter.ai.chat("1+1=?", {
-                        model: alt,
-                        max_tokens: 5
-                    });
-                    debug.innerHTML += `<p style="color:green">✅ ${alt}: ${response}</p>`;
-                    return; // 找到可用的就停止
-                } catch (err) {
-                    debug.innerHTML += `<p style="color:gray">❌ ${alt}: ${err.message || err}</p>`;
-                }
-                await new Promise(resolve => setTimeout(resolve, 500));
+            for (const model of quickModels) {
+                await testModel(model, !model.includes('openrouter:'));
+                await new Promise(resolve => setTimeout(resolve, 1000));
             }
         }
         
-        // 同时测试 o1 和 o1-mini 对比
-        async function compareO1andO1Mini() {
-            debug.innerHTML += "<h3>对比测试：</h3>";
+        // 分析测试结果
+        function analyzeResults(results) {
+            const successModels = results.filter(r => r.success);
+            const failedModels = results.filter(r => !r.success);
             
-            // 测试 o1（已知能工作）
-            try {
-                const o1Response = await puter.ai.chat("1+1=?", {
-                    model: "o1",
-                    max_tokens: 5
-                });
-                debug.innerHTML += `<p>✅ o1: ${o1Response}</p>`;
-            } catch (err) {
-                debug.innerHTML += `<p>❌ o1: ${err.message}</p>`;
-            }
+            const analysisDiv = document.createElement('div');
+            analysisDiv.className = 'model-test';
+            analysisDiv.style.background = '#e7f3ff';
+            analysisDiv.style.borderLeftColor = '#007bff';
             
-            // 等待后测试 o1-mini
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            analysisDiv.innerHTML = `
+                <h4>分析结果:</h4>
+                <p><strong>成功:</strong> ${successModels.length} 个模型</p>
+                <p><strong>失败:</strong> ${failedModels.length} 个模型</p>
+                
+                <h5>✅ 可用的 o1-mini 变体:</h5>
+                <ul>
+                    ${successModels
+                        .filter(r => r.model.includes('o1-mini'))
+                        .map(r => `<li>${r.model} (${r.duration}ms)</li>`)
+                        .join('') || '<li>无</li>'}
+                </ul>
+                
+                <h5>✅ 可用的其他 o 系列模型:</h5>
+                <ul>
+                    ${successModels
+                        .filter(r => r.model.includes('o1') || r.model.includes('o3') || r.model.includes('o4'))
+                        .filter(r => !r.model.includes('o1-mini'))
+                        .map(r => `<li>${r.model} (${r.duration}ms)</li>`)
+                        .join('') || '<li>无</li>'}
+                </ul>
+                
+                <h5>❌ 失败的模型及原因:</h5>
+                <ul>
+                    ${failedModels.map(r => {
+                        const error = r.error?.error?.message || r.error?.message || '未知错误';
+                        return `<li>${r.model}: ${error.substring(0, 100)}</li>`;
+                    }).join('')}
+                </ul>
+            `;
             
-            try {
-                const o1MiniResponse = await puter.ai.chat("1+1=?", {
-                    model: "o1-mini",
-                    max_tokens: 5
-                });
-                debug.innerHTML += `<p>✅ o1-mini: ${o1MiniResponse}</p>`;
-            } catch (err) {
-                debug.innerHTML += `<p>❌ o1-mini: ${err.message || JSON.stringify(err)}</p>`;
-            }
+            outputDiv.appendChild(analysisDiv);
+            
+            // 保存到 localStorage 供参考
+            localStorage.setItem('puter-model-test', JSON.stringify({
+                timestamp: new Date().toISOString(),
+                results: results
+            }));
         }
         
-        // 运行测试
-        testWithDetails();
-        setTimeout(compareO1andO1Mini, 2000);
+        // 页面加载时自动运行快速测试
+        setTimeout(runQuickTest, 1000);
+        
+        // 额外的：测试模型是否存在的方法
+        async function testModelExistence(modelName) {
+            try {
+                // 尝试非常简短的请求
+                const response = await puter.ai.chat("test", {
+                    model: modelName,
+                    max_tokens: 1,
+                    temperature: 0
+                });
+                return { exists: true, response };
+            } catch (error) {
+                const errorMsg = error?.error?.message || error.message || '';
+                const exists = !errorMsg.includes('does not exist') && 
+                              !errorMsg.includes('not found') &&
+                              !errorMsg.includes('404');
+                return { exists, error: errorMsg };
+            }
+        }
     </script>
 </body>
 </html>
