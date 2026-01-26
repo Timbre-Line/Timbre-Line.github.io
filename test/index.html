@@ -2,298 +2,147 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>详细测试失败模型</title>
+    <title>GPT-5.2 Pro 参数测试</title>
     <style>
         body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        .test-case { padding: 15px; margin: 10px 0; border-left: 5px solid #ccc; }
+        .test { padding: 15px; margin: 10px 0; border-left: 5px solid #ccc; }
         .success { border-left-color: #28a745; background: #d4edda; }
         .error { border-left-color: #dc3545; background: #f8d7da; }
-        .testing { border-left-color: #ffc107; background: #fff3cd; }
-        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; overflow: auto; }
         button { padding: 10px 20px; margin: 5px; }
-        .error-details { margin-top: 10px; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; }
     </style>
 </head>
 <body>
-    <h1>🔍 详细测试失败模型</h1>
-    <p>测试时间: <span id="timestamp"></span></p>
+    <h1>GPT-5.2 Pro 参数测试</h1>
     
-    <div id="controls">
-        <button onclick="testAllFailedModels()">测试所有失败模型</button>
-        <button onclick="testSpecificModel('gpt-5')">测试 gpt-5</button>
-        <button onclick="testSpecificModel('gpt-5-mini')">测试 gpt-5-mini</button>
-        <button onclick="testSpecificModel('gpt-5-nano')">测试 gpt-5-nano</button>
-        <button onclick="testSpecificModel('gpt-5.1-chat')">测试 gpt-5.1-chat</button>
-        <button onclick="testSpecificModel('gpt-5.1-codex')">测试 gpt-5.1-codex</button>
-        <button onclick="testSpecificModel('gpt-5.2-chat')">测试 gpt-5.2-chat</button>
-        <button onclick="testSpecificModel('gpt-5.2-pro')">测试 gpt-5.2-pro</button>
+    <div>
+        <button onclick="testGPT52Pro()">测试 GPT-5.2 Pro</button>
+        <button onclick="testWithDifferentParams()">测试不同参数</button>
     </div>
     
-    <div id="results">
-        <h3>测试结果:</h3>
-        <div id="test-output"></div>
-    </div>
+    <div id="results"></div>
     
     <script src="https://js.puter.com/v2/"></script>
     <script>
-        document.getElementById('timestamp').textContent = new Date().toLocaleString();
+        const resultsDiv = document.getElementById('results');
         
-        // 失败模型列表（根据您的测试结果）
-        const failedModels = [
-            "openrouter:openai/gpt-5",
-            "openrouter:openai/gpt-5-mini",
-            "openrouter:openai/gpt-5-nano",
-            "openrouter:openai/gpt-5.1-chat",
-            "openrouter:openai/gpt-5.1-codex",
-            "openrouter:openai/gpt-5.2-chat",
-            "openrouter:openai/gpt-5.2-pro"
-        ];
-        
-        // 成功模型（对比用）
-        const successModels = [
-            "openrouter:openai/gpt-5-chat",
-            "openrouter:openai/gpt-5-pro",
-            "openrouter:openai/gpt-5.1",
-            "openrouter:openai/gpt-5.1-codex-max",
-            "openrouter:openai/gpt-5.2"
-        ];
-        
-        const outputDiv = document.getElementById('test-output');
-        
-        // 创建测试条目
-        function createTestEntry(modelName) {
+        function createTestResult(title, success, data) {
             const div = document.createElement('div');
-            div.className = 'test-case testing';
-            div.id = `test-${modelName.replace(/[:\/.-]/g, '_')}`;
-            div.innerHTML = `
-                <strong>${modelName}</strong>
-                <div class="status">测试中...</div>
-                <div class="details" style="margin-top: 10px;"></div>
-                <div class="error-details" style="display: none;"></div>
-            `;
+            div.className = success ? 'test success' : 'test error';
+            div.innerHTML = `<strong>${title}</strong>`;
+            
+            if (success) {
+                div.innerHTML += `<p>✅ 成功</p>`;
+                if (typeof data === 'string') {
+                    div.innerHTML += `<p>${data}</p>`;
+                } else if (data?.message?.content) {
+                    div.innerHTML += `<p>${data.message.content}</p>`;
+                }
+            } else {
+                div.innerHTML += `<p>❌ 失败</p>`;
+                if (data?.message) {
+                    div.innerHTML += `<pre>${data.message}</pre>`;
+                }
+            }
+            
+            resultsDiv.appendChild(div);
             return div;
         }
         
-        // 更新测试结果
-        function updateTestResult(modelName, success, data, duration = null) {
-            const testId = `test-${modelName.replace(/[:\/.-]/g, '_')}`;
-            const div = document.getElementById(testId);
-            if (!div) return;
+        async function testGPT52Pro() {
+            const model = "openrouter:openai/gpt-5.2-pro";
             
-            const statusDiv = div.querySelector('.status');
-            const detailsDiv = div.querySelector('.details');
-            const errorDiv = div.querySelector('.error-details');
+            // 尝试1: 标准参数（可能失败）
+            try {
+                const response = await puter.ai.chat("AI是什么？", {
+                    model: model,
+                    max_tokens: 50
+                });
+                createTestResult(`${model} (max_tokens: 50)`, true, response);
+            } catch (error) {
+                createTestResult(`${model} (max_tokens: 50)`, false, error);
+            }
             
-            if (success) {
-                div.className = 'test-case success';
-                statusDiv.innerHTML = `✅ 成功 (${duration}ms)`;
-                
-                // 显示响应
-                let responseText = '';
-                if (typeof data === 'string') {
-                    responseText = data;
-                } else if (data?.message?.content) {
-                    responseText = data.message.content;
-                } else if (data?.content) {
-                    responseText = data.content;
-                }
-                
-                detailsDiv.innerHTML = `<p><strong>响应:</strong> ${responseText || '空响应'}</p>`;
-                
-                // 调试信息
-                console.log(`${modelName} 成功:`, data);
-                
-            } else {
-                div.className = 'test-case error';
-                statusDiv.innerHTML = '❌ 失败';
-                
-                // 显示详细错误
-                let errorObj = data;
-                if (data?.error) {
-                    errorObj = data.error;
-                }
-                
-                detailsDiv.innerHTML = `<p><strong>错误类型:</strong> ${errorObj?.code || '未知'}</p>`;
-                errorDiv.innerHTML = `
-                    <p><strong>完整错误信息:</strong></p>
-                    <pre>${JSON.stringify(errorObj, null, 2)}</pre>
-                `;
-                errorDiv.style.display = 'block';
-                
-                // 分析错误原因
-                analyzeError(modelName, errorObj, detailsDiv);
-                
-                // 调试信息
-                console.error(`${modelName} 失败:`, errorObj);
+            // 尝试2: 增加max_tokens
+            try {
+                const response = await puter.ai.chat("AI是什么？", {
+                    model: model,
+                    max_tokens: 100
+                });
+                createTestResult(`${model} (max_tokens: 100)`, true, response);
+            } catch (error) {
+                createTestResult(`${model} (max_tokens: 100)`, false, error);
             }
         }
         
-        // 分析错误原因
-        function analyzeError(modelName, errorObj, detailsDiv) {
-            const errorMsg = errorObj?.message || '';
-            let analysis = '';
-            
-            if (errorMsg.includes('does not exist') || errorMsg.includes('not found')) {
-                analysis = '❓ 模型可能不存在或已下线';
-            } else if (errorMsg.includes('rate limit') || errorMsg.includes('limit')) {
-                analysis = '⏱️ 速率限制或配额不足';
-            } else if (errorMsg.includes('access') || errorMsg.includes('permission')) {
-                analysis = '🔐 需要特殊权限或API密钥';
-            } else if (errorMsg.includes('endpoint') || errorMsg.includes('end point')) {
-                analysis = '🔧 需要不同的API端点';
-            } else if (errorMsg.includes('parameters') || errorMsg.includes('invalid')) {
-                analysis = '⚙️ 参数格式不正确';
-            } else if (errorMsg.includes('fallback model')) {
-                analysis = '🔄 无备用模型可用';
-            }
-            
-            if (analysis) {
-                detailsDiv.innerHTML += `<p><strong>分析:</strong> ${analysis}</p>`;
-            }
-            
-            // 特殊模型分析
-            if (modelName.includes('gpt-5.1-codex') && modelName.includes('max')) {
-                detailsDiv.innerHTML += `<p><strong>注意:</strong> gpt-5.1-codex-max 成功，但 gpt-5.1-codex 失败，可能是不问的版本或权限</p>`;
-            }
-            
-            if (modelName.includes('gpt-5') && !modelName.includes('chat') && !modelName.includes('pro')) {
-                detailsDiv.innerHTML += `<p><strong>模式差异:</strong> gpt-5-chat 成功但 gpt-5 失败，可能是基础模型和聊天模型的区别</p>`;
-            }
-        }
-        
-        // 测试单个模型（带不同参数尝试）
-        async function testModel(modelName) {
-            const testDiv = createTestEntry(modelName);
-            outputDiv.appendChild(testDiv);
-            
-            // 尝试不同的参数组合
-            const testAttempts = [
-                {
-                    name: '标准参数',
-                    params: { model: modelName, max_tokens: 50, temperature: 0.3 }
-                },
-                {
-                    name: '短响应',
-                    params: { model: modelName, max_tokens: 10, temperature: 0 }
-                },
-                {
-                    name: '长响应',
-                    params: { model: modelName, max_tokens: 100, temperature: 0.7 }
-                },
-                {
-                    name: '极简',
-                    params: { model: modelName, max_tokens: 5, temperature: 0 }
-                }
+        async function testWithDifferentParams() {
+            const model = "openrouter:openai/gpt-5.2-pro";
+            const tests = [
+                { max_tokens: 16, temp: 0.7, name: "最小tokens (16)" },
+                { max_tokens: 32, temp: 0.7, name: "32 tokens" },
+                { max_tokens: 64, temp: 0.7, name: "64 tokens" },
+                { max_tokens: 128, temp: 0.7, name: "128 tokens" },
+                { max_tokens: 50, temp: 0.3, name: "低温 (0.3)" },
+                { max_tokens: 50, temp: 0.9, name: "高温 (0.9)" }
             ];
             
-            for (const attempt of testAttempts) {
+            for (const test of tests) {
                 try {
-                    console.log(`尝试 ${modelName} 参数: ${attempt.name}`);
-                    const startTime = Date.now();
-                    const response = await puter.ai.chat("AI是什么？", attempt.params);
-                    const endTime = Date.now();
-                    
-                    updateTestResult(modelName, true, response, endTime - startTime);
-                    return { success: true, attempt: attempt.name };
-                    
+                    const response = await puter.ai.chat("AI是什么？用一句话回答。", {
+                        model: model,
+                        max_tokens: test.max_tokens,
+                        temperature: test.temp
+                    });
+                    createTestResult(`${model} - ${test.name}`, true, response);
                 } catch (error) {
-                    console.log(`${modelName} ${attempt.name} 失败:`, error.message?.substring(0, 100));
-                    
-                    // 如果是最后一个尝试，显示错误
-                    if (attempt === testAttempts[testAttempts.length - 1]) {
-                        updateTestResult(modelName, false, error);
-                        return { success: false, error: error };
-                    }
-                    
-                    // 等待1秒再试
-                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    createTestResult(`${model} - ${test.name}`, false, error);
                 }
-            }
-        }
-        
-        // 测试所有失败模型
-        async function testAllFailedModels() {
-            outputDiv.innerHTML = '<h4>测试失败模型:</h4>';
-            
-            for (const model of failedModels) {
-                await testModel(model);
-                await new Promise(resolve => setTimeout(resolve, 2000)); // 等待2秒
-            }
-            
-            // 显示对比的成功模型
-            outputDiv.innerHTML += '<h4>对比成功模型:</h4>';
-            for (const model of successModels.slice(0, 3)) { // 只测试前3个成功模型作为对比
-                await testModel(model);
                 await new Promise(resolve => setTimeout(resolve, 1000));
             }
         }
         
-        // 测试特定模型
-        async function testSpecificModel(modelShortName) {
-            const fullModelName = `openrouter:openai/${modelShortName}`;
-            outputDiv.innerHTML = `<h4>详细测试 ${fullModelName}:</h4>`;
-            await testModel(fullModelName);
-        }
-        
-        // 页面加载时自动测试一个关键模型
-        window.onload = async function() {
-            // 先测试 gpt-5 看看详细错误
-            setTimeout(() => {
-                testSpecificModel('gpt-5');
-            }, 1000);
-        };
-        
-        // 添加额外的测试功能：尝试不同的查询
-        async function testWithDifferentQueries(modelName) {
-            const queries = [
-                "Hello",
-                "What is 2+2?",
-                "Explain AI",
-                "Write a haiku",
-                "Translate 'hello' to Spanish"
+        // 对比测试其他模型
+        async function compareModels() {
+            const models = [
+                "openrouter:openai/gpt-5.2",
+                "openrouter:openai/gpt-5.2-chat",
+                "openrouter:openai/gpt-5.2-pro"
             ];
             
-            const results = [];
-            for (const query of queries) {
+            for (const model of models) {
                 try {
-                    const response = await puter.ai.chat(query, {
-                        model: modelName,
-                        max_tokens: 20
+                    const response = await puter.ai.chat("测试", {
+                        model: model,
+                        max_tokens: 10
                     });
-                    results.push({ query, success: true, response });
+                    createTestResult(`${model} (max_tokens: 10)`, true, response);
                 } catch (error) {
-                    results.push({ query, success: false, error });
+                    createTestResult(`${model} (max_tokens: 10)`, false, error);
                 }
-                await new Promise(resolve => setTimeout(resolve, 500));
+                await new Promise(resolve => setTimeout(resolve, 1000));
             }
-            return results;
         }
         
-        // 添加这个函数到全局，方便调试
-        window.detailedTest = testWithDifferentQueries;
+        // 页面加载时运行
+        window.onload = function() {
+            setTimeout(() => {
+                testGPT52Pro();
+            }, 500);
+        };
     </script>
     
-    <div style="margin-top: 30px; padding: 15px; background: #f8f9fa; border-radius: 5px;">
-        <h3>测试说明</h3>
-        <p><strong>目标：</strong>找出这些模型失败的具体原因</p>
-        <p><strong>测试方法：</strong></p>
+    <div style="margin-top: 20px; padding: 15px; background: #f0f8ff; border-radius: 5px;">
+        <h3>问题分析</h3>
+        <p><strong>错误信息：</strong></p>
+        <pre>Invalid 'max_output_tokens': integer below minimum value. Expected a value >= 16, but got 5 instead.</pre>
+        <p><strong>问题：</strong>GPT-5.2 Pro 要求最少输出16个token</p>
+        <p><strong>解决方案：</strong>使用 <code>max_tokens: 16</code> 或更多</p>
+        <p><strong>有趣发现：</strong></p>
         <ul>
-            <li>每个模型尝试4种不同的参数组合</li>
-            <li>显示完整的错误信息</li>
-            <li>分析可能的失败原因</li>
-            <li>与成功模型对比</li>
+            <li>GPT-5.2 和 GPT-5.2-chat 可能没有这个限制</li>
+            <li>GPT-5.2-pro 可能有更高的最低输出要求</li>
+            <li>这可能是因为 pro 版本针对更长、更复杂的输出进行了优化</li>
         </ul>
-        
-        <h4>可能的原因：</h4>
-        <ol>
-            <li><strong>模型不存在：</strong>某些模型可能从未发布或已下线</li>
-            <li><strong>权限限制：</strong>需要特殊API密钥或付费计划</li>
-            <li><strong>参数问题：</strong>需要特定的参数格式</li>
-            <li><strong>版本差异：</strong>如 gpt-5 基础模型 vs gpt-5-chat</li>
-            <li><strong>区域限制：</strong>某些模型可能地区受限</li>
-        </ol>
-        
-        <p><em>提示：打开浏览器控制台（F12）查看更多调试信息</em></p>
     </div>
 </body>
 </html>
