@@ -2,530 +2,298 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>OpenRouter GPT 模型全面测试</title>
+    <title>详细测试失败模型</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .model-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
-        .model-card { padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
-        .success { background: #d4edda; border-color: #c3e6cb; }
-        .error { background: #f8d7da; border-color: #f5c6cb; }
-        .testing { background: #fff3cd; border-color: #ffeaa7; }
-        .controls { margin: 20px 0; }
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-case { padding: 15px; margin: 10px 0; border-left: 5px solid #ccc; }
+        .success { border-left-color: #28a745; background: #d4edda; }
+        .error { border-left-color: #dc3545; background: #f8d7da; }
+        .testing { border-left-color: #ffc107; background: #fff3cd; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; overflow: auto; }
         button { padding: 10px 20px; margin: 5px; }
-        .filter { margin: 10px 0; }
-        .filter select { padding: 5px; margin: 0 10px; }
-        .progress { margin: 20px 0; }
-        .progress-bar { height: 10px; background: #eee; border-radius: 5px; overflow: hidden; }
-        .progress-fill { height: 100%; background: #007bff; width: 0%; transition: width 0.5s; }
-        h4 { margin: 15px 0 10px 0; color: #333; }
-        .summary { background: #e7f3ff; padding: 15px; border-radius: 5px; margin: 20px 0; }
-        .model-name { font-weight: bold; font-size: 14px; word-break: break-word; }
-        .model-status { font-size: 12px; margin: 5px 0; }
-        .model-details { font-size: 11px; color: #666; }
+        .error-details { margin-top: 10px; }
     </style>
 </head>
 <body>
-    <h1>🤖 OpenRouter GPT 模型全面测试</h1>
+    <h1>🔍 详细测试失败模型</h1>
     <p>测试时间: <span id="timestamp"></span></p>
     
-    <div class="summary">
-        <h3>测试说明</h3>
-        <p>测试所有 OpenRouter 上的 GPT 模型（不包括有问题的 o 系列）</p>
-        <p><strong>总模型数: <span id="total-models">0</span></strong></p>
-    </div>
-    
-    <div class="controls">
-        <button onclick="startSequentialTest()">开始顺序测试</button>
-        <button onclick="stopTest()">停止测试</button>
-        <button onclick="testSelectedModels()">测试选中模型</button>
-        <button onclick="clearResults()">清除结果</button>
-    </div>
-    
-    <div class="filter">
-        <label>过滤模型:</label>
-        <select id="version-filter">
-            <option value="all">全部版本</option>
-            <option value="3.5">GPT-3.5 系列</option>
-            <option value="4">GPT-4 系列</option>
-            <option value="4o">GPT-4o 系列</option>
-            <option value="5">GPT-5 系列</option>
-            <option value="5.1">GPT-5.1 系列</option>
-            <option value="5.2">GPT-5.2 系列</option>
-        </select>
-        
-        <select id="status-filter">
-            <option value="all">全部状态</option>
-            <option value="success">仅成功</option>
-            <option value="error">仅失败</option>
-            <option value="testing">仅测试中</option>
-        </select>
-        
-        <button onclick="applyFilters()">应用过滤</button>
-        <button onclick="resetFilters()">重置过滤</button>
-    </div>
-    
-    <div class="progress">
-        <div id="progress-text">准备开始测试...</div>
-        <div class="progress-bar">
-            <div id="progress-fill" class="progress-fill"></div>
-        </div>
+    <div id="controls">
+        <button onclick="testAllFailedModels()">测试所有失败模型</button>
+        <button onclick="testSpecificModel('gpt-5')">测试 gpt-5</button>
+        <button onclick="testSpecificModel('gpt-5-mini')">测试 gpt-5-mini</button>
+        <button onclick="testSpecificModel('gpt-5-nano')">测试 gpt-5-nano</button>
+        <button onclick="testSpecificModel('gpt-5.1-chat')">测试 gpt-5.1-chat</button>
+        <button onclick="testSpecificModel('gpt-5.1-codex')">测试 gpt-5.1-codex</button>
+        <button onclick="testSpecificModel('gpt-5.2-chat')">测试 gpt-5.2-chat</button>
+        <button onclick="testSpecificModel('gpt-5.2-pro')">测试 gpt-5.2-pro</button>
     </div>
     
     <div id="results">
         <h3>测试结果:</h3>
-        <div class="model-grid" id="model-grid"></div>
-    </div>
-    
-    <div id="summary" class="summary" style="display: none;">
-        <h3>📊 测试总结</h3>
-        <div id="summary-content"></div>
+        <div id="test-output"></div>
     </div>
     
     <script src="https://js.puter.com/v2/"></script>
     <script>
         document.getElementById('timestamp').textContent = new Date().toLocaleString();
         
-        // 所有 GPT 模型列表（不包括有问题的 o 系列）
-        const allGPTModels = [
-            // GPT-3.5 系列
-            "openrouter:openai/gpt-3.5-turbo",
-            "openrouter:openai/gpt-3.5-turbo-0613",
-            "openrouter:openai/gpt-3.5-turbo-16k",
-            "openrouter:openai/gpt-3.5-turbo-instruct",
-            
-            // GPT-4 系列
-            "openrouter:openai/gpt-4",
-            "openrouter:openai/gpt-4-0314",
-            "openrouter:openai/gpt-4-1106-preview",
-            "openrouter:openai/gpt-4-turbo",
-            "openrouter:openai/gpt-4-turbo-preview",
-            
-            // GPT-4.1 系列
-            "openrouter:openai/gpt-4.1",
-            "openrouter:openai/gpt-4.1-mini",
-            "openrouter:openai/gpt-4.1-nano",
-            
-            // GPT-4o 系列
-            "openrouter:openai/gpt-4o",
-            "openrouter:openai/gpt-4o-2024-05-13",
-            "openrouter:openai/gpt-4o-2024-08-06",
-            "openrouter:openai/gpt-4o-2024-11-20",
-            "openrouter:openai/gpt-4o-audio-preview",
-            "openrouter:openai/gpt-4o-mini",
-            "openrouter:openai/gpt-4o-mini-2024-07-18",
-            "openrouter:openai/gpt-4o-mini-search-preview",
-            "openrouter:openai/gpt-4o-search-preview",
-            "openrouter:openai/gpt-4o:extended",
-            
-            // GPT-5 系列
+        // 失败模型列表（根据您的测试结果）
+        const failedModels = [
             "openrouter:openai/gpt-5",
-            "openrouter:openai/gpt-5-chat",
-            "openrouter:openai/gpt-5-codex",
-            "openrouter:openai/gpt-5-image",
-            "openrouter:openai/gpt-5-image-mini",
             "openrouter:openai/gpt-5-mini",
             "openrouter:openai/gpt-5-nano",
-            "openrouter:openai/gpt-5-pro",
-            
-            // GPT-5.1 系列
-            "openrouter:openai/gpt-5.1",
             "openrouter:openai/gpt-5.1-chat",
             "openrouter:openai/gpt-5.1-codex",
-            "openrouter:openai/gpt-5.1-codex-max",
-            
-            // GPT-5.2 系列
-            "openrouter:openai/gpt-5.2",
             "openrouter:openai/gpt-5.2-chat",
             "openrouter:openai/gpt-5.2-pro"
         ];
         
-        // 更新总模型数
-        document.getElementById('total-models').textContent = allGPTModels.length;
+        // 成功模型（对比用）
+        const successModels = [
+            "openrouter:openai/gpt-5-chat",
+            "openrouter:openai/gpt-5-pro",
+            "openrouter:openai/gpt-5.1",
+            "openrouter:openai/gpt-5.1-codex-max",
+            "openrouter:openai/gpt-5.2"
+        ];
         
-        const modelGrid = document.getElementById('model-grid');
-        const progressText = document.getElementById('progress-text');
-        const progressFill = document.getElementById('progress-fill');
-        const summaryDiv = document.getElementById('summary');
-        const summaryContent = document.getElementById('summary-content');
+        const outputDiv = document.getElementById('test-output');
         
-        let testResults = new Map();
-        let isTesting = false;
-        let currentIndex = 0;
-        let timeoutId = null;
-        const TIMEOUT_MS = 30000; // 30秒超时（GPT模型通常较快）
-        
-        // 创建模型卡片
-        function createModelCard(modelName) {
-            const card = document.createElement('div');
-            card.className = 'model-card testing';
-            card.id = `card-${modelName.replace(/[:\/.-]/g, '_')}`;
-            card.innerHTML = `
-                <div class="model-name">${modelName.split('/').pop()}</div>
-                <div class="model-status">测试中...</div>
-                <div class="model-details" style="display: none;"></div>
-                <div style="margin-top: 5px;">
-                    <input type="checkbox" class="model-select" checked> 选中
-                </div>
+        // 创建测试条目
+        function createTestEntry(modelName) {
+            const div = document.createElement('div');
+            div.className = 'test-case testing';
+            div.id = `test-${modelName.replace(/[:\/.-]/g, '_')}`;
+            div.innerHTML = `
+                <strong>${modelName}</strong>
+                <div class="status">测试中...</div>
+                <div class="details" style="margin-top: 10px;"></div>
+                <div class="error-details" style="display: none;"></div>
             `;
-            
-            // 点击卡片查看详情
-            card.addEventListener('click', (e) => {
-                if (!e.target.classList.contains('model-select')) {
-                    const details = card.querySelector('.model-details');
-                    details.style.display = details.style.display === 'none' ? 'block' : 'none';
-                }
-            });
-            
-            return card;
+            return div;
         }
         
-        // 更新模型卡片
-        function updateModelCard(modelName, result) {
-            const cardId = `card-${modelName.replace(/[:\/.-]/g, '_')}`;
-            const card = document.getElementById(cardId);
-            if (!card) return;
+        // 更新测试结果
+        function updateTestResult(modelName, success, data, duration = null) {
+            const testId = `test-${modelName.replace(/[:\/.-]/g, '_')}`;
+            const div = document.getElementById(testId);
+            if (!div) return;
             
-            const statusDiv = card.querySelector('.model-status');
-            const detailsDiv = card.querySelector('.model-details');
+            const statusDiv = div.querySelector('.status');
+            const detailsDiv = div.querySelector('.details');
+            const errorDiv = div.querySelector('.error-details');
             
-            if (result.success) {
-                card.className = 'model-card success';
-                statusDiv.innerHTML = `✅ 成功 (${result.duration}ms)`;
+            if (success) {
+                div.className = 'test-case success';
+                statusDiv.innerHTML = `✅ 成功 (${duration}ms)`;
                 
-                // 显示响应摘要
+                // 显示响应
                 let responseText = '';
-                if (typeof result.response === 'string') {
-                    responseText = result.response.substring(0, 50);
-                } else if (result.response?.message?.content) {
-                    responseText = result.response.message.content.substring(0, 50);
+                if (typeof data === 'string') {
+                    responseText = data;
+                } else if (data?.message?.content) {
+                    responseText = data.message.content;
+                } else if (data?.content) {
+                    responseText = data.content;
                 }
                 
-                detailsDiv.innerHTML = `<div>响应: ${responseText}...</div>`;
+                detailsDiv.innerHTML = `<p><strong>响应:</strong> ${responseText || '空响应'}</p>`;
                 
-            } else if (result.error === 'timeout') {
-                card.className = 'model-card error';
-                statusDiv.innerHTML = '⏰ 超时';
-                detailsDiv.innerHTML = '超过30秒无响应';
+                // 调试信息
+                console.log(`${modelName} 成功:`, data);
+                
             } else {
-                card.className = 'model-card error';
+                div.className = 'test-case error';
                 statusDiv.innerHTML = '❌ 失败';
                 
-                let errorMsg = '';
-                if (result.error?.error?.message) {
-                    errorMsg = result.error.error.message;
-                } else if (result.error?.message) {
-                    errorMsg = result.error.message;
-                } else {
-                    errorMsg = JSON.stringify(result.error).substring(0, 100);
+                // 显示详细错误
+                let errorObj = data;
+                if (data?.error) {
+                    errorObj = data.error;
                 }
                 
-                detailsDiv.innerHTML = `<div>错误: ${errorMsg}</div>`;
+                detailsDiv.innerHTML = `<p><strong>错误类型:</strong> ${errorObj?.code || '未知'}</p>`;
+                errorDiv.innerHTML = `
+                    <p><strong>完整错误信息:</strong></p>
+                    <pre>${JSON.stringify(errorObj, null, 2)}</pre>
+                `;
+                errorDiv.style.display = 'block';
+                
+                // 分析错误原因
+                analyzeError(modelName, errorObj, detailsDiv);
+                
+                // 调试信息
+                console.error(`${modelName} 失败:`, errorObj);
             }
-            
-            // 存储结果
-            testResults.set(modelName, result);
         }
         
-        // 测试单个模型
-        async function testSingleModel(modelName) {
-            return new Promise(async (resolve) => {
-                let timeout = false;
-                
-                // 设置超时
-                timeoutId = setTimeout(() => {
-                    timeout = true;
-                    updateModelCard(modelName, { 
-                        model: modelName, 
-                        success: false, 
-                        error: 'timeout' 
-                    });
-                    resolve({ model: modelName, success: false, error: 'timeout' });
-                }, TIMEOUT_MS);
-                
+        // 分析错误原因
+        function analyzeError(modelName, errorObj, detailsDiv) {
+            const errorMsg = errorObj?.message || '';
+            let analysis = '';
+            
+            if (errorMsg.includes('does not exist') || errorMsg.includes('not found')) {
+                analysis = '❓ 模型可能不存在或已下线';
+            } else if (errorMsg.includes('rate limit') || errorMsg.includes('limit')) {
+                analysis = '⏱️ 速率限制或配额不足';
+            } else if (errorMsg.includes('access') || errorMsg.includes('permission')) {
+                analysis = '🔐 需要特殊权限或API密钥';
+            } else if (errorMsg.includes('endpoint') || errorMsg.includes('end point')) {
+                analysis = '🔧 需要不同的API端点';
+            } else if (errorMsg.includes('parameters') || errorMsg.includes('invalid')) {
+                analysis = '⚙️ 参数格式不正确';
+            } else if (errorMsg.includes('fallback model')) {
+                analysis = '🔄 无备用模型可用';
+            }
+            
+            if (analysis) {
+                detailsDiv.innerHTML += `<p><strong>分析:</strong> ${analysis}</p>`;
+            }
+            
+            // 特殊模型分析
+            if (modelName.includes('gpt-5.1-codex') && modelName.includes('max')) {
+                detailsDiv.innerHTML += `<p><strong>注意:</strong> gpt-5.1-codex-max 成功，但 gpt-5.1-codex 失败，可能是不问的版本或权限</p>`;
+            }
+            
+            if (modelName.includes('gpt-5') && !modelName.includes('chat') && !modelName.includes('pro')) {
+                detailsDiv.innerHTML += `<p><strong>模式差异:</strong> gpt-5-chat 成功但 gpt-5 失败，可能是基础模型和聊天模型的区别</p>`;
+            }
+        }
+        
+        // 测试单个模型（带不同参数尝试）
+        async function testModel(modelName) {
+            const testDiv = createTestEntry(modelName);
+            outputDiv.appendChild(testDiv);
+            
+            // 尝试不同的参数组合
+            const testAttempts = [
+                {
+                    name: '标准参数',
+                    params: { model: modelName, max_tokens: 50, temperature: 0.3 }
+                },
+                {
+                    name: '短响应',
+                    params: { model: modelName, max_tokens: 10, temperature: 0 }
+                },
+                {
+                    name: '长响应',
+                    params: { model: modelName, max_tokens: 100, temperature: 0.7 }
+                },
+                {
+                    name: '极简',
+                    params: { model: modelName, max_tokens: 5, temperature: 0 }
+                }
+            ];
+            
+            for (const attempt of testAttempts) {
                 try {
-                    console.log(`测试: ${modelName}`);
+                    console.log(`尝试 ${modelName} 参数: ${attempt.name}`);
                     const startTime = Date.now();
-                    
-                    // 使用简单的问题测试
-                    const response = await puter.ai.chat("AI是什么？用一句话回答。", {
-                        model: modelName,
-                        max_tokens: 50,
-                        temperature: 0.3
-                    });
-                    
+                    const response = await puter.ai.chat("AI是什么？", attempt.params);
                     const endTime = Date.now();
                     
-                    if (!timeout) {
-                        clearTimeout(timeoutId);
-                        updateModelCard(modelName, {
-                            model: modelName,
-                            success: true,
-                            response: response,
-                            duration: endTime - startTime
-                        });
-                        resolve({ 
-                            model: modelName, 
-                            success: true, 
-                            response: response,
-                            duration: endTime - startTime
-                        });
-                    }
+                    updateTestResult(modelName, true, response, endTime - startTime);
+                    return { success: true, attempt: attempt.name };
+                    
                 } catch (error) {
-                    if (!timeout) {
-                        clearTimeout(timeoutId);
-                        updateModelCard(modelName, {
-                            model: modelName,
-                            success: false,
-                            error: error
-                        });
-                        resolve({ 
-                            model: modelName, 
-                            success: false, 
-                            error: error 
-                        });
+                    console.log(`${modelName} ${attempt.name} 失败:`, error.message?.substring(0, 100));
+                    
+                    // 如果是最后一个尝试，显示错误
+                    if (attempt === testAttempts[testAttempts.length - 1]) {
+                        updateTestResult(modelName, false, error);
+                        return { success: false, error: error };
                     }
-                }
-            });
-        }
-        
-        // 顺序测试所有模型
-        async function startSequentialTest() {
-            if (isTesting) return;
-            isTesting = true;
-            currentIndex = 0;
-            testResults.clear();
-            
-            // 清除并重新创建网格
-            modelGrid.innerHTML = '';
-            allGPTModels.forEach(model => {
-                modelGrid.appendChild(createModelCard(model));
-            });
-            
-            // 重置显示
-            summaryDiv.style.display = 'none';
-            progressFill.style.width = '0%';
-            
-            for (let i = 0; i < allGPTModels.length; i++) {
-                if (!isTesting) break;
-                
-                currentIndex = i;
-                const model = allGPTModels[i];
-                
-                // 更新进度
-                const progress = ((i + 1) / allGPTModels.length) * 100;
-                progressFill.style.width = `${progress}%`;
-                progressText.innerHTML = `测试中: ${model.split('/').pop()} (${i + 1}/${allGPTModels.length})`;
-                
-                // 测试当前模型
-                await testSingleModel(model);
-                
-                // 等待500ms再测试下一个，避免速率限制
-                if (isTesting && i < allGPTModels.length - 1) {
-                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    // 等待1秒再试
+                    await new Promise(resolve => setTimeout(resolve, 1000));
                 }
             }
+        }
+        
+        // 测试所有失败模型
+        async function testAllFailedModels() {
+            outputDiv.innerHTML = '<h4>测试失败模型:</h4>';
             
-            if (isTesting) {
-                progressText.innerHTML = '测试完成！';
-                progressFill.style.width = '100%';
-                displaySummary();
-                isTesting = false;
+            for (const model of failedModels) {
+                await testModel(model);
+                await new Promise(resolve => setTimeout(resolve, 2000)); // 等待2秒
+            }
+            
+            // 显示对比的成功模型
+            outputDiv.innerHTML += '<h4>对比成功模型:</h4>';
+            for (const model of successModels.slice(0, 3)) { // 只测试前3个成功模型作为对比
+                await testModel(model);
+                await new Promise(resolve => setTimeout(resolve, 1000));
             }
         }
         
-        // 测试选中的模型
-        async function testSelectedModels() {
-            const selectedCheckboxes = document.querySelectorAll('.model-select:checked');
-            const selectedModels = [];
-            
-            selectedCheckboxes.forEach(checkbox => {
-                const card = checkbox.closest('.model-card');
-                if (card) {
-                    const modelName = card.querySelector('.model-name').textContent;
-                    // 找到完整模型名
-                    const fullModelName = allGPTModels.find(m => m.includes(modelName));
-                    if (fullModelName) {
-                        selectedModels.push(fullModelName);
-                    }
-                }
-            });
-            
-            if (selectedModels.length === 0) {
-                alert('请至少选择一个模型');
-                return;
-            }
-            
-            // 测试选中的模型
-            for (let i = 0; i < selectedModels.length; i++) {
-                const model = selectedModels[i];
-                
-                // 更新进度
-                progressText.innerHTML = `测试选中模型: ${model.split('/').pop()} (${i + 1}/${selectedModels.length})`;
-                
-                // 测试模型
-                await testSingleModel(model);
-                
-                // 等待
-                if (i < selectedModels.length - 1) {
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                }
-            }
-            
-            progressText.innerHTML = '选中模型测试完成！';
-            displaySummary();
+        // 测试特定模型
+        async function testSpecificModel(modelShortName) {
+            const fullModelName = `openrouter:openai/${modelShortName}`;
+            outputDiv.innerHTML = `<h4>详细测试 ${fullModelName}:</h4>`;
+            await testModel(fullModelName);
         }
         
-        // 停止测试
-        function stopTest() {
-            isTesting = false;
-            if (timeoutId) {
-                clearTimeout(timeoutId);
-            }
-            progressText.innerHTML = '测试已停止';
-        }
-        
-        // 清除结果
-        function clearResults() {
-            modelGrid.innerHTML = '';
-            testResults.clear();
-            summaryDiv.style.display = 'none';
-            progressText.innerHTML = '结果已清除';
-            progressFill.style.width = '0%';
-        }
-        
-        // 应用过滤
-        function applyFilters() {
-            const versionFilter = document.getElementById('version-filter').value;
-            const statusFilter = document.getElementById('status-filter').value;
-            
-            allGPTModels.forEach(model => {
-                const card = document.getElementById(`card-${model.replace(/[:\/.-]/g, '_')}`);
-                if (!card) return;
-                
-                let showCard = true;
-                
-                // 版本过滤
-                if (versionFilter !== 'all') {
-                    const modelVersion = model.toLowerCase();
-                    if (versionFilter === '3.5' && !modelVersion.includes('3.5')) showCard = false;
-                    if (versionFilter === '4' && !modelVersion.includes('gpt-4') && !modelVersion.includes('4.1')) showCard = false;
-                    if (versionFilter === '4o' && !modelVersion.includes('4o')) showCard = false;
-                    if (versionFilter === '5' && !modelVersion.includes('gpt-5') && !modelVersion.includes('5.1') && !modelVersion.includes('5.2')) showCard = false;
-                    if (versionFilter === '5.1' && !modelVersion.includes('5.1')) showCard = false;
-                    if (versionFilter === '5.2' && !modelVersion.includes('5.2')) showCard = false;
-                }
-                
-                // 状态过滤
-                if (statusFilter !== 'all') {
-                    const cardClass = card.className;
-                    if (statusFilter === 'success' && !cardClass.includes('success')) showCard = false;
-                    if (statusFilter === 'error' && !cardClass.includes('error')) showCard = false;
-                    if (statusFilter === 'testing' && !cardClass.includes('testing')) showCard = false;
-                }
-                
-                card.style.display = showCard ? 'block' : 'none';
-            });
-        }
-        
-        // 重置过滤
-        function resetFilters() {
-            document.getElementById('version-filter').value = 'all';
-            document.getElementById('status-filter').value = 'all';
-            applyFilters();
-        }
-        
-        // 显示总结
-        function displaySummary() {
-            const successModels = Array.from(testResults.values())
-                .filter(r => r.success)
-                .map(r => r.model);
-            
-            const failedModels = Array.from(testResults.values())
-                .filter(r => !r.success)
-                .map(r => r.model);
-            
-            const totalTested = testResults.size;
-            const successCount = successModels.length;
-            const failedCount = failedModels.length;
-            
-            summaryDiv.style.display = 'block';
-            summaryContent.innerHTML = `
-                <p><strong>已测试模型数:</strong> ${totalTested}/${allGPTModels.length}</p>
-                <p><strong>✅ 成功:</strong> ${successCount} 个</p>
-                <p><strong>❌ 失败:</strong> ${failedCount} 个</p>
-                <p><strong>成功率:</strong> ${totalTested > 0 ? Math.round((successCount / totalTested) * 100) : 0}%</p>
-                
-                <h4>成功模型 (${successCount}个):</h4>
-                <div style="column-count: 2; font-size: 12px;">
-                    ${successModels.map(m => `<div><code>${m.split('/').pop()}</code></div>`).join('')}
-                </div>
-                
-                ${failedCount > 0 ? `
-                <h4>失败模型 (${failedCount}个):</h4>
-                <div style="font-size: 12px; max-height: 200px; overflow-y: auto;">
-                    ${failedModels.map(m => {
-                        const result = testResults.get(m);
-                        let errorMsg = '';
-                        if (result?.error === 'timeout') {
-                            errorMsg = '超时';
-                        } else if (result?.error?.error?.message) {
-                            errorMsg = result.error.error.message.substring(0, 100);
-                        }
-                        return `<div><code>${m.split('/').pop()}</code>: ${errorMsg}</div>`;
-                    }).join('')}
-                </div>
-                ` : ''}
-                
-                <h4>🏆 推荐模型:</h4>
-                <ul>
-                    <li><strong>GPT-4o-mini</strong> - 性价比最高</li>
-                    <li><strong>GPT-4o</strong> - 功能全面</li>
-                    <li><strong>GPT-3.5-turbo</strong> - 经典稳定</li>
-                    ${successModels.some(m => m.includes('gpt-5')) ? '<li><strong>GPT-5系列</strong> - 最新技术</li>' : ''}
-                </ul>
-            `;
-            
-            // 滚动到总结
-            summaryDiv.scrollIntoView({ behavior: 'smooth' });
-        }
-        
-        // 页面加载时显示所有模型卡片
-        window.onload = function() {
-            allGPTModels.forEach(model => {
-                modelGrid.appendChild(createModelCard(model));
-            });
-            
-            console.log(`准备测试 ${allGPTModels.length} 个 GPT 模型`);
-            console.log('按需点击"开始顺序测试"按钮');
+        // 页面加载时自动测试一个关键模型
+        window.onload = async function() {
+            // 先测试 gpt-5 看看详细错误
+            setTimeout(() => {
+                testSpecificModel('gpt-5');
+            }, 1000);
         };
         
-        // 键盘快捷键
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && e.ctrlKey) {
-                e.preventDefault();
-                startSequentialTest();
+        // 添加额外的测试功能：尝试不同的查询
+        async function testWithDifferentQueries(modelName) {
+            const queries = [
+                "Hello",
+                "What is 2+2?",
+                "Explain AI",
+                "Write a haiku",
+                "Translate 'hello' to Spanish"
+            ];
+            
+            const results = [];
+            for (const query of queries) {
+                try {
+                    const response = await puter.ai.chat(query, {
+                        model: modelName,
+                        max_tokens: 20
+                    });
+                    results.push({ query, success: true, response });
+                } catch (error) {
+                    results.push({ query, success: false, error });
+                }
+                await new Promise(resolve => setTimeout(resolve, 500));
             }
-        });
+            return results;
+        }
+        
+        // 添加这个函数到全局，方便调试
+        window.detailedTest = testWithDifferentQueries;
     </script>
     
     <div style="margin-top: 30px; padding: 15px; background: #f8f9fa; border-radius: 5px;">
-        <h3>使用说明</h3>
+        <h3>测试说明</h3>
+        <p><strong>目标：</strong>找出这些模型失败的具体原因</p>
+        <p><strong>测试方法：</strong></p>
         <ul>
-            <li><strong>开始顺序测试</strong>：逐个测试所有模型（约需15-20分钟）</li>
-            <li><strong>测试选中模型</strong>：只测试勾选的模型</li>
-            <li><strong>过滤功能</strong>：按版本或状态过滤显示结果</li>
-            <li><strong>卡片点击</strong>：点击卡片查看详情/错误信息</li>
-            <li><strong>快捷键</strong>：Ctrl+Enter 开始测试</li>
+            <li>每个模型尝试4种不同的参数组合</li>
+            <li>显示完整的错误信息</li>
+            <li>分析可能的失败原因</li>
+            <li>与成功模型对比</li>
         </ul>
         
-        <h4>预期结果：</h4>
-        <ul>
-            <li>✅ GPT-3.5系列 - 应该大部分成功</li>
-            <li>✅ GPT-4系列 - 应该成功</li>
-            <li>✅ GPT-4o系列 - 应该成功</li>
-            <li>⚠️ GPT-5系列 - 部分可能失败（较新模型）</li>
-            <li>❌ 旧版本（如gpt-4-0314）- 可能已下线</li>
-        </ul>
+        <h4>可能的原因：</h4>
+        <ol>
+            <li><strong>模型不存在：</strong>某些模型可能从未发布或已下线</li>
+            <li><strong>权限限制：</strong>需要特殊API密钥或付费计划</li>
+            <li><strong>参数问题：</strong>需要特定的参数格式</li>
+            <li><strong>版本差异：</strong>如 gpt-5 基础模型 vs gpt-5-chat</li>
+            <li><strong>区域限制：</strong>某些模型可能地区受限</li>
+        </ol>
+        
+        <p><em>提示：打开浏览器控制台（F12）查看更多调试信息</em></p>
     </div>
 </body>
 </html>
