@@ -12,16 +12,21 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #fff;
             color: #000;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+            padding-top: 64px;
+            padding-bottom: 140px;
         }
         .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
             padding: 12px 15px;
             background: #fff;
             display: flex;
             align-items: center;
             gap: 15px;
+            z-index: 1000;
+            border-bottom: 1px solid #eee;
         }
         .new-chat-btn {
             width: 40px;
@@ -32,38 +37,15 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            position: relative;
             transition: all 0.2s;
             border: none;
         }
         .new-chat-btn:hover {
             background: #f5f5f5;
         }
-        .new-chat-btn::after {
-            content: "新聊天";
-            position: absolute;
-            top: calc(100% + 8px);
-            left: 50%;
-            transform: translateX(-50%);
-            background: #000;
-            color: white;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s;
-            z-index: 1000;
-        }
-        .new-chat-btn:hover::after {
-            opacity: 1;
-        }
 
         .custom-select {
             position: relative;
-            width: 100%;
             max-width: 180px;
         }
         .select-selected {
@@ -83,9 +65,6 @@
             font-size: 10px;
             color: #666;
             transition: transform 0.2s;
-        }
-        .select-selected.active::after {
-            transform: rotate(180deg);
         }
         .select-items {
             position: absolute;
@@ -118,14 +97,11 @@
         }
         
         .chat-container {
-            flex: 1;
+            height: calc(100vh - 204px);
             overflow-y: auto;
             padding: 15px;
-            background: #fff;
             display: flex;
             flex-direction: column;
-            height: calc(100vh - 200px);
-            min-height: 0;
         }
         .message {
             margin-bottom: 16px;
@@ -140,18 +116,15 @@
         }
         .message.ai {
             align-self: flex-start;
-            background: #f5f5f5;
         }
         .model-label {
             font-size: 12px;
             color: #666;
             margin-bottom: 6px;
-            display: block;
         }
         .message-content {
             font-size: 16px;
             line-height: 1.5;
-            word-wrap: break-word;
         }
         .welcome-message {
             text-align: center;
@@ -161,9 +134,13 @@
             margin: auto;
         }
         .bottom-section {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
             padding: 15px;
             background: #fff;
-            border-top: 1px solid #eee;
+            z-index: 1000;
         }
         .web-search-toggle {
             border: 1px solid #d0d0d0;
@@ -176,7 +153,6 @@
             align-items: center;
             gap: 4px;
             height: 36px;
-            white-space: nowrap;
             margin-bottom: 8px;
         }
         .web-search-toggle.active {
@@ -184,13 +160,9 @@
             color: #1565c0;
             border-color: #1565c0;
         }
-        .input-wrapper {
-            position: relative;
-        }
         .input-container {
             display: flex;
             align-items: flex-start;
-            background: #fff;
             position: relative;
         }
         .input-box {
@@ -207,9 +179,7 @@
             background: #fff;
             color: #000;
             line-height: 1.4;
-            scrollbar-width: none;
         }
-        .input-box::-webkit-scrollbar { display: none; }
         .input-box:focus { outline: none; border-color: #888; }
         .send-button {
             position: absolute;
@@ -226,7 +196,6 @@
             align-items: center;
             justify-content: center;
             padding: 0;
-            z-index: 1;
         }
         .send-button:disabled { background: #ccc; cursor: not-allowed; }
         .footer {
@@ -256,7 +225,6 @@
             <img src="icon.png" alt="新聊天" width="20" height="20">
         </button>
         
-        <!-- 自定义下拉框 -->
         <div class="custom-select" id="customSelect">
             <div class="select-selected" id="selectSelected">GPT-5.2 Instant</div>
             <div class="select-items" id="selectItems">
@@ -281,29 +249,6 @@
                 <div class="select-item" data-value="o4-mini">OpenAI o4-mini</div>
             </div>
         </div>
-        
-        <!-- 隐藏的原始select用于表单提交等 -->
-        <select class="model-select" id="modelSelect" style="display: none;">
-            <option value="gpt-5.2-chat" selected>GPT-5.2 Instant</option>
-            <option value="gpt-5.2">GPT-5.2 Thinking</option>
-            <option value="gpt-5.1-chat-latest">GPT-5.1 Instant</option>
-            <option value="gpt-5.1">GPT-5.1 Thinking</option>
-            <option value="gpt-5-nano">GPT-5 Nano</option>
-            <option value="gpt-5-mini">GPT-5 Mini</option>
-            <option value="gpt-5">GPT-5</option>
-            <option value="gpt-4.5-preview">GPT-4.5 Preview</option>
-            <option value="gpt-4.1-nano">GPT-4.1 Nano</option>
-            <option value="gpt-4.1-mini">GPT-4.1 Mini</option>
-            <option value="gpt-4.1">GPT-4.1</option>
-            <option value="gpt-4o">GPT-4o</option>
-            <option value="gpt-4o-mini">GPT-4o Mini</option>
-            <option value="o1">OpenAI o1</option>
-            <option value="o1-mini">OpenAI o1-mini</option>
-            <option value="o1-pro">OpenAI o1-pro</option>
-            <option value="o3">OpenAI o3</option>
-            <option value="o3-mini">OpenAI o3-mini</option>
-            <option value="o4-mini">OpenAI o4-mini</option>
-        </select>
     </div>
     
     <div class="chat-container" id="chatContainer">
@@ -312,11 +257,9 @@
     
     <div class="bottom-section">
         <button class="web-search-toggle" id="webSearchToggle">🌐联网搜索</button>
-        <div class="input-wrapper">
-            <div class="input-container">
-                <textarea class="input-box" id="inputBox" placeholder="有问题，尽管问" rows="2"></textarea>
-                <button class="send-button" id="sendButton">↑</button>
-            </div>
+        <div class="input-container">
+            <textarea class="input-box" id="inputBox" placeholder="有问题，尽管问" rows="2"></textarea>
+            <button class="send-button" id="sendButton">↑</button>
         </div>
         <div class="footer">
             向 AI 聊天机器人 ChatGPT 发送消息即表示，你同意我们的条款并已阅读我们的隐私政策。
@@ -327,12 +270,9 @@
         const chatContainer = document.getElementById('chatContainer');
         const inputBox = document.getElementById('inputBox');
         const sendButton = document.getElementById('sendButton');
-        const modelSelect = document.getElementById('modelSelect');
         const webSearchToggle = document.getElementById('webSearchToggle');
         const welcomeMessage = document.getElementById('welcomeMessage');
         const newChatBtn = document.getElementById('newChatBtn');
-        
-        // 自定义下拉框元素
         const selectSelected = document.getElementById('selectSelected');
         const selectItems = document.getElementById('selectItems');
         const customSelect = document.getElementById('customSelect');
@@ -356,42 +296,27 @@
         
         // 自定义下拉框功能
         function initCustomSelect() {
-            // 点击下拉框标题时切换显示/隐藏
             selectSelected.addEventListener('click', function(e) {
                 e.stopPropagation();
                 selectItems.classList.toggle('active');
-                selectSelected.classList.toggle('active');
             });
             
-            // 点击选项时选择
             document.querySelectorAll('.select-item').forEach(item => {
                 item.addEventListener('click', function() {
-                    const value = this.getAttribute('data-value');
-                    const text = this.textContent;
+                    selectSelected.textContent = this.textContent;
                     
-                    // 更新显示
-                    selectSelected.textContent = text;
-                    
-                    // 更新原始select
-                    modelSelect.value = value;
-                    
-                    // 更新选中状态
                     document.querySelectorAll('.select-item').forEach(el => {
                         el.classList.remove('selected');
                     });
                     this.classList.add('selected');
                     
-                    // 关闭下拉框
                     selectItems.classList.remove('active');
-                    selectSelected.classList.remove('active');
                 });
             });
             
-            // 点击页面其他地方时关闭下拉框
             document.addEventListener('click', function(e) {
                 if (!customSelect.contains(e.target)) {
                     selectItems.classList.remove('active');
-                    selectSelected.classList.remove('active');
                 }
             });
         }
@@ -445,7 +370,8 @@
             
             try {
                 const fullPrompt = conversationContext + "用户: " + userInput + "\nAI: ";
-                const options = { stream: true, model: modelSelect.value };
+                const selectedModel = document.querySelector('.select-item.selected').getAttribute('data-value');
+                const options = { stream: true, model: selectedModel };
                 if (webSearchEnabled) options.tools = [{ type: "web_search" }];
                 
                 const response = await puter.ai.chat(fullPrompt, options);
@@ -504,7 +430,6 @@
         });
 
         initCustomSelect();
-        
         inputBox.focus();
     </script>
 </body>
