@@ -1,11 +1,25 @@
 <html>
 <body>
+    <div id="result">加载中...</div>
+    
     <script src="https://js.puter.com/v2/"></script>
     <script>
+        // 方法1：最可靠的写法（推荐）
         puter.ai.chat("Explain quantum computing in simple terms", {
-            model: "o1-mini"
-        }).then(response => {
-            document.body.innerHTML = response.message.content;
+            model: "openrouter:openai/o1-mini"
+        })
+        .then(response => {
+            console.log("响应类型:", typeof response);
+            console.log("完整响应:", response);
+            
+            // response 是直接字符串，不是对象！
+            document.getElementById('result').innerHTML = 
+                `<h3>o1-mini 回答：</h3><p>${response}</p>`;
+        })
+        .catch(error => {
+            console.error("错误详情:", error);
+            document.getElementById('result').innerHTML = 
+                `<p style="color:red">错误：${error.message}</p>`;
         });
     </script>
 </body>
