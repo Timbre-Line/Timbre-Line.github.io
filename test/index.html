@@ -2,161 +2,103 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Puter.js o系列模型测试</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        .test-case { margin: 15px 0; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
-        .success { background-color: #d4edda; border-color: #c3e6cb; }
-        .error { background-color: #f8d7da; border-color: #f5c6cb; }
-        .loading { background-color: #fff3cd; border-color: #ffeaa7; }
-        button { padding: 10px 20px; margin: 5px; }
-        h3 { color: #333; }
-    </style>
+    <title>详细错误调试</title>
 </head>
 <body>
-    <h1>Puter.js o系列模型测试</h1>
-    <p>测试时间: <span id="current-time"></span></p>
-    
-    <div>
-        <button onclick="runAllTests()">测试所有o系列模型</button>
-        <button onclick="testSpecificModel('o1-mini')">单独测试 o1-mini</button>
-        <button onclick="testSpecificModel('o1')">单独测试 o1</button>
-        <button onclick="testSpecificModel('o3-mini')">单独测试 o3-mini</button>
-    </div>
-    
-    <div id="results"></div>
+    <h2>o1-mini 详细错误分析</h2>
+    <div id="debug"></div>
     
     <script src="https://js.puter.com/v2/"></script>
     <script>
-        // 更新当前时间
-        document.getElementById('current-time').textContent = new Date().toLocaleString();
+        const debug = document.getElementById('debug');
         
-        // 要测试的模型列表（按原文档格式）
-        const oSeriesModels = [
-            // 直接模型名（原文档列表格式）
-            { name: "o1", model: "o1" },
-            { name: "o1-mini", model: "o1-mini" },
-            { name: "o1-pro", model: "o1-pro" },
-            { name: "o3", model: "o3" },
-            { name: "o3-mini", model: "o3-mini" },
-            { name: "o4-mini", model: "o4-mini" },
+        async function testWithDetails() {
+            debug.innerHTML = "<p>测试中...</p>";
             
-            // openrouter 格式（原文档示例格式）
-            { name: "openrouter:openai/o1-mini", model: "openrouter:openai/o1-mini" },
-            { name: "openrouter:openai/o1", model: "openrouter:openai/o1" },
-            { name: "openrouter:openai/o3-mini", model: "openrouter:openai/o3-mini" },
-            
-            // 对照模型
-            { name: "gpt-4o-mini (对照)", model: "gpt-4o-mini" },
-            { name: "gpt-5-nano (对照)", model: "gpt-5-nano" }
-        ];
-        
-        // 创建测试用例显示
-        function createTestCase(modelInfo) {
-            const div = document.createElement('div');
-            div.className = 'test-case loading';
-            div.id = `test-${modelInfo.name.replace(/[:/]/g, '-')}`;
-            div.innerHTML = `
-                <strong>${modelInfo.name}</strong>
-                <div class="status">测试中...</div>
-                <div class="response" style="display:none; margin-top:5px;"></div>
-                <div class="error" style="display:none; color:red; margin-top:5px;"></div>
-            `;
-            document.getElementById('results').appendChild(div);
-            return div;
+            // 测试 o1-mini 并捕获完整错误
+            try {
+                const response = await puter.ai.chat("1+1=?", {
+                    model: "o1-mini",
+                    max_tokens: 10
+                });
+                debug.innerHTML = `<p style="color:green">✅ 成功: ${response}</p>`;
+            } catch (error) {
+                // 详细显示错误对象的所有属性
+                debug.innerHTML = `
+                    <h3 style="color:red">❌ o1-mini 错误详情：</h3>
+                    <pre>${JSON.stringify(error, null, 2)}</pre>
+                    <p><strong>错误类型：</strong> ${error?.constructor?.name || '未知'}</p>
+                    <p><strong>错误消息：</strong> ${error?.message || '无消息'}</p>
+                    <p><strong>错误状态：</strong> ${error?.status || '无状态'}</p>
+                    <p><strong>错误代码：</strong> ${error?.code || '无代码'}</p>
+                    <p><strong>堆栈：</strong><br>${error?.stack || '无堆栈'}</p>
+                `;
+                
+                console.error("完整错误对象:", error);
+                
+                // 尝试其他可能的模型名称
+                await testAlternatives();
+            }
         }
         
-        // 测试单个模型
-        async function testModel(modelInfo) {
-            const testDiv = createTestCase(modelInfo);
+        async function testAlternatives() {
+            debug.innerHTML += "<h3>尝试替代方案：</h3>";
+            
+            const alternatives = [
+                "o1-mini-2025",
+                "openai/o1-mini", 
+                "gpt-o1-mini",
+                "o1-mini-latest",
+                "o1-mini-preview"
+            ];
+            
+            for (const alt of alternatives) {
+                try {
+                    const response = await puter.ai.chat("1+1=?", {
+                        model: alt,
+                        max_tokens: 5
+                    });
+                    debug.innerHTML += `<p style="color:green">✅ ${alt}: ${response}</p>`;
+                    return; // 找到可用的就停止
+                } catch (err) {
+                    debug.innerHTML += `<p style="color:gray">❌ ${alt}: ${err.message || err}</p>`;
+                }
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+        }
+        
+        // 同时测试 o1 和 o1-mini 对比
+        async function compareO1andO1Mini() {
+            debug.innerHTML += "<h3>对比测试：</h3>";
+            
+            // 测试 o1（已知能工作）
+            try {
+                const o1Response = await puter.ai.chat("1+1=?", {
+                    model: "o1",
+                    max_tokens: 5
+                });
+                debug.innerHTML += `<p>✅ o1: ${o1Response}</p>`;
+            } catch (err) {
+                debug.innerHTML += `<p>❌ o1: ${err.message}</p>`;
+            }
+            
+            // 等待后测试 o1-mini
+            await new Promise(resolve => setTimeout(resolve, 1000));
             
             try {
-                const startTime = Date.now();
-                
-                // 使用简单的数学问题测试（o系列擅长推理）
-                const response = await puter.ai.chat("1+1等于多少？请只回答数字。", {
-                    model: modelInfo.model,
-                    max_tokens: 10,
-                    temperature: 0
+                const o1MiniResponse = await puter.ai.chat("1+1=?", {
+                    model: "o1-mini",
+                    max_tokens: 5
                 });
-                
-                const endTime = Date.now();
-                const duration = endTime - startTime;
-                
-                testDiv.className = 'test-case success';
-                testDiv.querySelector('.status').innerHTML = 
-                    `✅ 成功 (${duration}ms)`;
-                testDiv.querySelector('.response').innerHTML = 
-                    `<em>响应:</em> ${response}`;
-                testDiv.querySelector('.response').style.display = 'block';
-                
-                console.log(`${modelInfo.name} 成功:`, response);
-                
-            } catch (error) {
-                testDiv.className = 'test-case error';
-                testDiv.querySelector('.status').innerHTML = '❌ 失败';
-                
-                const errorMsg = error.message || String(error);
-                testDiv.querySelector('.error').innerHTML = 
-                    `<em>错误:</em> ${errorMsg}`;
-                testDiv.querySelector('.error').style.display = 'block';
-                
-                console.error(`${modelInfo.name} 失败:`, error);
-                
-                // 检查错误类型
-                if (errorMsg.includes('rate limit') || errorMsg.includes('limit')) {
-                    testDiv.querySelector('.error').innerHTML += 
-                        '<br><small>可能原因：速率限制</small>';
-                } else if (errorMsg.includes('payment') || errorMsg.includes('付费')) {
-                    testDiv.querySelector('.error').innerHTML += 
-                        '<br><small>可能原因：需要付费</small>';
-                } else if (errorMsg.includes('not found') || errorMsg.includes('不存在')) {
-                    testDiv.querySelector('.error').innerHTML += 
-                        '<br><small>可能原因：模型名称错误</small>';
-                }
+                debug.innerHTML += `<p>✅ o1-mini: ${o1MiniResponse}</p>`;
+            } catch (err) {
+                debug.innerHTML += `<p>❌ o1-mini: ${err.message || JSON.stringify(err)}</p>`;
             }
         }
         
-        // 测试所有模型
-        async function runAllTests() {
-            document.getElementById('results').innerHTML = '<h3>测试结果：</h3>';
-            console.log('开始测试所有o系列模型...');
-            
-            // 逐个测试，避免并发限制
-            for (const modelInfo of oSeriesModels) {
-                await testModel(modelInfo);
-                // 等待1秒，避免速率限制
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-            
-            console.log('所有测试完成');
-        }
-        
-        // 测试特定模型
-        async function testSpecificModel(modelName) {
-            document.getElementById('results').innerHTML = '<h3>测试结果：</h3>';
-            
-            // 查找模型信息
-            let modelInfo = oSeriesModels.find(m => m.name === modelName || m.model === modelName);
-            
-            if (!modelInfo) {
-                // 如果没有找到，创建一个新的测试项
-                modelInfo = {
-                    name: modelName,
-                    model: modelName
-                };
-            }
-            
-            await testModel(modelInfo);
-        }
-        
-        // 页面加载后自动运行一个快速测试
-        window.onload = function() {
-            // 先测试一个对照模型，确保基础功能正常
-            setTimeout(() => {
-                testModel({ name: "gpt-4o-mini (快速测试)", model: "gpt-4o-mini" });
-            }, 1000);
-        };
+        // 运行测试
+        testWithDetails();
+        setTimeout(compareO1andO1Mini, 2000);
     </script>
 </body>
 </html>
