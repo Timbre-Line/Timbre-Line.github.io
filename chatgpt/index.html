@@ -229,30 +229,7 @@
         
         <div class="custom-select" id="customSelect">
             <div class="select-selected" id="selectSelected">GPT-5.2 Instant</div>
-            <div class="select-items" id="selectItems">
-                <div class="select-item selected" data-value="gpt-5.2-chat">GPT-5.2 Instant</div>
-                <div class="select-item" data-value="gpt-5.2">GPT-5.2 Thinking</div>
-                <div class="select-item" data-value="openrouter:openai/gpt-5.2-pro">GPT-5.2 Pro</div>
-                <div class="select-item" data-value="gpt-5.1-chat-latest">GPT-5.1 Instant</div>
-                <div class="select-item" data-value="gpt-5.1">GPT-5.1 Thinking</div>
-                <div class="select-item" data-value="gpt-5-nano">GPT-5 Nano</div>
-                <div class="select-item" data-value="gpt-5-mini">GPT-5 Mini</div>
-                <div class="select-item" data-value="gpt-5">GPT-5</div>
-                <div class="select-item" data-value="openrouter:openai/gpt-5-pro">GPT-5 Pro</div>
-                <div class="select-item" data-value="gpt-4.5-preview">GPT-4.5 Preview</div>
-                <div class="select-item" data-value="gpt-4.1-nano">GPT-4.1 Nano</div>
-                <div class="select-item" data-value="gpt-4.1-mini">GPT-4.1 Mini</div>
-                <div class="select-item" data-value="gpt-4.1">GPT-4.1</div>
-                <div class="select-item" data-value="gpt-4o">GPT-4o</div>
-                <div class="select-item" data-value="gpt-4o-mini">GPT-4o Mini</div>
-                <div class="select-item" data-value="openrouter:openai/gpt-4">GPT-4</div>
-                <div class="select-item" data-value="openrouter:openai/gpt-4-turbo">GPT-4 Turbo</div>
-                <div class="select-item" data-value="openrouter:openai/gpt-3.5-turbo">GPT-3.5 Turbo</div>
-                <div class="select-item" data-value="o1">OpenAI o1</div>
-                <div class="select-item" data-value="o3">OpenAI o3</div>
-                <div class="select-item" data-value="o3-mini">OpenAI o3-mini</div>
-                <div class="select-item" data-value="o4-mini">OpenAI o4-mini</div>
-            </div>
+            <div class="select-items" id="selectItems"></div>
         </div>
     </div>
     
@@ -305,19 +282,78 @@
         
         // 自定义下拉框功能
         function initCustomSelect() {
+            // 更新模型选择框的选项
+            const modelGroups = {
+                'Light': ['gpt-5-nano', 'gpt-5-mini', 'gpt-4.1-nano', 'gpt-4.1-mini', 'gpt-4o-mini'],
+                'Standard': ['gpt-5.2-chat', 'gpt-5.1-chat-latest', 'gpt-5', 'gpt-4.5-preview', 'gpt-4.1', 'gpt-4o', 'o3-mini', 'o4-mini'],
+                'Enhanced': ['gpt-5.2', 'gpt-5.1', 'o1', 'o3'],
+                'Pro': ['openrouter:openai/gpt-5.2-pro', 'openrouter:openai/gpt-5-pro'],
+                'Legacy（不能联网）': ['openrouter:openai/gpt-4', 'openrouter:openai/gpt-4-turbo', 'openrouter:openai/gpt-3.5-turbo']
+            };
+            
+            const modelNames = {
+                'gpt-5.2-chat': 'GPT-5.2 Instant',
+                'gpt-5.2': 'GPT-5.2 Thinking',
+                'openrouter:openai/gpt-5.2-pro': 'GPT-5.2 Pro',
+                'gpt-5.1-chat-latest': 'GPT-5.1 Instant',
+                'gpt-5.1': 'GPT-5.1 Thinking',
+                'gpt-5-nano': 'GPT-5 Nano',
+                'gpt-5-mini': 'GPT-5 Mini',
+                'gpt-5': 'GPT-5',
+                'openrouter:openai/gpt-5-pro': 'GPT-5 Pro',
+                'gpt-4.5-preview': 'GPT-4.5 Preview',
+                'gpt-4.1-nano': 'GPT-4.1 Nano',
+                'gpt-4.1-mini': 'GPT-4.1 Mini',
+                'gpt-4.1': 'GPT-4.1',
+                'gpt-4o': 'GPT-4o',
+                'gpt-4o-mini': 'GPT-4o Mini',
+                'openrouter:openai/gpt-4': 'GPT-4',
+                'openrouter:openai/gpt-4-turbo': 'GPT-4 Turbo',
+                'openrouter:openai/gpt-3.5-turbo': 'GPT-3.5 Turbo',
+                'o1': 'OpenAI o1',
+                'o3': 'OpenAI o3',
+                'o3-mini': 'OpenAI o3-mini',
+                'o4-mini': 'OpenAI o4-mini'
+            };
+            
+            selectItems.innerHTML = '';
+            for (const [groupName, models] of Object.entries(modelGroups)) {
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'select-item select-group';
+                groupDiv.textContent = groupName;
+                groupDiv.style.cssText = 'color: #666; font-size: 12px; padding: 8px 12px 4px; cursor: default; background: #f8f9fa; border-bottom: 1px solid #eee;';
+                selectItems.appendChild(groupDiv);
+                
+                models.forEach(model => {
+                    const item = document.createElement('div');
+                    item.className = 'select-item';
+                    item.dataset.value = model;
+                    item.textContent = modelNames[model] || model;
+                    if (model === 'gpt-5.2-chat') item.classList.add('selected');
+                    selectItems.appendChild(item);
+                });
+            }
+            
             selectSelected.addEventListener('click', function(e) {
                 e.stopPropagation();
                 selectItems.classList.toggle('active');
             });
             
-            document.querySelectorAll('.select-item').forEach(item => {
+            document.querySelectorAll('.select-item:not(.select-group)').forEach(item => {
                 item.addEventListener('click', function() {
                     selectSelected.textContent = this.textContent;
                     
-                    document.querySelectorAll('.select-item').forEach(el => {
+                    document.querySelectorAll('.select-item:not(.select-group)').forEach(el => {
                         el.classList.remove('selected');
                     });
                     this.classList.add('selected');
+                    
+                    // 检查是否为Legacy模型，禁用联网按钮
+                    const isLegacy = modelGroups['Legacy（不能联网）'].includes(this.dataset.value);
+                    webSearchToggle.disabled = isLegacy;
+                    webSearchToggle.style.opacity = isLegacy ? '0.5' : '1';
+                    webSearchToggle.style.cursor = isLegacy ? 'not-allowed' : 'pointer';
+                    if (isLegacy) webSearchToggle.classList.remove('active');
                     
                     selectItems.classList.remove('active');
                 });
@@ -379,7 +415,7 @@
             
             try {
                 const fullPrompt = conversationContext + "用户: " + userInput + "\nAI: ";
-                const selectedModel = document.querySelector('.select-item.selected').getAttribute('data-value');
+                const selectedModel = document.querySelector('.select-item:not(.select-group).selected').getAttribute('data-value');
                 const options = { stream: true, model: selectedModel };
                 if (webSearchEnabled) options.tools = [{ type: "web_search" }];
                 
