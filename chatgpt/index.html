@@ -244,7 +244,7 @@
         </button>
         
         <div class="custom-select" id="customSelect">
-            <div class="select-selected" id="selectSelected">GPT-5.2 Instant</div>
+            <div class="select-selected" id="selectSelected">GPT-5 Nano</div>
             <div class="select-items" id="selectItems"></div>
         </div>
     </div>
@@ -295,10 +295,8 @@
         
         welcomeMessage.textContent = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
         marked.setOptions({ breaks: true, gfm: true });
-        
-        // 自定义下拉框功能
+
         function initCustomSelect() {
-            // 更新模型选择框的选项
             const modelGroups = {
                 'Light': ['gpt-5-nano', 'gpt-5-mini', 'gpt-4.1-nano', 'gpt-4.1-mini', 'gpt-4o-mini'],
                 'Standard': ['gpt-5.2-chat', 'gpt-5.1-chat-latest', 'gpt-5', 'gpt-4.5-preview', 'gpt-4.1', 'gpt-4o', 'o3-mini', 'o4-mini'],
@@ -345,7 +343,7 @@
                     item.className = 'select-item';
                     item.dataset.value = model;
                     item.textContent = modelNames[model] || model;
-                    if (model === 'gpt-5.2-chat') item.classList.add('selected');
+                    if (model === 'gpt-5-nano') item.classList.add('selected');
                     selectItems.appendChild(item);
                 });
             }
@@ -363,8 +361,7 @@
                         el.classList.remove('selected');
                     });
                     this.classList.add('selected');
-                    
-                    // 检查是否为Legacy模型，禁用联网按钮
+
                     const isLegacy = modelGroups['Legacy（不能联网）'].includes(this.dataset.value);
                     webSearchToggle.disabled = isLegacy;
                     webSearchToggle.style.opacity = isLegacy ? '0.5' : '1';
