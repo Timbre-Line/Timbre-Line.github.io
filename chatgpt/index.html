@@ -42,6 +42,21 @@
         .new-chat-btn:hover {
             background: #e5e5e5;
         }
+        .new-chat-btn:hover::after {
+            content: '新聊天';
+            position: absolute;
+            bottom: -38px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            z-index: 1001;
+        }
         .custom-select {
             position: relative;
             width: 200px;
@@ -223,7 +238,7 @@
 </head>
 <body>
     <div class="header">
-        <button class="new-chat-btn" id="newChatBtn" title="新聊天">
+        <button class="new-chat-btn" id="newChatBtn">
             <img src="icon.png" width="20" height="20">
         </button>
         
