@@ -312,9 +312,9 @@
             </button>
             
             <div class="export-menu" id="exportMenu">
-                <div class="export-option" id="exportChatBtn">导出为.chat文件</div>
-                <div class="export-option" id="exportTxtBtn">导出为.txt文件</div>
-                <div class="export-option" id="importChatBtn">导入.chat文件</div>
+                <div class="export-option" id="exportChatBtn">导出聊天记录</div>
+                <div class="export-option" id="importChatBtn">导入聊天记录</div>
+                <div class="export-option" id="exportTxtBtn">导出聊天记录为TXT文本</div>
             </div>
             
             <input type="file" id="fileInput" accept=".chat" style="display: none;">
@@ -663,8 +663,7 @@
             };
             reader.readAsText(file);
         }
-        
-        // 事件监听器
+
         inputBox.addEventListener('input', () => {
             inputBox.style.height = 'auto';
             inputBox.style.height = Math.min(inputBox.scrollHeight, 132) + 'px';
@@ -714,8 +713,7 @@
                 fileInput.value = '';
             }
         });
-        
-        // 点击其他地方关闭导出菜单
+
         document.addEventListener('click', (e) => {
             if (!exportBtn.contains(e.target) && !exportMenu.contains(e.target)) {
                 exportMenu.classList.remove('active');
