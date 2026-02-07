@@ -1,49 +1,202 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Image Generator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        body {font-family: 'Inter', sans-serif; margin: 0; padding: 20px; height: 100vh; display: grid; grid-template-rows: auto 1fr auto;}
-        #model {position: absolute; top: 20px; left: 20px; padding: 8px 12px; border-radius: 6px; border: 1px solid #ccc;}
-        #imageContainer {margin: 60px 0 20px; text-align: center; min-height: 300px; display: flex; align-items: center; justify-content: center;}
-        img {max-width: 90%; max-height: 60vh; border-radius: 8px;}
-        .input-area {display: flex; gap: 10px; padding: 10px 0;}
-        #prompt {flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 6px;}
-        #generate, #download {padding: 12px 24px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;}
-        #download {background: #10b981; margin-top: 10px; display: none;}
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8fafc;
+            color: #334155;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            min-height: 95vh;
+            gap: 20px;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        h1 {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 1.8rem;
+        }
+        #model {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            font-family: 'Inter', sans-serif;
+            background: white;
+            min-width: 180px;
+        }
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            min-height: 450px;
+        }
+        .image-container {
+            width: 100%;
+            text-align: center;
+            margin: 20px 0;
+            min-height: 350px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .image-container img {
+            max-width: 100%;
+            max-height: 450px;
+            border-radius: 10px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+        .input-area {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            margin-top: auto;
+        }
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+        #prompt {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            resize: none;
+            line-height: 1.4;
+            max-height: 120px; /* 5行 * 24px行高 */
+            overflow-y: auto;
+            transition: border-color 0.2s;
+        }
+        #prompt:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        button {
+            padding: 12px 28px;
+            border-radius: 10px;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        #generate {
+            background: #3b82f6;
+            color: white;
+            height: 46px;
+        }
+        #generate:hover {
+            background: #2563eb;
+        }
+        #download {
+            background: #10b981;
+            color: white;
+            margin-top: 15px;
+        }
+        #download:hover {
+            background: #059669;
+        }
+        .placeholder {
+            color: #94a3b8;
+            font-size: 16px;
+        }
+        .loading {
+            color: #64748b;
+            font-size: 16px;
+        }
+        .error {
+            color: #ef4444;
+            font-size: 16px;
+        }
+        @media (max-width: 768px) {
+            body { padding: 15px; }
+            header { flex-direction: column; align-items: flex-start; gap: 15px; }
+            #model { width: 100%; }
+            .main-content { padding: 20px; }
+        }
     </style>
 </head>
 <body>
-    <select id="model">
-        <option value="gpt-image-1.5">GPT-Image 1.5</option>
-        <option value="gpt-image-1-mini">GPT-Image 1 Mini</option>
-        <option value="gpt-image-1">GPT-Image 1</option>
-        <option value="dall-e-3" selected>DALL-E 3</option>
-        <option value="dall-e-2">DALL-E 2</option>
-    </select>
-    
-    <div id="imageContainer">等待生成图像...</div>
-    
-    <div class="input-area">
-        <input type="text" id="prompt" placeholder="输入图像描述..." value="A futuristic cityscape at night">
-        <button id="generate">生成</button>
+    <div class="container">
+        <header>
+            <h1>AI Image Generator</h1>
+            <select id="model">
+                <option value="gpt-image-1.5">GPT-Image 1.5</option>
+                <option value="gpt-image-1-mini">GPT-Image 1 Mini</option>
+                <option value="gpt-image-1">GPT-Image 1</option>
+                <option value="dall-e-3">DALL-E 3</option>
+                <option value="dall-e-2">DALL-E 2</option>
+            </select>
+        </header>
+        
+        <main class="main-content">
+            <div class="image-container" id="imageContainer">
+                <div class="placeholder">生成的图像将显示在这里</div>
+            </div>
+            <button id="download" style="display:none;">下载图像</button>
+        </main>
+        
+        <div class="input-area">
+            <div class="input-wrapper">
+                <textarea id="prompt" placeholder="输入描述词，例如：A futuristic cityscape at night" rows="1">A futuristic cityscape at night</textarea>
+            </div>
+            <button id="generate">生成</button>
+        </div>
     </div>
-    
-    <button id="download">下载图像</button>
 
     <script src="https://js.puter.com/v2/"></script>
     <script>
+        const promptEl = document.getElementById('prompt');
+        const imageContainer = document.getElementById('imageContainer');
+        const downloadBtn = document.getElementById('download');
+        
+        // 自动调整文本区域高度
+        promptEl.addEventListener('input', function() {
+            this.style.height = 'auto';
+            const newHeight = Math.min(this.scrollHeight, 120); // 限制为5行高度
+            this.style.height = newHeight + 'px';
+        });
+        
+        // Shift+Enter 换行，Enter 发送
+        promptEl.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                document.getElementById('generate').click();
+            }
+        });
+        
         document.getElementById('generate').onclick = async function() {
-            const prompt = document.getElementById('prompt').value;
+            const prompt = promptEl.value.trim();
             const model = document.getElementById('model').value;
-            const imageContainer = document.getElementById('imageContainer');
-            const downloadBtn = document.getElementById('download');
             
             if (!prompt) return alert('请输入描述词');
             
-            imageContainer.innerHTML = '生成中...';
+            imageContainer.innerHTML = '<div class="loading">生成中，请稍候...</div>';
             downloadBtn.style.display = 'none';
             
             try {
@@ -51,7 +204,7 @@
                 imageContainer.innerHTML = '';
                 imageContainer.appendChild(imageElement);
                 downloadBtn.style.display = 'block';
-                
+
                 downloadBtn.onclick = function() {
                     const link = document.createElement('a');
                     link.href = imageElement.src;
@@ -59,7 +212,7 @@
                     link.click();
                 };
             } catch (error) {
-                imageContainer.innerHTML = '生成失败，请重试';
+                imageContainer.innerHTML = '<div class="error">生成失败，请重试</div>';
                 console.error(error);
             }
         };
