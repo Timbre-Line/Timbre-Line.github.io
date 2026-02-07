@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Image Generator</title>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        input, select, button { width: 100%; padding: 12px; margin: 8px 0; box-sizing: border-box; }
+        #imageContainer { margin: 20px 0; text-align: center; min-height: 300px; }
+        img { max-width: 100%; max-height: 500px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <h1>极简AI绘画</h1>
+    <input type="text" id="prompt" placeholder="输入描述词，例如：A futuristic cityscape at night" value="A futuristic cityscape at night">
+    <select id="model">
+        <option value="gpt-image-1.5">GPT-Image 1.5</option>
+        <option value="gpt-image-1-mini">GPT-Image 1 Mini</option>
+        <option value="gpt-image-1">GPT-Image 1</option>
+        <option value="dall-e-3">DALL-E 3</option>
+        <option value="dall-e-2">DALL-E 2</option>
+    </select>
+    <button id="generate">生成图像</button>
+    <div id="imageContainer"></div>
+    <button id="download" style="display:none;">下载图像</button>
+
+    <script src="https://js.puter.com/v2/"></script>
+    <script>
+        document.getElementById('generate').onclick = async function() {
+            const prompt = document.getElementById('prompt').value;
+            const model = document.getElementById('model').value;
+            const imageContainer = document.getElementById('imageContainer');
+            const downloadBtn = document.getElementById('download');
+            
+            if (!prompt) return alert('请输入描述词');
+            
+            imageContainer.innerHTML = '生成中...';
+            downloadBtn.style.display = 'none';
+            
+            try {
+                const imageElement = await puter.ai.txt2img(prompt, { model: model });
+                imageContainer.innerHTML = '';
+                imageContainer.appendChild(imageElement);
+                downloadBtn.style.display = 'block';
+
+                downloadBtn.onclick = function() {
+                    const link = document.createElement('a');
+                    link.href = imageElement.src;
+                    link.download = `ai-image-${Date.now()}.png`;
+                    link.click();
+                };
+            } catch (error) {
+                imageContainer.innerHTML = '生成失败，请重试';
+                console.error(error);
+            }
+        };
+    </script>
+</body>
+</html>
