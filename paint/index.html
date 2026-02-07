@@ -163,7 +163,7 @@
         
         <div class="input-area">
             <div class="input-wrapper">
-                <textarea id="prompt" placeholder="输入描述词，例如：A futuristic cityscape at night" rows="1">A futuristic cityscape at night</textarea>
+                <textarea id="prompt" placeholder="Describe the image you want to generate" rows="1"></textarea>
             </div>
             <button id="generate">生成</button>
         </div>
@@ -181,8 +181,7 @@
             const newHeight = Math.min(this.scrollHeight, 120); // 限制为5行高度
             this.style.height = newHeight + 'px';
         });
-        
-        // Shift+Enter 换行，Enter 发送
+
         promptEl.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
