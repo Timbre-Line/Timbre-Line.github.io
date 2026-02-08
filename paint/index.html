@@ -99,7 +99,6 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             min-height: 0;
             overflow: hidden;
-            position: relative;
         }
         .prompt-history {
             margin-bottom: 15px;
@@ -189,7 +188,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0;
         }
         #generate {
             background: #3b82f6;
@@ -202,11 +200,6 @@
             background: #10b981;
             color: white;
             display: none;
-            margin: 15px auto 0;
-            border-radius: 50%;
-            width: 46px;
-            height: 46px;
-            padding: 12px;
         }
         #download:hover {
             background: #059669;
@@ -256,12 +249,6 @@
             <div class="image-container" id="imageContainer">
                 <div class="placeholder">The generated image will be displayed here</div>
             </div>
-            <button id="download">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <path d="M12 3v12M7 16l5 5 5-5"/>
-                </svg>
-            </button>
         </main>
         
         <div class="input-area">
@@ -270,8 +257,13 @@
             </div>
             <button id="generate">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <path d="M7 11l5-5 5 5M12 4v12"/>
+                </svg>
+            </button>
+            <button id="download">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <path d="M12 3v12M7 8l5-5 5 5"/>
+                    <path d="M7 13l5 5 5-5M12 18v-12"/>
                 </svg>
             </button>
         </div>
@@ -367,7 +359,7 @@
                     modal.style.display = 'flex';
                 });
                 imageContainer.appendChild(imageElement);
-                downloadBtn.style.display = 'block';
+                downloadBtn.style.display = 'flex';
 
                 downloadBtn.onclick = function() {
                     const link = document.createElement('a');
