@@ -99,6 +99,7 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             min-height: 0;
             overflow: hidden;
+            position: relative;
         }
         .prompt-history {
             margin-bottom: 15px;
@@ -188,6 +189,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
         }
         #generate {
             background: #3b82f6;
@@ -200,8 +202,7 @@
             background: #10b981;
             color: white;
             display: none;
-            margin-top: 15px;
-            align-self: center;
+            margin: 15px auto 0;
             border-radius: 50%;
             width: 46px;
             height: 46px;
@@ -258,7 +259,7 @@
             <button id="download">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <path d="M7 10l5 5 5-5"/>
+                    <path d="M12 3v12M7 16l5 5 5-5"/>
                 </svg>
             </button>
         </main>
