@@ -38,6 +38,33 @@
             color: #1e293b;
             font-size: 1.8rem;
         }
+        .quality-selector {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-left: auto;
+            margin-right: 15px;
+        }
+        .quality-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            color: #475569;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .quality-btn:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+        .quality-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
         #model {
             padding: 8px 12px;
             border-radius: 8px;
@@ -169,6 +196,7 @@
         @media (max-width: 768px) {
             body { padding: 15px; }
             header { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .quality-selector { margin: 10px 0; order: 3; width: 100%; justify-content: center; }
             #model { width: 100%; }
         }
     </style>
@@ -177,6 +205,13 @@
     <div class="container">
         <header>
             <h1>AI Image Generator</h1>
+            <div class="quality-selector" id="qualitySelector">
+                <button class="quality-btn" data-value="low">Low</button>
+                <button class="quality-btn active" data-value="medium">Medium</button>
+                <button class="quality-btn" data-value="high">High</button>
+                <button class="quality-btn" data-value="standard">Standard</button>
+                <button class="quality-btn" data-value="hd">HD</button>
+            </div>
             <select id="model">
                 <option value="gpt-image-1.5">GPT-Image 1.5</option>
                 <option value="gpt-image-1-mini">GPT-Image 1 Mini</option>
@@ -188,6 +223,8 @@
                 <option value="google/imagen-4.0-preview">Google Imagen 4.0 Preview</option>
                 <option value="google/imagen-4.0-fast">Google Imagen 4.0 Fast</option>
                 <option value="google/imagen-4.0-ultra">Google Imagen 4.0 Ultra</option>
+                <option value="stabilityai/stable-diffusion-3-medium">Stable Diffusion 3</option>
+                <option value="stabilityai/stable-diffusion-xl-base-1.0">Stable Diffusion XL</option>
             </select>
         </header>
         
@@ -219,6 +256,71 @@
         const downloadBtn = document.getElementById('download');
         const modal = document.getElementById('imageModal');
         const modalImage = document.getElementById('modalImage');
+        const qualitySelector = document.getElementById('qualitySelector');
+        const qualityBtns = qualitySelector.querySelectorAll('.quality-btn');
+        const modelSelect = document.getElementById('model');
+
+        let currentQuality = 'medium';
+        
+        // 更新质量选择器可见性
+        function updateQualitySelector() {
+            const model = modelSelect.value;
+            const isGptModel = model === 'gpt-image-1' || model === 'gpt-image-1-mini';
+            const isDallE3 = model === 'dall-e-3';
+            
+            if (isGptModel) {
+                qualitySelector.style.display = 'flex';
+                qualityBtns.forEach(btn => {
+                    const value = btn.dataset.value;
+                    btn.style.display = value === 'standard' || value === 'hd' ? 'none' : 'inline-block';
+                    if (value === currentQuality && btn.style.display !== 'none') {
+                        btn.classList.add('active');
+                    }
+                });
+            } else if (isDallE3) {
+                qualitySelector.style.display = 'flex';
+                qualityBtns.forEach(btn => {
+                    const value = btn.dataset.value;
+                    btn.style.display = value === 'low' || value === 'medium' || value === 'high' ? 'none' : 'inline-block';
+                    if (value === currentQuality && btn.style.display !== 'none') {
+                        btn.classList.add('active');
+                    }
+                });
+            } else {
+                qualitySelector.style.display = 'none';
+            }
+        }
+
+        // 质量按钮点击事件
+        qualityBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (btn.style.display === 'none') return;
+                qualityBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentQuality = btn.dataset.value;
+            });
+        });
+
+        // 模型选择变化事件
+        modelSelect.addEventListener('change', () => {
+            // 重置为默认质量
+            const model = modelSelect.value;
+            if (model === 'gpt-image-1' || model === 'gpt-image-1-mini') {
+                currentQuality = 'medium';
+                qualityBtns.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.value === 'medium');
+                });
+            } else if (model === 'dall-e-3') {
+                currentQuality = 'standard';
+                qualityBtns.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.value === 'standard');
+                });
+            }
+            updateQualitySelector();
+        });
+
+        // 初始更新
+        updateQualitySelector();
 
         promptEl.addEventListener('input', function() {
             this.style.height = 'auto';
@@ -239,7 +341,7 @@
 
         document.getElementById('generate').onclick = async function() {
             const prompt = promptEl.value.trim();
-            const model = document.getElementById('model').value;
+            const model = modelSelect.value;
             
             if (!prompt) return alert('Please enter a description');
 
@@ -256,15 +358,22 @@
                 let imageElement;
                 const isImagenModel = model.startsWith('google/imagen');
                 
-                if (isImagenModel) {
-                    imageElement = await puter.ai.txt2img(prompt, {
-                        model: model,
-                        provider: "together-ai",
-                        disable_safety_checker: true
-                    });
-                } else {
-                    imageElement = await puter.ai.txt2img(prompt, { model: model });
+                // 构建API参数
+                const params = { model: model };
+                const supportsQuality = model === 'gpt-image-1' || 
+                                       model === 'gpt-image-1-mini' || 
+                                       model === 'dall-e-3';
+                
+                if (supportsQuality) {
+                    params.quality = currentQuality === 'hd' ? 'hd' : currentQuality;
                 }
+                
+                if (isImagenModel) {
+                    params.provider = "together-ai";
+                    params.disable_safety_checker = true;
+                }
+                
+                imageElement = await puter.ai.txt2img(prompt, params);
                 
                 imageContainer.innerHTML = '';
                 imageElement.style.cursor = 'pointer';
