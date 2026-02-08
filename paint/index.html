@@ -53,11 +53,7 @@
             align-items: center;
         }
         .current-model {
-            font-weight: 600;
-            background: #e0f2fe;
-            padding: 2px 8px;
-            border-radius: 4px;
-            color: #0369a1;
+            font-weight: 500;
         }
         .select-options {
             position: absolute;
@@ -77,9 +73,16 @@
             padding: 8px 12px;
             cursor: pointer;
             transition: background 0.2s;
+            font-weight: 400;
+            color: #334155;
         }
         .select-option:hover {
             background: #f1f5f9;
+        }
+        .select-option.selected {
+            font-weight: 600;
+            background: #e0f2fe;
+            color: #000;
         }
         .main-content {
             flex: 1;
@@ -214,7 +217,7 @@
                     <span>▼</span>
                 </div>
                 <div class="select-options">
-                    <div class="select-option" data-value="gpt-image-1.5">GPT-Image 1.5</div>
+                    <div class="select-option selected" data-value="gpt-image-1.5">GPT-Image 1.5</div>
                     <div class="select-option" data-value="gpt-image-1-mini">GPT-Image 1 Mini</div>
                     <div class="select-option" data-value="gpt-image-1">GPT-Image 1</div>
                     <div class="select-option" data-value="dall-e-3">DALL-E 3</div>
@@ -269,6 +272,13 @@
 
         document.querySelectorAll('.select-option').forEach(option => {
             option.addEventListener('click', () => {
+                // 移除之前选中的样式
+                document.querySelectorAll('.select-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                // 添加当前选中的样式
+                option.classList.add('selected');
+                
                 currentModel.textContent = option.textContent;
                 currentModelValue = option.dataset.value;
                 selectOptions.style.display = 'none';
