@@ -183,6 +183,9 @@
                 <option value="gpt-image-1">GPT-Image 1</option>
                 <option value="dall-e-3">DALL-E 3</option>
                 <option value="dall-e-2">DALL-E 2</option>
+                <option value="google/imagen-4.0-preview">Google Imagen 4.0 Preview</option>
+                <option value="google/imagen-4.0-fast">Google Imagen 4.0 Fast</option>
+                <option value="google/imagen-4.0-ultra">Google Imagen 4.0 Ultra</option>
             </select>
         </header>
         
@@ -248,7 +251,19 @@
             downloadBtn.style.display = 'none';
             
             try {
-                const imageElement = await puter.ai.txt2img(prompt, { model: model });
+                let imageElement;
+                const isImagenModel = model.startsWith('google/imagen');
+                
+                if (isImagenModel) {
+                    imageElement = await puter.ai.txt2img(prompt, {
+                        model: model,
+                        provider: "together-ai",
+                        disable_safety_checker: true
+                    });
+                } else {
+                    imageElement = await puter.ai.txt2img(prompt, { model: model });
+                }
+                
                 imageContainer.innerHTML = '';
                 imageElement.style.cursor = 'pointer';
                 imageElement.addEventListener('click', () => {
