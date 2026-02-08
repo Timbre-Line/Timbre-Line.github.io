@@ -53,6 +53,12 @@
             align-items: center;
             width: 100%;
         }
+        .select-header svg {
+            transition: transform 0.3s;
+        }
+        .select-header.active svg {
+            transform: rotate(180deg);
+        }
         .select-options {
             position: absolute;
             top: 100%;
@@ -170,14 +176,18 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
         button {
-            padding: 12px 28px;
-            border-radius: 10px;
+            padding: 12px;
+            border-radius: 50%;
             border: none;
             font-family: 'Inter', sans-serif;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
+            width: 46px;
             height: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         #generate {
             background: #3b82f6;
@@ -192,6 +202,9 @@
             display: none;
             margin-top: 15px;
             align-self: center;
+            border-radius: 10px;
+            width: auto;
+            padding: 12px 28px;
         }
         #download:hover {
             background: #059669;
@@ -203,6 +216,10 @@
         }
         .loading { color: #64748b; }
         .error { color: #ef4444; }
+        .arrow-icon {
+            width: 20px;
+            height: 20px;
+        }
     </style>
 </head>
 <body>
@@ -212,6 +229,9 @@
             <div class="custom-select">
                 <div class="select-header">
                     <span>GPT-Image 1.5</span>
+                    <svg class="arrow-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
                 </div>
                 <div class="select-options">
                     <div class="select-option selected" data-value="gpt-image-1.5">GPT-Image 1.5</div>
@@ -241,7 +261,12 @@
             <div class="input-wrapper">
                 <textarea id="prompt" placeholder="Describe the image" rows="1"></textarea>
             </div>
-            <button id="generate">Generate</button>
+            <button id="generate">
+                <svg width="20" height="20" fill="none" stroke="white" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <path d="M12 3v12M7 8l5-5 5 5"/>
+                </svg>
+            </button>
         </div>
     </div>
 
@@ -263,27 +288,29 @@
         let currentModelValue = 'gpt-image-1.5';
 
         selectHeader.addEventListener('click', () => {
-            selectOptions.style.display = selectOptions.style.display === 'block' ? 'none' : 'block';
+            const isActive = selectOptions.style.display === 'block';
+            selectOptions.style.display = isActive ? 'none' : 'block';
+            selectHeader.classList.toggle('active', !isActive);
         });
 
         document.querySelectorAll('.select-option').forEach(option => {
             option.addEventListener('click', () => {
-                // 移除之前选中的样式
                 document.querySelectorAll('.select-option').forEach(opt => {
                     opt.classList.remove('selected');
                 });
-                // 添加当前选中的样式
                 option.classList.add('selected');
                 
                 selectHeaderText.textContent = option.textContent;
                 currentModelValue = option.dataset.value;
                 selectOptions.style.display = 'none';
+                selectHeader.classList.remove('active');
             });
         });
 
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.custom-select')) {
                 selectOptions.style.display = 'none';
+                selectHeader.classList.remove('active');
             }
         });
 
