@@ -202,9 +202,10 @@
             display: none;
             margin-top: 15px;
             align-self: center;
-            border-radius: 10px;
-            width: auto;
-            padding: 12px 28px;
+            border-radius: 50%;
+            width: 46px;
+            height: 46px;
+            padding: 12px;
         }
         #download:hover {
             background: #059669;
@@ -254,7 +255,12 @@
             <div class="image-container" id="imageContainer">
                 <div class="placeholder">The generated image will be displayed here</div>
             </div>
-            <button id="download">Download</button>
+            <button id="download">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <path d="M7 10l5 5 5-5"/>
+                </svg>
+            </button>
         </main>
         
         <div class="input-area">
