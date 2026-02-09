@@ -196,6 +196,10 @@
         #generate:hover {
             background: #2563eb;
         }
+        #generate svg {
+            transform: scale(1.5);
+            transform-origin: center;
+        }
         #download {
             background: #10b981;
             color: white;
@@ -212,8 +216,8 @@
         .loading { color: #64748b; }
         .error { color: #ef4444; }
         .arrow-icon {
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
         }
     </style>
 </head>
@@ -256,7 +260,7 @@
                 <textarea id="prompt" placeholder="Describe the image" rows="1"></textarea>
             </div>
             <button id="generate">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M12 18V6M12 6L8 10M12 6L16 10"/>
                 </svg>
             </button>
