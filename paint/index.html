@@ -194,6 +194,13 @@
         #generate:hover {
             background: #2563eb;
         }
+        #generate:disabled {
+            background: #93c5fd;
+            cursor: not-allowed;
+        }
+        #generate:disabled:hover {
+            background: #93c5fd;
+        }
         #generate svg {
             transform: scale(1.5);
             transform-origin: center;
@@ -281,13 +288,23 @@
         const promptHistory = document.getElementById('promptHistory');
         const imageContainer = document.getElementById('imageContainer');
         const downloadBtn = document.getElementById('download');
+        const generateBtn = document.getElementById('generate');
         const modal = document.getElementById('imageModal');
         const modalImage = document.getElementById('modalImage');
         const selectHeader = document.querySelector('.select-header');
         const selectOptions = document.querySelector('.select-options');
         let currentModelValue = 'gpt-image-1.5';
+        let isGenerating = false;
 
-        // 下拉菜单逻辑
+        function updateGenerateButton() {
+            const prompt = promptEl.value.trim();
+            if (isGenerating || !prompt) {
+                generateBtn.disabled = true;
+            } else {
+                generateBtn.disabled = false;
+            }
+        }
+
         selectHeader.addEventListener('click', () => {
             const isActive = selectOptions.style.display === 'block';
             selectOptions.style.display = isActive ? 'none' : 'block';
@@ -314,26 +331,28 @@
             selectHeader.classList.remove('active');
         });
 
-        // 文本区域逻辑
         promptEl.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+            updateGenerateButton();
         });
 
         promptEl.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
+                const prompt = promptEl.value.trim();
+                if (!prompt || isGenerating) return;
                 generateImage();
             }
         });
 
-        // 模态窗口
+        updateGenerateButton();
+
         modal.addEventListener('click', () => modal.style.display = 'none');
 
-        // 生成图片函数
         async function generateImage() {
             const prompt = promptEl.value.trim();
-            if (!prompt) return alert('Please enter a description');
+            if (!prompt) return;
 
             promptHistory.textContent = `Prompt: ${prompt}`;
             promptHistory.style.display = 'block';
@@ -342,6 +361,9 @@
 
             imageContainer.innerHTML = '<div class="loading">Generating, please wait...</div>';
             downloadBtn.style.display = 'none';
+
+            isGenerating = true;
+            updateGenerateButton();
             
             try {
                 const options = currentModelValue.startsWith('google/imagen') 
@@ -367,10 +389,17 @@
             } catch (error) {
                 imageContainer.innerHTML = '<div class="error">Generation failed, please try again</div>';
                 console.error(error);
+            } finally {
+                isGenerating = false;
+                updateGenerateButton();
             }
         }
 
-        document.getElementById('generate').onclick = generateImage;
+        generateBtn.onclick = () => {
+            const prompt = promptEl.value.trim();
+            if (!prompt || isGenerating) return;
+            generateImage();
+        };
     </script>
 </body>
 </html>
