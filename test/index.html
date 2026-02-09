@@ -1,15 +1,30 @@
 <html>
 <body>
-    <h1>FLUX.2 Pro Image Generation</h1>
+    <div id="response">生成中...</div>
     <script src="https://js.puter.com/v2/"></script>
     <script>
-        puter.ai.txt2img(
-            "A serene Japanese garden with cherry blossoms and a koi pond",
-            { model: "black-forest-labs/FLUX.2-pro", disable_safety_checker: true }
-        )
-        .then(imageElement => {
-            document.body.appendChild(imageElement);
-        });
+        async function generateImage() {
+            const outputDiv = document.getElementById('response');
+            
+            try {
+                const response = await puter.ai.images.generate({
+                    prompt: "A beautiful sunset over mountains, digital art style",
+                    model: "openrouter:bytedance-seed/seedream-4.5",
+                    size: "1024x1024"
+                });
+                
+                if (response?.data?.[0]?.url) {
+                    outputDiv.innerHTML = `<img src="${response.data[0].url}" style="max-width: 100%; border-radius: 8px;" />`;
+                } else {
+                    outputDiv.innerHTML = "图像生成成功但没有获取到URL";
+                }
+            } catch (error) {
+                outputDiv.innerHTML = `错误: ${error.message}`;
+                console.error(error);
+            }
+        }
+
+        generateImage();
     </script>
 </body>
 </html>
