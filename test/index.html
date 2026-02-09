@@ -1,123 +1,45 @@
 <html>
 <body>
     <div>
-        <button onclick="debugImageModel()">开始调试 - 探查模型返回格式</button>
+        <button onclick="testAsTextModel()">测试：作为文本模型调用</button>
     </div>
-    <div id="debugOutput" style="margin-top:20px; padding:15px; border:1px solid #ccc; background:#f9f9f9; white-space: pre-wrap; font-family: monospace;"></div>
-    <div id="imagePreview" style="margin-top:20px;"></div>
+    <div id="testOutput" style="margin-top:20px; padding:15px; border:1px solid #ccc; background:#f9f9f9; white-space: pre-wrap; font-family: monospace;"></div>
 
     <script src="https://js.puter.com/v2/"></script>
     <script>
-        async function debugImageModel() {
-            const debugDiv = document.getElementById('debugOutput');
-            const previewDiv = document.getElementById('imagePreview');
-            debugDiv.innerHTML = '🕵️ 正在发送请求并探查返回格式...\n\n';
-            previewDiv.innerHTML = '';
+        async function testAsTextModel() {
+            const outputDiv = document.getElementById('testOutput');
+            outputDiv.innerHTML = '🧪 开始测试模型在文本生成模式下的行为...\n\n';
 
+            // 测试用例1：直接生成图像的Prompt（最可能触发其“图像模型”本质）
+            outputDiv.innerHTML += '=== 测试用例 1: 直接图像生成指令 ===\n';
+            await makeChatRequest('Generate an image of a cyberpunk cat.', outputDiv);
+
+            // 测试用例2：描述图像的Prompt（测试其多模态理解能力）
+            outputDiv.innerHTML += '\n\n=== 测试用例 2: 描述图像内容 ===\n';
+            await makeChatRequest('Describe the visual details of a sunset over a mountain lake in one paragraph.', outputDiv);
+
+            // 测试用例3：纯文本任务（测试其基础对话能力）
+            outputDiv.innerHTML += '\n\n=== 测试用例 3: 纯文本任务 ===\n';
+            await makeChatRequest('Write a short haiku about technology.', outputDiv);
+        }
+
+        async function makeChatRequest(prompt, outputDiv) {
             try {
-                // 1. 尝试使用 images.generate (如果存在)
-                debugDiv.innerHTML += '=== 尝试方法: puter.ai.images.generate ===\n';
-                if (typeof puter.ai.images !== 'undefined' && puter.ai.images.generate) {
-                    const payload = {
-                        prompt: "A simple red apple on a table", // 使用简单提示
-                        model: 'openrouter:bytedance-seed/seedream-4.5',
-                        size: "512x512"
-                    };
-                    debugDiv.innerHTML += `发送载荷: ${JSON.stringify(payload, null, 2)}\n---\n`;
-                    
-                    const result = await puter.ai.images.generate(payload);
-                    debugDiv.innerHTML += `✅ 原始响应对象:\n${JSON.stringify(result, null, 2)}\n\n`;
-                    inspectResponse(result, debugDiv, previewDiv);
-                } else {
-                    debugDiv.innerHTML += '❌ puter.ai.images.generate 不存在，跳过。\n\n';
-                }
-
-                // 2. 尝试使用 chat 接口（关键步骤）
-                debugDiv.innerHTML += '=== 尝试方法: puter.ai.chat (非流式) ===\n';
-                const chatPayload = {
-                    model: 'openrouter:bytedance-seed/seedream-4.5',
-                    stream: false, // 使用非流式以便获取完整对象
-                    messages: [
-                        { role: 'user', content: 'Generate an image of a simple red apple.' }
-                    ]
-                };
-                debugDiv.innerHTML += `发送载荷: ${JSON.stringify(chatPayload, null, 2)}\n---\n`;
+                outputDiv.innerHTML += `📤 发送: "${prompt}"\n`;
                 
-                const chatResponse = await puter.ai.chat(chatPayload);
-                debugDiv.innerHTML += `✅ 原始响应对象:\n${JSON.stringify(chatResponse, null, 2)}\n\n`;
-                inspectResponse(chatResponse, debugDiv, previewDiv);
-
-                // 3. 尝试流式接口（如果支持）
-                debugDiv.innerHTML += '=== 尝试方法: puter.ai.chat (流式) ===\n';
-                debugDiv.innerHTML += '（此方法用于探查是否分块返回图像数据）\n---\n';
-                const streamResponse = await puter.ai.chat({
+                const response = await puter.ai.chat({
                     model: 'openrouter:bytedance-seed/seedream-4.5',
-                    stream: true,
-                    messages: [
-                        { role: 'user', content: 'A simple red apple.' }
-                    ]
+                    messages: [{ role: 'user', content: prompt }],
+                    stream: false // 非流式，方便查看完整对象
                 });
-                
-                let aggregatedText = '';
-                for await (const chunk of streamResponse) {
-                    debugDiv.innerHTML += `收到流块: ${JSON.stringify(chunk)}\n`;
-                    aggregatedText += chunk?.text || '';
-                }
-                if (aggregatedText) {
-                    debugDiv.innerHTML += `\n🔍 聚合的文本内容:\n${aggregatedText}\n`;
-                    tryParseAsImage(aggregatedText, debugDiv, previewDiv);
-                }
+
+                outputDiv.innerHTML += `✅ 收到响应 (完整结构):\n${JSON.stringify(response, null, 2)}\n`;
+                outputDiv.innerHTML += `---\n📄 提取的文本内容:\n${response?.choices?.[0]?.message?.content || '(无文本内容)'}\n`;
+                outputDiv.innerHTML += '---\n';
 
             } catch (error) {
-                debugDiv.innerHTML += `❌ 请求失败:\n${error.message}\n${error.stack}\n`;
-                console.error('调试错误:', error);
-            }
-        }
-
-        // 分析响应对象的通用函数
-        function inspectResponse(obj, debugDiv, previewDiv) {
-            // 递归查找所有字符串属性，看是否有Base64图像或URL
-            function findPotentialImages(currentObj, path = '') {
-                for (const key in currentObj) {
-                    const value = currentObj[key];
-                    const currentPath = path ? `${path}.${key}` : key;
-                    
-                    if (typeof value === 'string') {
-                        // 检查是否是URL
-                        if (value.startsWith('http://') || value.startsWith('https://')) {
-                            debugDiv.innerHTML += `🌐 发现URL (位于 ${currentPath}): ${value}\n`;
-                            previewDiv.innerHTML += `<div><strong>从URL加载:</strong><br><img src="${value}" style="max-width:300px; border:2px solid blue;" onerror="this.style.display='none'"/></div>`;
-                        }
-                        // 检查是否是Base64图像数据
-                        if (value.startsWith('data:image/')) {
-                            debugDiv.innerHTML += `🖼️ 发现Base64图像数据 (位于 ${currentPath})，长度: ${value.length}\n`;
-                            previewDiv.innerHTML += `<div><strong>Base64图像:</strong><br><img src="${value}" style="max-width:300px; border:2px solid green;"/></div>`;
-                        }
-                        // 检查是否是不带前缀的Base64（尝试添加前缀）
-                        if (value.length > 100 && /^[A-Za-z0-9+/]+=*$/.test(value)) {
-                            debugDiv.innerHTML += `🔢 发现纯Base64字符串 (位于 ${currentPath})，长度: ${value.length}\n`;
-                            const testDataUrl = `data:image/png;base64,${value}`;
-                            previewDiv.innerHTML += `<div><strong>尝试解码Base64:</strong><br><img src="${testDataUrl}" style="max-width:300px; border:2px solid orange;" onerror="this.style.display='none'"/></div>`;
-                        }
-                    } else if (typeof value === 'object' && value !== null) {
-                        findPotentialImages(value, currentPath);
-                    }
-                }
-            }
-            
-            findPotentialImages(obj);
-        }
-
-        // 尝试将文本解析为图像
-        function tryParseAsImage(text, debugDiv, previewDiv) {
-            // 尝试提取JSON（如果响应是JSON字符串）
-            try {
-                const parsed = JSON.parse(text);
-                debugDiv.innerHTML += `📦 文本可解析为JSON，开始分析内部结构...\n`;
-                inspectResponse(parsed, debugDiv, previewDiv);
-            } catch (e) {
-                // 不是JSON，按原文本处理
-                debugDiv.innerHTML += `📝 响应是纯文本，不是JSON。\n`;
+                outputDiv.innerHTML += `❌ 请求失败: ${error.message}\n`;
             }
         }
     </script>
