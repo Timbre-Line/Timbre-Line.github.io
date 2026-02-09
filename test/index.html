@@ -3,28 +3,53 @@
     <div id="response">生成中...</div>
     <script src="https://js.puter.com/v2/"></script>
     <script>
-        async function generateImage() {
+        async function tryChatMethod() {
             const outputDiv = document.getElementById('response');
             
             try {
-                const response = await puter.ai.images.generate({
-                    prompt: "A beautiful sunset over mountains, digital art style",
-                    model: "openrouter:bytedance-seed/seedream-4.5",
-                    size: "1024x1024"
-                });
+                // 尝试明确告诉模型要生成图像
+                const response = await puter.ai.chat(
+                    "Generate an image of a cute robot with blue LED eyes in a futuristic city", 
+                    {
+                        model: 'openrouter:bytedance-seed/seedream-4.5',
+                        stream: false
+                    }
+                );
                 
-                if (response?.data?.[0]?.url) {
-                    outputDiv.innerHTML = `<img src="${response.data[0].url}" style="max-width: 100%; border-radius: 8px;" />`;
+                if (response?.text) {
+                    outputDiv.innerHTML = response.text;
+                } else if (response?.image) {
+                    outputDiv.innerHTML = `<img src="${response.image}" style="max-width: 100%;" />`;
                 } else {
-                    outputDiv.innerHTML = "图像生成成功但没有获取到URL";
+                    outputDiv.innerHTML = "响应中没有找到图像数据";
                 }
             } catch (error) {
-                outputDiv.innerHTML = `错误: ${error.message}`;
-                console.error(error);
+                outputDiv.innerHTML = `错误: ${error.message}<br>尝试其他方法...`;
+                setTimeout(tryAlternativeMethod, 1000);
             }
         }
 
-        generateImage();
+        async function tryAlternativeMethod() {
+            const outputDiv = document.getElementById('response');
+            
+            try {
+                // 尝试使用不同的参数格式
+                const response = await puter.ai.chat({
+                    messages: [{
+                        role: "user", 
+                        content: "画一幅星空下的城市风景画"
+                    }],
+                    model: "openrouter:bytedance-seed/seedream-4.5",
+                    max_tokens: 50
+                });
+                
+                outputDiv.innerHTML = response?.choices?.[0]?.message?.content || "无响应";
+            } catch (error) {
+                outputDiv.innerHTML = `所有方法都失败了: ${error.message}`;
+            }
+        }
+
+        tryChatMethod();
     </script>
 </body>
 </html>
