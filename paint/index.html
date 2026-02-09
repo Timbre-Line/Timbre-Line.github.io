@@ -51,7 +51,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            width: 100%;
         }
         .select-header svg {
             transition: transform 0.3s;
@@ -72,7 +71,6 @@
             z-index: 100;
             max-height: 300px;
             overflow-y: auto;
-            width: 100%;
         }
         .select-option {
             padding: 8px 12px;
@@ -287,27 +285,13 @@
         const modalImage = document.getElementById('modalImage');
         const selectHeader = document.querySelector('.select-header');
         const selectOptions = document.querySelector('.select-options');
-        const selectHeaderText = selectHeader.querySelector('span');
         let currentModelValue = 'gpt-image-1.5';
 
+        // 下拉菜单逻辑
         selectHeader.addEventListener('click', () => {
             const isActive = selectOptions.style.display === 'block';
             selectOptions.style.display = isActive ? 'none' : 'block';
             selectHeader.classList.toggle('active', !isActive);
-        });
-
-        document.querySelectorAll('.select-option').forEach(option => {
-            option.addEventListener('click', () => {
-                document.querySelectorAll('.select-option').forEach(opt => {
-                    opt.classList.remove('selected');
-                });
-                option.classList.add('selected');
-                
-                selectHeaderText.textContent = option.textContent;
-                currentModelValue = option.dataset.value;
-                selectOptions.style.display = 'none';
-                selectHeader.classList.remove('active');
-            });
         });
 
         document.addEventListener('click', (e) => {
@@ -317,6 +301,20 @@
             }
         });
 
+        selectOptions.addEventListener('click', (e) => {
+            const option = e.target.closest('.select-option');
+            if (!option) return;
+            
+            document.querySelectorAll('.select-option').forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            
+            selectHeader.querySelector('span').textContent = option.textContent;
+            currentModelValue = option.dataset.value;
+            selectOptions.style.display = 'none';
+            selectHeader.classList.remove('active');
+        });
+
+        // 文本区域逻辑
         promptEl.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = Math.min(this.scrollHeight, 150) + 'px';
@@ -325,13 +323,15 @@
         promptEl.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                document.getElementById('generate').click();
+                generateImage();
             }
         });
 
+        // 模态窗口
         modal.addEventListener('click', () => modal.style.display = 'none');
 
-        document.getElementById('generate').onclick = async function() {
+        // 生成图片函数
+        async function generateImage() {
             const prompt = promptEl.value.trim();
             if (!prompt) return alert('Please enter a description');
 
@@ -344,18 +344,11 @@
             downloadBtn.style.display = 'none';
             
             try {
-                let imageElement;
-                const isImagenModel = currentModelValue.startsWith('google/imagen');
+                const options = currentModelValue.startsWith('google/imagen') 
+                    ? { model: currentModelValue, provider: "together-ai", disable_safety_checker: true }
+                    : { model: currentModelValue };
                 
-                if (isImagenModel) {
-                    imageElement = await puter.ai.txt2img(prompt, {
-                        model: currentModelValue,
-                        provider: "together-ai",
-                        disable_safety_checker: true
-                    });
-                } else {
-                    imageElement = await puter.ai.txt2img(prompt, { model: currentModelValue });
-                }
+                const imageElement = await puter.ai.txt2img(prompt, options);
                 
                 imageContainer.innerHTML = '';
                 imageElement.addEventListener('click', () => {
@@ -365,7 +358,7 @@
                 imageContainer.appendChild(imageElement);
                 downloadBtn.style.display = 'flex';
 
-                downloadBtn.onclick = function() {
+                downloadBtn.onclick = () => {
                     const link = document.createElement('a');
                     link.href = imageElement.src;
                     link.download = `ai-image-${Date.now()}.png`;
@@ -375,7 +368,9 @@
                 imageContainer.innerHTML = '<div class="error">Generation failed, please try again</div>';
                 console.error(error);
             }
-        };
+        }
+
+        document.getElementById('generate').onclick = generateImage;
     </script>
 </body>
 </html>
