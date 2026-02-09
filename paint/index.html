@@ -72,6 +72,16 @@
             max-height: 300px;
             overflow-y: auto;
         }
+        .select-group {
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            cursor: default;
+            user-select: none;
+        }
         .select-option {
             padding: 8px 12px;
             cursor: pointer;
@@ -86,6 +96,16 @@
             font-weight: 600;
             background: #e0f2fe;
             color: #000;
+        }
+        .select-option.pro-option {
+            background: #fef3c7;
+        }
+        .select-option.pro-option.selected {
+            background: #e0f2fe;
+            color: #000;
+        }
+        .select-option.pro-option:hover {
+            background: #fde68a;
         }
         .main-content {
             flex: 1;
@@ -238,21 +258,37 @@
                     </svg>
                 </div>
                 <div class="select-options">
-                    <div class="select-option selected" data-value="gpt-image-1-mini">GPT-Image 1 Mini</div>
-                    <div class="select-option" data-value="gpt-image-1">GPT-Image 1</div>
-                    <div class="select-option" data-value="gpt-image-1.5">GPT-Image 1.5</div>
+                    <div class="select-group">Legacy</div>
+                    <div class="select-option selected" data-value="stabilityai/stable-diffusion-xl-base-1.0">Stable Diffusion XL</div>
                     <div class="select-option" data-value="dall-e-2">DALL-E 2</div>
-                    <div class="select-option" data-value="dall-e-3">DALL-E 3</div>
-                    <div class="select-option" data-value="gemini-2.5-flash-image-preview">Nano Banana</div>
-                    <div class="select-option" data-value="google/imagen-4.0-preview">Imagen 4.0 Preview</div>
-                    <div class="select-option" data-value="google/imagen-4.0-fast">Imagen 4.0 Fast</div>
-                    <div class="select-option" data-value="google/imagen-4.0-ultra">Imagen 4.0 Ultra</div>
+                    <div class="select-option" data-value="Lykon/DreamShaper">DreamShaper</div>
                     <div class="select-option" data-value="stabilityai/stable-diffusion-3-medium">Stable Diffusion 3</div>
-                    <div class="select-option" data-value="stabilityai/stable-diffusion-xl-base-1.0">Stable Diffusion XL</div>
+                    
+                    <div class="select-group">Light</div>
+                    <div class="select-option" data-value="gpt-image-1-mini">GPT-Image 1 Mini</div>
+                    <div class="select-option" data-value="google/imagen-4.0-fast">Imagen 4.0 Fast</div>
+                    <div class="select-option" data-value="google/imagen-4.0-preview">Imagen 4.0 Preview</div>
+                    <div class="select-option" data-value="black-forest-labs/FLUX.1-dev">FLUX.1 [dev]</div>
+                    <div class="select-option" data-value="black-forest-labs/FLUX.1-kontext-dev">FLUX.1 Kontext [dev]</div>
+                    
+                    <div class="select-group">Standard</div>
+                    <div class="select-option" data-value="dall-e-3">DALL-E 3</div>
+                    <div class="select-option" data-value="google/flash-image-2.5">Nano Banana</div>
+                    <div class="select-option" data-value="gpt-image-1">GPT-Image 1</div>
+                    <div class="select-option" data-value="ideogram/ideogram-3.0">Ideogram 3.0</div>
+                    <div class="select-option" data-value="black-forest-labs/FLUX.1-kontext-max">FLUX.1 Kontext [max]</div>
+                    
+                    <div class="select-group">Pro</div>
+                    <div class="select-option pro-option" data-value="google/imagen-4.0-ultra">Imagen 4.0 Ultra</div>
+                    <div class="select-option pro-option" data-value="black-forest-labs/FLUX.1-kontext-pro">FLUX.1 Kontext [pro]</div>
+                    <div class="select-option pro-option" data-value="black-forest-labs/FLUX.1-Canny-pro">FLUX.1 Canny [pro]</div>
+                    <div class="select-option pro-option" data-value="black-forest-labs/FLUX.1-pro">FLUX.1 Pro</div>
+                    <div class="select-option pro-option" data-value="black-forest-labs/FLUX.1.1-pro">FLUX 1.1 Pro</div>
+                    <div class="select-option pro-option" data-value="gpt-image-1.5">GPT-Image 1.5</div>
                 </div>
             </div>
         </header>
-        
+
         <main class="main-content">
             <div class="prompt-history" id="promptHistory"></div>
             <div class="image-container" id="imageContainer">
