@@ -273,7 +273,6 @@
                     <div class="select-option" data-value="google/flash-image-2.5">Nano Banana</div>
                     <div class="select-option" data-value="gpt-image-1">GPT-Image 1</div>
                     <div class="select-option" data-value="ideogram/ideogram-3.0">Ideogram 3.0</div>
-                    <div class="select-option" data-value="openrouter:bytedance-seed/seedream-4.5">Seedream 4.5</div>
 
                     <div class="select-group">Pro</div>
                     <div class="select-option pro-option" data-value="google/imagen-4.0-ultra">Imagen 4.0 Ultra</div>
@@ -322,7 +321,7 @@
         const modalImage = document.getElementById('modalImage');
         const selectHeader = document.querySelector('.select-header');
         const selectOptions = document.querySelector('.select-options');
-        let currentModelValue = 'gpt-image-1.5';
+        let currentModelValue = 'stabilityai/stable-diffusion-xl-base-1.0';
         let isGenerating = false;
 
         function updateGenerateButton() {
