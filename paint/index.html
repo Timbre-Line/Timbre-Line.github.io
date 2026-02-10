@@ -7,7 +7,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { height: 100%; overflow: hidden; }
+        html, body { 
+            height: 100%; 
+            overflow: hidden;
+            touch-action: manipulation;
+            -webkit-text-size-adjust: 100%;
+        }
         body {
             font-family: 'Inter', sans-serif;
             padding: 20px;
@@ -16,6 +21,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            touch-action: pan-y;
+            -webkit-user-select: none;
+            user-select: none;
         }
         .container {
             width: 100%;
@@ -187,6 +195,9 @@
             overflow-y: auto;
             transition: border-color 0.2s;
             max-height: 150px;
+            -webkit-user-select: text;
+            user-select: text;
+            touch-action: auto;
         }
         #prompt:focus {
             outline: none;
@@ -243,6 +254,10 @@
         .arrow-icon {
             width: 24px;
             height: 24px;
+        }
+        /* 禁用双指捏合缩放 */
+        * {
+            touch-action: pan-y;
         }
     </style>
 </head>
