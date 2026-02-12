@@ -1,83 +1,35 @@
 <html>
 <body>
-    <div>
-        <button onclick="finalDebug()">最终模型排查测试</button>
-    </div>
-    <div id="debugOutput" style="margin-top:20px; padding:15px; border:1px solid #ccc; background:#f9f9f9; white-space: pre-wrap; font-family: monospace;"></div>
-
+    <h1>Seedance 1.0 Pro Video Generation</h1>
+    <div id="status"></div>
     <script src="https://js.puter.com/v2/"></script>
     <script>
-        async function finalDebug() {
-            const outputDiv = document.getElementById('debugOutput');
-            outputDiv.innerHTML = '🔍 开始最终排查...\n\n';
+        // Start timer
+        const status = document.getElementById('status');
+        const startTime = Date.now();
+        const timerInterval = setInterval(() => {
+            const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+            status.textContent = `Loading (${elapsed} seconds)`;
+        }, 100);
 
-            // 关键：先获取可用模型列表
-            outputDiv.innerHTML += '=== 步骤1: 获取Puter支持的模型列表 ===\n';
-            try {
-                // 尝试调用可能存在的模型列表API
-                const models = await puter.ai.models.list();
-                outputDiv.innerHTML += `✅ 获取到模型列表:\n${JSON.stringify(models, null, 2)}\n\n`;
-                
-                // 检查列表中是否有字节跳动相关模型
-                const byteDanceModels = models.filter(m => 
-                    m.id && (m.id.includes('byte') || m.id.includes('seed') || m.id.includes('dream'))
-                );
-                if (byteDanceModels.length > 0) {
-                    outputDiv.innerHTML += `🎯 找到字节跳动相关模型:\n${JSON.stringify(byteDanceModels, null, 2)}\n`;
-                } else {
-                    outputDiv.innerHTML += '⚠️ 模型列表中未找到字节跳动相关模型\n';
-                }
-            } catch (e) {
-                outputDiv.innerHTML += `❌ 无法获取模型列表: ${e.message}\n`;
-            }
+        // Generate video
+        puter.ai.txt2vid(
+            "A majestic dragon flying through clouds at sunset, cinematic lighting, 4k quality",
+            { model: "ByteDance/Seedance-1.0-pro" }
+        )
+        .then(videoElement => {
+            document.body.appendChild(videoElement);
+            videoElement.addEventListener('loadeddata', () => videoElement.play().catch(() => {}));
 
-            // 测试其他已知可工作的图像模型作为对照组
-            outputDiv.innerHTML += '\n=== 步骤2: 测试其他图像模型作为对照 ===\n';
-            const testModels = [
-                'openai/dall-e-3',  // OpenAI图像模型
-                'stabilityai/stable-diffusion-3',  // 知名开源图像模型
-                'anthropic/claude-3-haiku'  // 文本模型作为对照组
-            ];
-
-            for (const model of testModels) {
-                outputDiv.innerHTML += `\n测试模型: ${model}\n`;
-                try {
-                    const response = await puter.ai.chat({
-                        model: `openrouter:${model}`,
-                        messages: [{ role: 'user', content: 'Say "Hello" in one word.' }],
-                        stream: false
-                    });
-                    outputDiv.innerHTML += `✅ 成功! 响应: ${JSON.stringify(response?.choices?.[0]?.message?.content || response)}\n`;
-                } catch (error) {
-                    outputDiv.innerHTML += `❌ 失败: ${error.message || 'undefined error'}\n`;
-                }
-            }
-
-            // 最后测试可能的正确模型名称变体
-            outputDiv.innerHTML += '\n=== 步骤3: 测试模型名称变体 ===\n';
-            const modelVariants = [
-                'bytedance/seedream-4.5',
-                'seedream-4.5',
-                'seedream',
-                'bytedance-seed/seedream-4.5-latest',
-                'openrouter:bytedance/seedream-4.5'
-            ];
-
-            for (const variant of modelVariants) {
-                outputDiv.innerHTML += `\n测试变体: ${variant}\n`;
-                try {
-                    const response = await puter.ai.chat({
-                        model: variant,
-                        messages: [{ role: 'user', content: 'Test' }],
-                        stream: false,
-                        max_tokens: 5
-                    });
-                    outputDiv.innerHTML += `✅ 可能找到了! 响应: ${JSON.stringify(response)}\n`;
-                } catch (error) {
-                    outputDiv.innerHTML += `❌ ${error.message || '失败'}\n`;
-                }
-            }
-        }
+            // Clear timer and show finished status
+            clearInterval(timerInterval);
+            const totalTime = ((Date.now() - startTime) / 1000).toFixed(1);
+            status.textContent = `Finished (${totalTime} seconds)`;
+        }).catch(error => {
+            console.error(error);
+            clearInterval(timerInterval);
+            status.textContent = JSON.stringify(error);
+        })
     </script>
 </body>
 </html>
