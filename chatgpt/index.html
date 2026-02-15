@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>ChatGPT</title>
+    <title>ChatGPT · 极简增强版</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="icon" href="icon.png" type="image/png">
     <script src="https://js.puter.com/v2/"></script>
@@ -162,7 +162,7 @@
             padding: 8px 12px;
             font-size: 14px;
             cursor: pointer;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 4px;
             height: 36px;
@@ -172,6 +172,36 @@
             background: #e3f2fd;
             color: #1565c0;
             border-color: #1565c0;
+        }
+        /* 增强按钮容器 */
+        .enhancements-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 8px;
+            min-height: 36px;
+        }
+        .enhancement-btn {
+            border: 1px solid #d0d0d0;
+            border-radius: 18px;
+            background: #fff;
+            padding: 8px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            height: 36px;
+            transition: all 0.2s;
+        }
+        .enhancement-btn.active {
+            background: #e3f2fd;
+            color: #1565c0;
+            border-color: #1565c0;
+        }
+        .enhancement-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
         }
         .input-container {
             display: flex;
@@ -252,7 +282,10 @@
     </div>
     
     <div class="bottom-section">
-        <button class="web-search-toggle" id="webSearchToggle">🌐联网搜索</button>
+        <button class="web-search-toggle" id="webSearchToggle">🌐 联网搜索</button>
+        <!-- 动态增强按钮容器 (初始隐藏) -->
+        <div class="enhancements-container" id="enhancementsContainer" style="display: none;"></div>
+        
         <div class="input-container">
             <textarea class="input-box" id="inputBox" placeholder="有问题，尽管问" rows="2"></textarea>
             <button class="send-button" id="sendButton">
@@ -267,227 +300,361 @@
     </div>
 
     <script>
-        const chatContainer = document.getElementById('chatContainer');
-        const inputBox = document.getElementById('inputBox');
-        const sendButton = document.getElementById('sendButton');
-        const webSearchToggle = document.getElementById('webSearchToggle');
-        const welcomeMessage = document.getElementById('welcomeMessage');
-        const newChatBtn = document.getElementById('newChatBtn');
-        const selectSelected = document.getElementById('selectSelected');
-        const selectItems = document.getElementById('selectItems');
-        const customSelect = document.getElementById('customSelect');
-        
-        let isThinking = false;
-        let webSearchEnabled = false;
-        let conversationContext = "";
-        let hasUserSentMessage = false;
-        
-        const welcomeMessages = [
-            "有什么可以帮忙的？",
-            "我们先从哪里开始呢？",
-            "准备好了，随时开始",
-            "今天有什么计划？",
-            "您今天在想什么？",
-            "你在忙什么？"
-        ];
-        welcomeMessage.textContent = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
-        marked.setOptions({ breaks: true, gfm: true });
+        (function() {
+            // ----- 核心元素 -----
+            const chatContainer = document.getElementById('chatContainer');
+            const inputBox = document.getElementById('inputBox');
+            const sendButton = document.getElementById('sendButton');
+            const webSearchToggle = document.getElementById('webSearchToggle');
+            const welcomeMessage = document.getElementById('welcomeMessage');
+            const newChatBtn = document.getElementById('newChatBtn');
+            const selectSelected = document.getElementById('selectSelected');
+            const selectItems = document.getElementById('selectItems');
+            const customSelect = document.getElementById('customSelect');
+            const enhancementsContainer = document.getElementById('enhancementsContainer');
 
-        function initCustomSelect() {
-            const modelGroups = {
-                'GPT-5.2 系列': ['gpt-5.2-chat', 'gpt-5.2', 'openrouter:openai/gpt-5.2-pro'],
-                'o 系列': ['o1', 'o3', 'o3-mini', 'openrouter:openai/o3-mini-high', 'openrouter:openai/o3-deep-research', 'o4-mini', 'openrouter:openai/o4-mini-high', 'openrouter:openai/o4-mini-deep-research', 'openrouter:openai/o3-pro'],
-                'Legacy (不能联网)': ['openrouter:openai/gpt-4', 'openrouter:openai/gpt-4-turbo', 'openrouter:openai/gpt-3.5-turbo']
-            };
+            // ----- 状态 -----
+            let isThinking = false;
+            let webSearchEnabled = false;
+            let conversationContext = "";
+            let hasUserSentMessage = false;
+            
+            // 当前激活的增强模型ID (如 'openrouter:openai/o3-deep-research')，null 表示使用基础模型
+            let currentEnhancementId = null;
+
+            // ----- 模型名称映射 (包含基础模型 + 所有增强变体) -----
             const modelNames = {
+                // GPT-5.2 系列
                 'gpt-5.2-chat': 'GPT-5.2 Instant',
                 'gpt-5.2': 'GPT-5.2 Thinking',
                 'openrouter:openai/gpt-5.2-pro': 'GPT-5.2 Pro',
+                // o系列基础
                 'o1': 'OpenAI o1',
                 'o3': 'OpenAI o3',
                 'o3-mini': 'OpenAI o3-mini',
-                'openrouter:openai/o3-mini-high': 'OpenAI o3-mini-high',
-                'openrouter:openai/o3-deep-research': 'OpenAI o3 Deep Research',
                 'o4-mini': 'OpenAI o4-mini',
+                // o3 增强
+                'openrouter:openai/o3-deep-research': 'OpenAI o3 Deep Research',
+                'openrouter:openai/o3-pro': 'OpenAI o3 Pro',
+                // o3-mini 增强
+                'openrouter:openai/o3-mini-high': 'OpenAI o3-mini-high',
+                // o4-mini 增强
                 'openrouter:openai/o4-mini-high': 'OpenAI o4-mini-high',
                 'openrouter:openai/o4-mini-deep-research': 'OpenAI o4-mini Deep Research',
-                'openrouter:openai/o3-pro': 'OpenAI o3-pro',
+                // Legacy
                 'openrouter:openai/gpt-4': 'GPT-4',
                 'openrouter:openai/gpt-4-turbo': 'GPT-4 Turbo',
                 'openrouter:openai/gpt-3.5-turbo': 'GPT-3.5 Turbo'
             };
-            
-            selectItems.innerHTML = '';
-            for (const [groupName, models] of Object.entries(modelGroups)) {
-                const groupDiv = document.createElement('div');
-                groupDiv.className = 'select-item select-group';
-                groupDiv.textContent = groupName;
-                groupDiv.style.cssText = 'color: #666; font-size: 12px; padding: 8px 12px 4px; cursor: default; background: #f8f9fa; border-bottom: 1px solid #eee;';
-                selectItems.appendChild(groupDiv);
-                
-                models.forEach(model => {
-                    const item = document.createElement('div');
-                    item.className = 'select-item';
-                    item.dataset.value = model;
-                    item.textContent = modelNames[model] || model;
-                    // 标记是否为 Legacy 模型（不能联网）
-                    if (groupName.includes('Legacy')) item.dataset.legacy = 'true';
-                    selectItems.appendChild(item);
-                });
-            }
-            
-            // 默认选中第一个模型（GPT-5.2 Instant）
-            const firstModel = document.querySelector('.select-item:not(.select-group)');
-            if (firstModel) {
-                firstModel.classList.add('selected');
-                selectSelected.textContent = firstModel.textContent;
-                // 根据默认模型设置联网按钮状态
-                webSearchToggle.disabled = firstModel.dataset.legacy === 'true';
-                webSearchToggle.style.opacity = firstModel.dataset.legacy === 'true' ? '0.5' : '1';
-                webSearchToggle.style.cursor = firstModel.dataset.legacy === 'true' ? 'not-allowed' : 'pointer';
-            }
-            
-            selectSelected.addEventListener('click', function(e) {
-                e.stopPropagation();
-                selectItems.classList.toggle('active');
-            });
-            
-            document.querySelectorAll('.select-item:not(.select-group)').forEach(item => {
-                item.addEventListener('click', function() {
-                    selectSelected.textContent = this.textContent;
-                    document.querySelectorAll('.select-item:not(.select-group)').forEach(el => {
-                        el.classList.remove('selected');
+
+            // ----- 增强映射: 基础模型 -> 支持的增强列表 -----
+            const enhancementMap = {
+                'o3': [
+                    { name: 'Deep Research', modelId: 'openrouter:openai/o3-deep-research' },
+                    { name: 'Pro', modelId: 'openrouter:openai/o3-pro' }
+                ],
+                'o3-mini': [
+                    { name: 'High', modelId: 'openrouter:openai/o3-mini-high' }
+                ],
+                'o4-mini': [
+                    { name: 'High', modelId: 'openrouter:openai/o4-mini-high' },
+                    { name: 'Deep Research', modelId: 'openrouter:openai/o4-mini-deep-research' }
+                ]
+            };
+
+            // ----- 初始化欢迎语 -----
+            const welcomeMessages = [
+                "有什么可以帮忙的？",
+                "我们先从哪里开始呢？",
+                "准备好了，随时开始",
+                "今天有什么计划？",
+                "您今天在想什么？",
+                "你在忙什么？"
+            ];
+            welcomeMessage.textContent = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
+            marked.setOptions({ breaks: true, gfm: true });
+
+            // ----- 构建极简下拉框 (移除了所有重复变体) -----
+            function initCustomSelect() {
+                const modelGroups = {
+                    'GPT-5.2 系列': ['gpt-5.2-chat', 'gpt-5.2', 'openrouter:openai/gpt-5.2-pro'],
+                    'o 系列': ['o1', 'o3', 'o3-mini', 'o4-mini'],   // 只保留基础型号
+                    'Legacy (不能联网)': ['openrouter:openai/gpt-4', 'openrouter:openai/gpt-4-turbo', 'openrouter:openai/gpt-3.5-turbo']
+                };
+
+                selectItems.innerHTML = '';
+                for (const [groupName, models] of Object.entries(modelGroups)) {
+                    // 分组标题
+                    const groupDiv = document.createElement('div');
+                    groupDiv.className = 'select-item select-group';
+                    groupDiv.textContent = groupName;
+                    groupDiv.style.cssText = 'color: #666; font-size: 12px; padding: 8px 12px 4px; cursor: default; background: #f8f9fa; border-bottom: 1px solid #eee;';
+                    selectItems.appendChild(groupDiv);
+
+                    // 模型选项
+                    models.forEach(model => {
+                        const item = document.createElement('div');
+                        item.className = 'select-item';
+                        item.dataset.value = model;
+                        item.textContent = modelNames[model] || model;
+                        // 标记 Legacy 组 (用于禁用联网)
+                        if (groupName.includes('Legacy')) item.dataset.legacy = 'true';
+                        selectItems.appendChild(item);
                     });
-                    this.classList.add('selected');
-                    
-                    // 根据所选模型是否 Legacy 控制联网按钮
-                    const isLegacy = this.dataset.legacy === 'true';
+                }
+
+                // 默认选中第一个模型 (GPT-5.2 Instant)
+                const firstModel = document.querySelector('.select-item:not(.select-group)');
+                if (firstModel) {
+                    firstModel.classList.add('selected');
+                    selectSelected.textContent = firstModel.textContent;
+                    // 根据默认模型设置联网按钮状态
+                    const isLegacy = firstModel.dataset.legacy === 'true';
                     webSearchToggle.disabled = isLegacy;
                     webSearchToggle.style.opacity = isLegacy ? '0.5' : '1';
                     webSearchToggle.style.cursor = isLegacy ? 'not-allowed' : 'pointer';
-                    if (isLegacy) webSearchToggle.classList.remove('active');
                     
-                    selectItems.classList.remove('active');
+                    // 初始化增强区域 (基于默认模型)
+                    updateEnhancementsForModel(firstModel.dataset.value);
+                }
+
+                // 下拉点击事件
+                selectSelected.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    selectItems.classList.toggle('active');
                 });
-            });
-            
-            document.addEventListener('click', function(e) {
-                if (!customSelect.contains(e.target)) {
-                    selectItems.classList.remove('active');
-                }
-            });
-        }
-        
-        function addMessage(content, isUser = false, isStreaming = false) {
-            if (isUser && !hasUserSentMessage) {
-                welcomeMessage.style.display = 'none';
-                hasUserSentMessage = true;
-            }
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isUser ? 'user' : 'ai'}`;
-            
-            const messageContent = document.createElement('div');
-            messageContent.className = 'message-content';
-            
-            if (isUser) {
-                messageContent.innerHTML = content.replace(/\n/g, '<br>');
-            } else if (isStreaming) {
-                messageContent.innerHTML = '<span class="typing"></span>思考中...';
-                messageDiv.id = 'streamingMessage';
-            } else {
-                const modelLabel = document.createElement('span');
-                modelLabel.className = 'model-label';
-                modelLabel.textContent = `Generated by ${selectSelected.textContent}`;
-                messageDiv.appendChild(modelLabel);
-                messageContent.innerHTML = marked.parse(content);
-            }
-            
-            messageDiv.appendChild(messageContent);
-            chatContainer.appendChild(messageDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-            
-            return { messageDiv, messageContent };
-        }
-        
-        async function sendMessage() {
-            if (isThinking) return;
-            
-            const userInput = inputBox.value.trim();
-            if (!userInput) return;
-            
-            inputBox.value = '';
-            addMessage(userInput, true);
-            
-            isThinking = true;
-            sendButton.disabled = true;
-            inputBox.disabled = true;
-            
-            const { messageDiv, messageContent } = addMessage('', false, true);
-            
-            try {
-                const fullPrompt = conversationContext + "用户: " + userInput + "\nAI: ";
-                const selectedModel = document.querySelector('.select-item.selected').getAttribute('data-value');
-                const options = { stream: true, model: selectedModel };
-                if (webSearchEnabled && !webSearchToggle.disabled) options.tools = [{ type: "web_search" }];
-                
-                const response = await puter.ai.chat(fullPrompt, options);
-                let fullResponse = '';
-                messageContent.innerHTML = '';
-                
-                for await (const part of response) {
-                    if (part?.text) {
-                        fullResponse += part.text;
-                        messageContent.innerHTML = marked.parse(fullResponse);
+
+                // 选项点击
+                document.querySelectorAll('.select-item:not(.select-group)').forEach(item => {
+                    item.addEventListener('click', function() {
+                        selectSelected.textContent = this.textContent;
+                        document.querySelectorAll('.select-item:not(.select-group)').forEach(el => {
+                            el.classList.remove('selected');
+                        });
+                        this.classList.add('selected');
+
+                        // 更新联网按钮
+                        const isLegacy = this.dataset.legacy === 'true';
+                        webSearchToggle.disabled = isLegacy;
+                        webSearchToggle.style.opacity = isLegacy ? '0.5' : '1';
+                        webSearchToggle.style.cursor = isLegacy ? 'not-allowed' : 'pointer';
+                        if (isLegacy) webSearchToggle.classList.remove('active');
+
+                        // 切换模型 → 重置增强激活状态，更新增强按钮
+                        currentEnhancementId = null;
+                        updateEnhancementsForModel(this.dataset.value);
+
+                        selectItems.classList.remove('active');
+                    });
+                });
+
+                // 点击外部关闭下拉
+                document.addEventListener('click', function(e) {
+                    if (!customSelect.contains(e.target)) {
+                        selectItems.classList.remove('active');
                     }
+                });
+            }
+
+            // ----- 根据当前基础模型 显示/隐藏 并生成增强按钮 -----
+            function updateEnhancementsForModel(baseModelValue) {
+                const enhancements = enhancementMap[baseModelValue];
+                if (!enhancements || enhancements.length === 0) {
+                    enhancementsContainer.style.display = 'none';
+                    enhancementsContainer.innerHTML = '';
+                    currentEnhancementId = null;  // 没有增强时清空
+                    return;
                 }
-                
-                conversationContext += "用户: " + userInput + "\nAI: " + fullResponse + "\n";
-                const lines = conversationContext.split('\n');
-                if (lines.length > 20) conversationContext = lines.slice(-20).join('\n');
-                
-                messageDiv.id = '';
-                const modelLabel = document.createElement('span');
-                modelLabel.className = 'model-label';
-                modelLabel.textContent = `Generated by ${selectSelected.textContent}`;
-                messageDiv.insertBefore(modelLabel, messageDiv.firstChild);
-                
-            } catch (error) {
-                messageContent.innerHTML = `错误: ${error.message}`;
-            } finally {
-                isThinking = false;
-                sendButton.disabled = false;
-                inputBox.disabled = false;
-                inputBox.focus();
-            }
-        }
 
-        inputBox.addEventListener('input', () => {
-            inputBox.style.height = 'auto';
-            inputBox.style.height = Math.min(inputBox.scrollHeight, 132) + 'px';
-        });
-        
-        inputBox.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey && !isThinking) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
-        
-        sendButton.addEventListener('click', sendMessage);
-        webSearchToggle.addEventListener('click', () => {
-            if (webSearchToggle.disabled) return;
-            webSearchEnabled = !webSearchEnabled;
-            webSearchToggle.classList.toggle('active', webSearchEnabled);
-        });
-        
-        newChatBtn.addEventListener('click', () => {
-            if (chatContainer.children.length > 1 && !confirm('开始新对话将清除当前对话，是否继续？')) return;
-            window.location.reload();
-        });
+                // 显示容器，并重新生成按钮
+                enhancementsContainer.style.display = 'flex';
+                enhancementsContainer.innerHTML = '';
 
-        initCustomSelect();
-        inputBox.focus();
+                enhancements.forEach(enh => {
+                    const btn = document.createElement('button');
+                    btn.className = 'enhancement-btn';
+                    btn.textContent = enh.name;
+                    btn.dataset.enhancementId = enh.modelId;
+                    
+                    // 如果当前激活的ID匹配，设为active
+                    if (currentEnhancementId === enh.modelId) {
+                        btn.classList.add('active');
+                    }
+
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const clickedId = btn.dataset.enhancementId;
+
+                        // 如果点击的按钮已经是激活状态 → 关闭增强 (设为null)
+                        if (btn.classList.contains('active')) {
+                            currentEnhancementId = null;
+                        } else {
+                            // 否则激活当前按钮，并确保同组其他按钮取消激活 (互斥)
+                            currentEnhancementId = clickedId;
+                        }
+
+                        // 更新容器内所有按钮的active状态
+                        Array.from(enhancementsContainer.children).forEach(b => {
+                            const bid = b.dataset.enhancementId;
+                            if (bid === currentEnhancementId) {
+                                b.classList.add('active');
+                            } else {
+                                b.classList.remove('active');
+                            }
+                        });
+                    });
+
+                    enhancementsContainer.appendChild(btn);
+                });
+            }
+
+            // ----- 获取当前真正使用的模型ID (基础 + 增强) -----
+            function getEffectiveModelId() {
+                const baseItem = document.querySelector('.select-item.selected');
+                if (!baseItem) return 'gpt-5.2-chat'; // fallback
+                const baseModel = baseItem.dataset.value;
+                // 如果有激活的增强，且属于当前基础模型 (避免切换后残留)
+                if (currentEnhancementId) {
+                    // 简单检查该增强是否属于当前基础模型 (防止手动切换模型后增强按钮未及时清除，但update已处理)
+                    const allowed = enhancementMap[baseModel]?.some(e => e.modelId === currentEnhancementId);
+                    if (allowed) return currentEnhancementId;
+                }
+                return baseModel;
+            }
+
+            // ----- 获取模型显示名称 (用于消息label) -----
+            function getModelDisplayName(modelId) {
+                return modelNames[modelId] || modelId;
+            }
+
+            // ----- 添加消息 (小幅改造：支持最终模型名称) -----
+            function addMessage(content, isUser = false, isStreaming = false, finalModelName = null) {
+                if (isUser && !hasUserSentMessage) {
+                    welcomeMessage.style.display = 'none';
+                    hasUserSentMessage = true;
+                }
+
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${isUser ? 'user' : 'ai'}`;
+
+                const messageContent = document.createElement('div');
+                messageContent.className = 'message-content';
+
+                if (isUser) {
+                    messageContent.innerHTML = content.replace(/\n/g, '<br>');
+                } else if (isStreaming) {
+                    messageContent.innerHTML = '<span class="typing"></span>思考中...';
+                    messageDiv.id = 'streamingMessage';
+                } else {
+                    // 只有最终消息才添加模型标签
+                    const modelLabel = document.createElement('span');
+                    modelLabel.className = 'model-label';
+                    modelLabel.textContent = `Generated by ${finalModelName || selectSelected.textContent}`;
+                    messageDiv.appendChild(modelLabel);
+                    messageContent.innerHTML = marked.parse(content);
+                }
+
+                messageDiv.appendChild(messageContent);
+                chatContainer.appendChild(messageDiv);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+
+                return { messageDiv, messageContent };
+            }
+
+            // ----- 发送消息 -----
+            async function sendMessage() {
+                if (isThinking) return;
+
+                const userInput = inputBox.value.trim();
+                if (!userInput) return;
+
+                inputBox.value = '';
+                addMessage(userInput, true);
+
+                isThinking = true;
+                sendButton.disabled = true;
+                inputBox.disabled = true;
+
+                const { messageDiv, messageContent } = addMessage('', false, true);
+
+                // 确定最终使用的模型ID和显示名称
+                const effectiveModelId = getEffectiveModelId();
+                const modelDisplayName = getModelDisplayName(effectiveModelId);
+
+                try {
+                    const fullPrompt = conversationContext + "用户: " + userInput + "\nAI: ";
+                    const options = { stream: true, model: effectiveModelId };
+                    if (webSearchEnabled && !webSearchToggle.disabled) {
+                        options.tools = [{ type: "web_search" }];
+                    }
+
+                    const response = await puter.ai.chat(fullPrompt, options);
+                    let fullResponse = '';
+                    messageContent.innerHTML = '';
+
+                    for await (const part of response) {
+                        if (part?.text) {
+                            fullResponse += part.text;
+                            messageContent.innerHTML = marked.parse(fullResponse);
+                        }
+                    }
+
+                    // 更新上下文
+                    conversationContext += "用户: " + userInput + "\nAI: " + fullResponse + "\n";
+                    const lines = conversationContext.split('\n');
+                    if (lines.length > 20) conversationContext = lines.slice(-20).join('\n');
+
+                    // 移除临时的“思考中”，替换为正式内容，并插入正确的模型标签
+                    messageDiv.id = '';
+                    // 清除可能存在的旧标签（流式时没有标签，但以防万一）
+                    const oldLabel = messageDiv.querySelector('.model-label');
+                    if (oldLabel) oldLabel.remove();
+                    
+                    const modelLabel = document.createElement('span');
+                    modelLabel.className = 'model-label';
+                    modelLabel.textContent = `Generated by ${modelDisplayName}`;
+                    messageDiv.insertBefore(modelLabel, messageDiv.firstChild);
+
+                } catch (error) {
+                    messageContent.innerHTML = `错误: ${error.message}`;
+                } finally {
+                    isThinking = false;
+                    sendButton.disabled = false;
+                    inputBox.disabled = false;
+                    inputBox.focus();
+                }
+            }
+
+            // ----- 事件绑定 -----
+            inputBox.addEventListener('input', () => {
+                inputBox.style.height = 'auto';
+                inputBox.style.height = Math.min(inputBox.scrollHeight, 132) + 'px';
+            });
+
+            inputBox.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey && !isThinking) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            sendButton.addEventListener('click', sendMessage);
+
+            webSearchToggle.addEventListener('click', () => {
+                if (webSearchToggle.disabled) return;
+                webSearchEnabled = !webSearchEnabled;
+                webSearchToggle.classList.toggle('active', webSearchEnabled);
+            });
+
+            newChatBtn.addEventListener('click', () => {
+                if (chatContainer.children.length > 1 && !confirm('开始新对话将清除当前对话，是否继续？')) return;
+                window.location.reload();
+            });
+
+            initCustomSelect();
+            inputBox.focus();
+
+        })();
     </script>
 </body>
 </html>
