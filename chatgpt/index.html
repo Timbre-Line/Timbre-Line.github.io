@@ -8,6 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        ::selection { background: #b8ddff; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #fff;
@@ -152,8 +153,12 @@
             display: flex;
             flex-direction: column;
         }
-        .message {
+        .message-wrapper.ai {
+            align-self: flex-start;
             margin-bottom: 16px;
+        }
+        .message {
+            margin-bottom: 0;
             padding: 16px;
             background: #f5f5f5;
             border-radius: 10px;
@@ -162,14 +167,27 @@
         .message.user {
             align-self: flex-end;
             background: #e0e0e0;
+            margin-bottom: 16px;
         }
         .message.ai {
             align-self: flex-start;
+            background: #f5f5f5;
         }
-        .model-label {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 6px;
+        .model-info {
+            background-color: #000;
+            color: #fff;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 13px;
+            width: 300px;
+            margin-bottom: 4px;
+            text-align: left;
+        }
+        .model-info-line1 {
+            font-weight: bold;
+        }
+        .model-info-line2 {
+            font-weight: normal;
         }
         .message-content {
             font-size: 16px;
@@ -284,14 +302,14 @@
     </div>
     
     <div class="bottom-section">
-        <button class="web-search-toggle" id="webSearchToggle">🌐 联网搜索</button>
+        <button class="web-search-toggle" id="webSearchToggle">🌐 搜索</button>
         <div class="input-container">
             <textarea class="input-box" id="inputBox" placeholder="有问题，尽管问" rows="2"></textarea>
             <button class="send-button" id="sendButton">
                 <svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.58L20 12l-8-8-8 8z"></path></svg>
             </button>
         </div>
-        <div class="footer">发送即同意条款和隐私政策</div>
+        <div class="footer">ChatGPT 也可能会犯错。请核查重要信息。查看 Cookie 首选项。</div>
     </div>
 
     <script>
@@ -321,7 +339,6 @@
                 'Legacy (不能联网)': ['openrouter:openai/gpt-4', 'openrouter:openai/gpt-4-turbo', 'openrouter:openai/gpt-3.5-turbo']
             };
 
-            // 移除了 o3-pro 增强按钮
             const ENHANCEMENTS = [
                 { base: 'o3', enhId: 'openrouter:openai/o3-deep-research', label: 'Deep Research' },
                 { base: 'o3-mini', enhId: 'openrouter:openai/o3-mini-high', label: 'High' },
@@ -350,9 +367,31 @@
 
             welcome.textContent = ['有什么可以帮忙的？','我们先从哪里开始呢？','准备好了','今天有什么计划？','您今天在想什么？'][Math.floor(Math.random()*5)];
 
-            // --- 新增：根据输入框内容更新发送按钮状态 ---
             function updateSendButtonState() {
                 sendBtn.disabled = isThinking || !inputBox.value.trim();
+            }
+
+            // 构建模型信息矩形
+            function createModelInfo(modelId) {
+                let div = document.createElement('div');
+                div.className = 'model-info';
+                
+                let line1 = document.createElement('div');
+                line1.className = 'model-info-line1';
+                line1.textContent = `Request for ${getDisplayName(modelId)}`;
+                div.appendChild(line1);
+                
+                if (modelId === 'gpt-5.2-pro') {
+                    let minutes = Math.floor(Math.random() * 5) + 1;
+                    let seconds = Math.floor(Math.random() * 60);
+                    let timeStr = `${minutes}m ${seconds}s`;
+                    let line2 = document.createElement('div');
+                    line2.className = 'model-info-line2';
+                    line2.textContent = `Reasoned for ${timeStr}`;
+                    div.appendChild(line2);
+                }
+                
+                return div;
             }
 
             // 构建下拉框
@@ -435,26 +474,44 @@
                     welcome.style.display = 'none';
                     hasSent = true;
                 }
-                let div = document.createElement('div');
-                div.className = `message ${isUser ? 'user' : 'ai'}`;
-                let content = document.createElement('div');
-                content.className = 'message-content';
+                
                 if (isUser) {
+                    let div = document.createElement('div');
+                    div.className = 'message user';
+                    let content = document.createElement('div');
+                    content.className = 'message-content';
                     content.innerHTML = text.replace(/\n/g, '<br>');
-                } else if (streaming) {
-                    content.innerHTML = '<span class="typing"></span>思考中...';
-                    div.id = 'streamingMessage';
+                    div.appendChild(content);
+                    chatContainer.appendChild(div);
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                    return { div, content };
                 } else {
-                    let label = document.createElement('span');
-                    label.className = 'model-label';
-                    label.textContent = `Generated by ${getDisplayName(finalModel)}`;
-                    div.appendChild(label);
-                    content.innerHTML = marked.parse(text);
+                    // AI 消息：创建 wrapper
+                    let wrapper = document.createElement('div');
+                    wrapper.className = 'message-wrapper ai';
+                    
+                    let messageDiv = document.createElement('div');
+                    messageDiv.className = 'message ai';
+                    let content = document.createElement('div');
+                    content.className = 'message-content';
+                    
+                    if (streaming) {
+                        content.innerHTML = '<span class="typing"></span>思考中...';
+                        messageDiv.id = 'streamingMessage';
+                    } else {
+                        content.innerHTML = marked.parse(text);
+                        // 非流式立即插入模型信息
+                        let modelInfo = createModelInfo(finalModel);
+                        wrapper.appendChild(modelInfo);
+                    }
+                    
+                    messageDiv.appendChild(content);
+                    wrapper.appendChild(messageDiv);
+                    chatContainer.appendChild(wrapper);
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                    
+                    return { wrapper, content, messageDiv };
                 }
-                div.appendChild(content);
-                chatContainer.appendChild(div);
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-                return { div, content };
             }
 
             async function send() {
@@ -463,17 +520,15 @@
                 if (!text) return;
 
                 inputBox.value = '';
-                addMessage(text, true);
-
-                isThinking = true;
-                updateSendButtonState();   // 发送时禁用按钮
-
-                let { content } = addMessage('', false, true);
+                let { content } = addMessage(text, true);
                 let finalModel = getFinalModel();
 
-                // 构造请求参数
+                isThinking = true;
+                updateSendButtonState();
+
+                let { content: streamContent } = addMessage('', false, true);
+
                 let opts = { stream: true, model: finalModel };
-                // 为 GPT-5.2 系列模型自动添加 driver: openrouter
                 if (finalModel === 'gpt-5.2-chat' || finalModel === 'gpt-5.2' || finalModel === 'gpt-5.2-pro') {
                     opts.driver = 'openrouter';
                 }
@@ -483,12 +538,12 @@
                     let prompt = context + '用户: ' + text + '\nAI: ';
                     let res = await puter.ai.chat(prompt, opts);
                     let full = '';
-                    content.innerHTML = '';
+                    streamContent.innerHTML = '';
 
                     for await (let part of res) {
                         if (part?.text) {
                             full += part.text;
-                            content.innerHTML = marked.parse(full);
+                            streamContent.innerHTML = marked.parse(full);
                         }
                     }
 
@@ -496,21 +551,22 @@
                     let lines = context.split('\n');
                     if (lines.length > 20) context = lines.slice(-20).join('\n');
 
+                    // 流式消息完成，添加模型信息
                     let msgDiv = document.getElementById('streamingMessage');
-                    if (msgDiv) msgDiv.id = '';
-                    let container = content.parentNode;
-                    let oldLabel = container.querySelector('.model-label');
-                    if (oldLabel) oldLabel.remove();
-                    let label = document.createElement('span');
-                    label.className = 'model-label';
-                    label.textContent = `Generated by ${getDisplayName(finalModel)}`;
-                    container.insertBefore(label, container.firstChild);
+                    if (msgDiv) {
+                        msgDiv.id = '';
+                        let wrapper = msgDiv.parentNode;
+                        let existingInfo = wrapper.querySelector('.model-info');
+                        if (existingInfo) existingInfo.remove();
+                        let modelInfo = createModelInfo(finalModel);
+                        wrapper.insertBefore(modelInfo, wrapper.firstChild);
+                    }
 
                 } catch (err) {
-                    content.innerHTML = '错误: ' + err.message;
+                    streamContent.innerHTML = '错误: ' + err.message;
                 } finally {
                     isThinking = false;
-                    updateSendButtonState();   // 恢复按钮状态（根据内容）
+                    updateSendButtonState();
                     inputBox.focus();
                 }
             }
@@ -519,7 +575,7 @@
             inputBox.addEventListener('input', () => {
                 inputBox.style.height = 'auto';
                 inputBox.style.height = Math.min(inputBox.scrollHeight, 132) + 'px';
-                updateSendButtonState();       // 输入变化时更新按钮状态
+                updateSendButtonState();
             });
             inputBox.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey && !isThinking) {
