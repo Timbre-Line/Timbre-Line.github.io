@@ -53,7 +53,7 @@
             padding: 6px 10px;
             border-radius: 6px;
             font-size: 12px;
-            font-weight: bold;          /* 加粗 */
+            font-weight: bold;
             white-space: nowrap;
             z-index: 1001;
         }
@@ -209,7 +209,6 @@
             color: #1565c0;
             border-color: #1565c0;
         }
-        /* 禁用状态鼠标禁止符号 */
         .web-search-toggle:disabled {
             cursor: not-allowed;
             opacity: 0.5;
@@ -301,7 +300,7 @@
             const MODEL_NAMES = {
                 'gpt-5.2-chat': 'GPT-5.2 Instant',
                 'gpt-5.2': 'GPT-5.2 Thinking',
-                'openrouter:openai/gpt-5.2-pro': 'GPT-5.2 Pro',
+                'gpt-5.2-pro': 'GPT-5.2 Pro',
                 'o1': 'OpenAI o1',
                 'o3': 'OpenAI o3',
                 'o3-mini': 'OpenAI o3-mini',
@@ -317,14 +316,14 @@
             };
 
             const GROUPS = {
-                'GPT-5.2 系列': ['gpt-5.2-chat', 'gpt-5.2', 'openrouter:openai/gpt-5.2-pro'],
+                'GPT-5.2 系列': ['gpt-5.2-chat', 'gpt-5.2', 'gpt-5.2-pro'],
                 'o 系列': ['o1', 'o3', 'o3-mini', 'o4-mini'],
                 'Legacy (不能联网)': ['openrouter:openai/gpt-4', 'openrouter:openai/gpt-4-turbo', 'openrouter:openai/gpt-3.5-turbo']
             };
 
+            // 移除了 o3-pro 增强按钮
             const ENHANCEMENTS = [
                 { base: 'o3', enhId: 'openrouter:openai/o3-deep-research', label: 'Deep Research' },
-                { base: 'o3', enhId: 'openrouter:openai/o3-pro', label: 'Pro' },
                 { base: 'o3-mini', enhId: 'openrouter:openai/o3-mini-high', label: 'High' },
                 { base: 'o4-mini', enhId: 'openrouter:openai/o4-mini-high', label: 'High' },
                 { base: 'o4-mini', enhId: 'openrouter:openai/o4-mini-deep-research', label: 'Deep Research' }
@@ -350,6 +349,11 @@
             let activeEnhancement = null;
 
             welcome.textContent = ['有什么可以帮忙的？','我们先从哪里开始呢？','准备好了','今天有什么计划？','您今天在想什么？'][Math.floor(Math.random()*5)];
+
+            // --- 新增：根据输入框内容更新发送按钮状态 ---
+            function updateSendButtonState() {
+                sendBtn.disabled = isThinking || !inputBox.value.trim();
+            }
 
             // 构建下拉框
             function buildSelect() {
@@ -462,16 +466,21 @@
                 addMessage(text, true);
 
                 isThinking = true;
-                sendBtn.disabled = true;      // 只禁用发送按钮，输入框保持可用
+                updateSendButtonState();   // 发送时禁用按钮
 
                 let { content } = addMessage('', false, true);
                 let finalModel = getFinalModel();
 
+                // 构造请求参数
+                let opts = { stream: true, model: finalModel };
+                // 为 GPT-5.2 系列模型自动添加 driver: openrouter
+                if (finalModel === 'gpt-5.2-chat' || finalModel === 'gpt-5.2' || finalModel === 'gpt-5.2-pro') {
+                    opts.driver = 'openrouter';
+                }
+                if (webEnabled && !webToggle.disabled) opts.tools = [{ type: 'web_search' }];
+
                 try {
                     let prompt = context + '用户: ' + text + '\nAI: ';
-                    let opts = { stream: true, model: finalModel };
-                    if (webEnabled && !webToggle.disabled) opts.tools = [{ type: 'web_search' }];
-
                     let res = await puter.ai.chat(prompt, opts);
                     let full = '';
                     content.innerHTML = '';
@@ -501,8 +510,8 @@
                     content.innerHTML = '错误: ' + err.message;
                 } finally {
                     isThinking = false;
-                    sendBtn.disabled = false;
-                    inputBox.focus();          // 输入框从未被禁用，直接获得焦点
+                    updateSendButtonState();   // 恢复按钮状态（根据内容）
+                    inputBox.focus();
                 }
             }
 
@@ -510,6 +519,7 @@
             inputBox.addEventListener('input', () => {
                 inputBox.style.height = 'auto';
                 inputBox.style.height = Math.min(inputBox.scrollHeight, 132) + 'px';
+                updateSendButtonState();       // 输入变化时更新按钮状态
             });
             inputBox.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey && !isThinking) {
@@ -543,7 +553,7 @@
 
                 let base = target.dataset.value;
                 webToggle.disabled = target.dataset.legacy === 'true';
-                if (webToggle.disabled) webEnabled = false;  // 同步状态
+                if (webToggle.disabled) webEnabled = false;
                 webToggle.classList.toggle('active', webEnabled && !webToggle.disabled);
 
                 updateEnhanceVisibility(base);
@@ -553,6 +563,7 @@
             // 启动
             buildSelect();
             buildHeaderEnhance();
+            updateSendButtonState();
             inputBox.focus();
         })();
     </script>
