@@ -2,10 +2,14 @@
 <body>
     <script src="https://js.puter.com/v2/"></script>
     <script>
-        // 最简测试 - 使用最常见的格式
-        puter.ai.chat("1+1=?", { model: "openrouter:openai/gpt-5.2-pro" })
+        puter.ai.chat("1+1=?", { model: "gpt-5.2-pro", driver: "openrouter" })
             .then(response => puter.print(response))
-            .catch(error => puter.print("错误: " + (error?.message || error)));
+            .catch(error => {
+                // 在控制台输出完整错误（供调试）
+                console.error(error);
+                // 显示可读的错误信息
+                puter.print("错误: " + (error.message || JSON.stringify(error)));
+            });
     </script>
 </body>
 </html>
