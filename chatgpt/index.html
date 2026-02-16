@@ -53,6 +53,7 @@
             padding: 6px 10px;
             border-radius: 6px;
             font-size: 12px;
+            font-weight: bold;          /* 加粗 */
             white-space: nowrap;
             z-index: 1001;
         }
@@ -208,6 +209,11 @@
             color: #1565c0;
             border-color: #1565c0;
         }
+        /* 禁用状态鼠标禁止符号 */
+        .web-search-toggle:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
         .input-container {
             display: flex;
             align-items: flex-start;
@@ -271,7 +277,6 @@
             <div class="select-selected" id="selectSelected">GPT-5.2 Instant</div>
             <div class="select-items" id="selectItems"></div>
         </div>
-        <!-- 增强按钮移到头部右侧 -->
         <div class="header-enhance" id="headerEnhance"></div>
     </div>
     
@@ -281,7 +286,6 @@
     
     <div class="bottom-section">
         <button class="web-search-toggle" id="webSearchToggle">🌐 联网搜索</button>
-        <!-- 底部原来的增强按钮容器已移除，现在全部由JS动态管理 -->
         <div class="input-container">
             <textarea class="input-box" id="inputBox" placeholder="有问题，尽管问" rows="2"></textarea>
             <button class="send-button" id="sendButton">
@@ -293,7 +297,7 @@
 
     <script>
         (function() {
-            // ----- 硬编码模型映射 -----
+            // 硬编码模型映射
             const MODEL_NAMES = {
                 'gpt-5.2-chat': 'GPT-5.2 Instant',
                 'gpt-5.2': 'GPT-5.2 Thinking',
@@ -312,14 +316,12 @@
                 'openrouter:openai/gpt-3.5-turbo': 'GPT-3.5 Turbo'
             };
 
-            // 基础模型分组 (只包含基础ID)
             const GROUPS = {
                 'GPT-5.2 系列': ['gpt-5.2-chat', 'gpt-5.2', 'openrouter:openai/gpt-5.2-pro'],
                 'o 系列': ['o1', 'o3', 'o3-mini', 'o4-mini'],
                 'Legacy (不能联网)': ['openrouter:openai/gpt-4', 'openrouter:openai/gpt-4-turbo', 'openrouter:openai/gpt-3.5-turbo']
             };
 
-            // 预定义的增强按钮配置 (直接硬编码)
             const ENHANCEMENTS = [
                 { base: 'o3', enhId: 'openrouter:openai/o3-deep-research', label: 'Deep Research' },
                 { base: 'o3', enhId: 'openrouter:openai/o3-pro', label: 'Pro' },
@@ -328,7 +330,7 @@
                 { base: 'o4-mini', enhId: 'openrouter:openai/o4-mini-deep-research', label: 'Deep Research' }
             ];
 
-            // 获取元素
+            // DOM 元素
             const chatContainer = document.getElementById('chatContainer');
             const inputBox = document.getElementById('inputBox');
             const sendBtn = document.getElementById('sendButton');
@@ -345,16 +347,14 @@
             let webEnabled = false;
             let context = '';
             let hasSent = false;
-            let activeEnhancement = null; // 当前激活的增强模型ID
+            let activeEnhancement = null;
 
-            // 欢迎语
             welcome.textContent = ['有什么可以帮忙的？','我们先从哪里开始呢？','准备好了','今天有什么计划？','您今天在想什么？'][Math.floor(Math.random()*5)];
 
             // 构建下拉框
             function buildSelect() {
                 selectItems.innerHTML = '';
                 for (let group in GROUPS) {
-                    // 分组标题 (添加 select-group 类，不可选)
                     let gDiv = document.createElement('div');
                     gDiv.className = 'select-item select-group';
                     gDiv.textContent = group;
@@ -369,15 +369,11 @@
                         selectItems.appendChild(item);
                     });
                 }
-
-                // 默认选中第一个 (GPT-5.2 Instant)
                 let first = document.querySelector('.select-item:not(.select-group)');
                 if (first) {
                     first.classList.add('selected');
                     selectSelected.textContent = first.textContent;
-                    let legacy = first.dataset.legacy === 'true';
-                    webToggle.disabled = legacy;
-                    webToggle.style.opacity = legacy ? '0.5' : '1';
+                    webToggle.disabled = first.dataset.legacy === 'true';
                     updateEnhanceVisibility(first.dataset.value);
                 }
             }
@@ -393,12 +389,10 @@
                     btn.textContent = cfg.label;
                     headerEnhance.appendChild(btn);
                 });
-                // 绑定点击事件（与之前相同）
                 for (let btn of headerEnhance.children) {
                     btn.addEventListener('click', (e) => {
                         let base = document.querySelector('.select-item.selected')?.dataset.value;
                         if (btn.dataset.base !== base) return;
-
                         let enhId = btn.dataset.enh;
                         if (btn.classList.contains('active')) {
                             btn.classList.remove('active');
@@ -414,7 +408,6 @@
                 }
             }
 
-            // 根据基础模型显示/隐藏增强按钮
             function updateEnhanceVisibility(baseId) {
                 activeEnhancement = null;
                 for (let btn of headerEnhance.children) {
@@ -424,7 +417,6 @@
                 }
             }
 
-            // 获取最终模型ID
             function getFinalModel() {
                 let base = document.querySelector('.select-item.selected')?.dataset.value || 'gpt-5.2-chat';
                 return activeEnhancement || base;
@@ -434,7 +426,6 @@
                 return MODEL_NAMES[modelId] || modelId;
             }
 
-            // 添加消息
             function addMessage(text, isUser = false, streaming = false, finalModel = null) {
                 if (isUser && !hasSent) {
                     welcome.style.display = 'none';
@@ -462,7 +453,6 @@
                 return { div, content };
             }
 
-            // 发送消息
             async function send() {
                 if (isThinking) return;
                 let text = inputBox.value.trim();
@@ -472,8 +462,7 @@
                 addMessage(text, true);
 
                 isThinking = true;
-                sendBtn.disabled = true;
-                inputBox.disabled = true;
+                sendBtn.disabled = true;      // 只禁用发送按钮，输入框保持可用
 
                 let { content } = addMessage('', false, true);
                 let finalModel = getFinalModel();
@@ -513,8 +502,7 @@
                 } finally {
                     isThinking = false;
                     sendBtn.disabled = false;
-                    inputBox.disabled = false;
-                    inputBox.focus();
+                    inputBox.focus();          // 输入框从未被禁用，直接获得焦点
                 }
             }
 
@@ -531,7 +519,6 @@
             });
             sendBtn.addEventListener('click', send);
             webToggle.addEventListener('click', () => {
-                if (webToggle.disabled) return;
                 webEnabled = !webEnabled;
                 webToggle.classList.toggle('active', webEnabled);
             });
@@ -540,7 +527,6 @@
                 location.reload();
             });
 
-            // 下拉交互
             selectSelected.addEventListener('click', (e) => {
                 e.stopPropagation();
                 selectItems.classList.toggle('active');
@@ -550,17 +536,15 @@
             });
             selectItems.addEventListener('click', (e) => {
                 let target = e.target.closest('.select-item');
-                if (!target || target.classList.contains('select-group')) return; // 忽略分组标题
-                // 取消其他选中
+                if (!target || target.classList.contains('select-group')) return;
                 document.querySelectorAll('.select-item:not(.select-group)').forEach(el => el.classList.remove('selected'));
                 target.classList.add('selected');
                 selectSelected.textContent = target.textContent;
 
                 let base = target.dataset.value;
-                let legacy = target.dataset.legacy === 'true';
-                webToggle.disabled = legacy;
-                webToggle.style.opacity = legacy ? '0.5' : '1';
-                if (legacy) webToggle.classList.remove('active');
+                webToggle.disabled = target.dataset.legacy === 'true';
+                if (webToggle.disabled) webEnabled = false;  // 同步状态
+                webToggle.classList.toggle('active', webEnabled && !webToggle.disabled);
 
                 updateEnhanceVisibility(base);
                 selectItems.classList.remove('active');
@@ -568,7 +552,7 @@
 
             // 启动
             buildSelect();
-            buildHeaderEnhance();  // 创建头部按钮
+            buildHeaderEnhance();
             inputBox.focus();
         })();
     </script>
