@@ -1,44 +1,11 @@
-<!DOCTYPE html>
 <html>
-<head>
-    <meta charset="UTF-8">
-    <title>测试 OpenRouter 模型</title>
-    <!-- 最小化样式：仅用于可读性 -->
-    <style>
-        body { font-family: sans-serif; padding: 2rem; }
-        button { margin-right: 1rem; padding: 0.5rem 1rem; font-size: 1rem; }
-        pre { background: #f4f4f4; padding: 1rem; margin-top: 1.5rem; border-radius: 6px; white-space: pre-wrap; }
-    </style>
-</head>
 <body>
-    <h3>点击按钮测试对应模型（使用固定 prompt）</h3>
-    <div>
-        <button onclick="testModel('openrouter:openai/gpt-5.2-pro')">GPT-5.2 Pro</button>
-        <button onclick="testModel('openrouter:openai/gpt-5-pro')">GPT-5 Pro</button>
-        <button onclick="testModel('openrouter:openai/o3-pro')">O3 Pro</button>
-    </div>
-    <pre id="output">点击按钮开始测试…</pre>
-
-    <!-- 引入 Puter.js SDK -->
     <script src="https://js.puter.com/v2/"></script>
-
     <script>
-        // 通用测试函数：调用指定模型并显示结果
-        function testModel(modelId) {
-            const output = document.getElementById('output');
-            output.textContent = `⏳ 正在测试 ${modelId} ...`;
-
-            // 使用和官方示例相同的 prompt
-            puter.ai.chat("Explain quantum computing in simple terms", { model: modelId })
-                .then(response => {
-                    output.textContent = `✅ 成功 (${modelId}):\n\n${response}`;
-                })
-                .catch(error => {
-                    // 提取错误信息，兼容各种错误格式
-                    const errMsg = error?.message || error?.toString() || '未知错误';
-                    output.textContent = `❌ 失败 (${modelId}):\n\n${errMsg}`;
-                });
-        }
+        // 最简测试 - 使用最常见的格式
+        puter.ai.chat("1+1=?", { model: "openrouter:openai/gpt-5.2-pro" })
+            .then(response => puter.print(response))
+            .catch(error => puter.print("错误: " + (error?.message || error)));
     </script>
 </body>
 </html>
