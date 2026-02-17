@@ -367,18 +367,20 @@
                 sendBtn.disabled = isThinking || !inputBox.value.trim();
             }
 
-            function createModelTag(modelId) {
+            // 修改：支持传入实际耗时（秒），仅对 gpt-5.2-pro 显示第二行
+            function createModelTag(modelId, elapsedSeconds = null) {
                 let div = document.createElement('div');
                 div.className = 'model-tag';
                 let line1 = document.createElement('div');
                 line1.style.fontWeight = 'bold';
                 line1.textContent = `Request for ${getDisplayName(modelId)}`;
                 div.appendChild(line1);
-                if (modelId === 'gpt-5.2-pro') {
-                    let minutes = Math.floor(Math.random() * 5) + 1;
-                    let seconds = Math.floor(Math.random() * 60);
+                if (modelId === 'gpt-5.2-pro' && elapsedSeconds !== null) {
                     let line2 = document.createElement('div');
-                    line2.textContent = `Reasoned for ${minutes}m ${seconds}s`;
+                    let minutes = Math.floor(elapsedSeconds / 60);
+                    let seconds = elapsedSeconds % 60;
+                    let timeStr = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+                    line2.textContent = `Reasoned for ${timeStr}`;
                     div.appendChild(line2);
                 }
                 return div;
@@ -523,6 +525,9 @@
                 }
                 if (webEnabled && !webToggle.disabled) opts.tools = [{ type: 'web_search' }];
 
+                // 记录开始时间（真实耗时起点）
+                const startTime = Date.now();
+
                 try {
                     let prompt = context + '用户: ' + text + '\nAI: ';
                     let res = await puter.ai.chat(prompt, opts);
@@ -540,12 +545,20 @@
                     let lines = context.split('\n');
                     if (lines.length > 20) context = lines.slice(-20).join('\n');
 
-                    // 流式完成，添加模型标签到行首
+                    // 流式完成，获取bubble并插入模型标签
                     let bubble = document.getElementById('streamingBubble');
                     if (bubble) {
                         bubble.id = '';
                         let row = bubble.parentNode;
-                        let tag = createModelTag(finalModel);
+                        // 计算实际耗时（秒）
+                        const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+                        let tag;
+                        if (finalModel === 'gpt-5.2-pro') {
+                            // 只有pro模型才传入耗时
+                            tag = createModelTag(finalModel, elapsedSeconds);
+                        } else {
+                            tag = createModelTag(finalModel);
+                        }
                         row.insertBefore(tag, row.firstChild);
                     }
 
