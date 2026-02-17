@@ -150,17 +150,16 @@
             display: flex;
             flex-direction: column;
         }
-        /* 完全重构的气泡结构 - 极简宽度计算 */
+        /* 完全重构的气泡结构 - 修复上下布局 */
         .msg-row {
             width: 100%;
             margin-bottom: 16px;
             display: flex;
+            flex-direction: column;
+            align-items: flex-start;
         }
         .msg-row.user {
-            justify-content: flex-end;
-        }
-        .msg-row.ai {
-            justify-content: flex-start;
+            align-items: flex-end;
         }
         .msg-bubble {
             max-width: 85%;
@@ -169,6 +168,7 @@
             padding: 16px;
             word-wrap: break-word;
             overflow-wrap: break-word;
+            width: fit-content;
         }
         .msg-bubble.user {
             background: #e0e0e0;
@@ -189,7 +189,6 @@
         .msg-text {
             font-size: 16px;
             line-height: 1.5;
-            /* 无任何特殊换行控制 */
         }
         .welcome-message {
             text-align: center;
@@ -457,7 +456,7 @@
                 return MODEL_NAMES[modelId] || modelId;
             }
 
-            // 完全重构的消息添加函数
+            // 完全重构的消息添加函数 - 修复上下布局
             function addMessage(text, isUser = false, streaming = false, finalModel = null) {
                 if (isUser && !hasSent) {
                     welcome.style.display = 'none';
@@ -479,7 +478,7 @@
                     chatContainer.scrollTop = chatContainer.scrollHeight;
                     return { row, bubble, msgText };
                 } else {
-                    // AI消息：先放模型标签（如果有），再放气泡
+                    // AI消息：模型标签在上，气泡在下，各自独立宽度
                     if (!streaming && finalModel) {
                         let tag = createModelTag(finalModel);
                         row.appendChild(tag);
@@ -541,7 +540,7 @@
                     let lines = context.split('\n');
                     if (lines.length > 20) context = lines.slice(-20).join('\n');
 
-                    // 流式完成，添加模型标签
+                    // 流式完成，添加模型标签到行首
                     let bubble = document.getElementById('streamingBubble');
                     if (bubble) {
                         bubble.id = '';
