@@ -114,9 +114,6 @@
             cursor: default;
             background: #f8f9fa;
         }
-        .select-group:hover {
-            background: #f8f9fa;
-        }
         .header-enhance {
             display: flex;
             gap: 6px;
@@ -153,49 +150,46 @@
             display: flex;
             flex-direction: column;
         }
-        .message-wrapper.ai {
-            align-self: flex-start;
+        /* 完全重构的气泡结构 - 极简宽度计算 */
+        .msg-row {
+            width: 100%;
             margin-bottom: 16px;
+            display: flex;
         }
-        .message {
-            display: inline-block;          /* 宽度由内容撑开 */
-            max-width: 85%;                  /* 但不超过父容器85% */
-            padding: 16px;
-            border-radius: 10px;
-            margin-bottom: 0;
+        .msg-row.user {
+            justify-content: flex-end;
+        }
+        .msg-row.ai {
+            justify-content: flex-start;
+        }
+        .msg-bubble {
+            max-width: 85%;
             background: #f5f5f5;
+            border-radius: 10px;
+            padding: 16px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
-        .message.user {
-            align-self: flex-end;
+        .msg-bubble.user {
             background: #e0e0e0;
         }
-        .message.ai {
-            align-self: flex-start;
-            background: #f5f5f5;
-        }
-        .model-info {
-            background-color: transparent;
-            color: #000;
+        .model-tag {
+            background: transparent;
             border: 1px solid #ccc;
             border-radius: 8px;
             padding: 6px 12px;
             font-size: 16px;
             width: 80%;
             margin-bottom: 4px;
-            margin-left: 0;
-            text-align: left;
             box-sizing: border-box;
         }
-        .model-info-line1 {
+        .model-tag div:first-child {
             font-weight: bold;
         }
-        .model-info-line2 {
-            font-weight: normal;
-        }
-        .message-content {
+        .msg-text {
             font-size: 16px;
             line-height: 1.5;
-            /* 无强制换行控制，浏览器自然换行 */
+            /* 无任何特殊换行控制 */
         }
         .welcome-message {
             text-align: center;
@@ -374,25 +368,20 @@
                 sendBtn.disabled = isThinking || !inputBox.value.trim();
             }
 
-            function createModelInfo(modelId) {
+            function createModelTag(modelId) {
                 let div = document.createElement('div');
-                div.className = 'model-info';
-                
+                div.className = 'model-tag';
                 let line1 = document.createElement('div');
-                line1.className = 'model-info-line1';
+                line1.style.fontWeight = 'bold';
                 line1.textContent = `Request for ${getDisplayName(modelId)}`;
                 div.appendChild(line1);
-                
                 if (modelId === 'gpt-5.2-pro') {
                     let minutes = Math.floor(Math.random() * 5) + 1;
                     let seconds = Math.floor(Math.random() * 60);
-                    let timeStr = `${minutes}m ${seconds}s`;
                     let line2 = document.createElement('div');
-                    line2.className = 'model-info-line2';
-                    line2.textContent = `Reasoned for ${timeStr}`;
+                    line2.textContent = `Reasoned for ${minutes}m ${seconds}s`;
                     div.appendChild(line2);
                 }
-                
                 return div;
             }
 
@@ -403,7 +392,6 @@
                     gDiv.className = 'select-item select-group';
                     gDiv.textContent = group;
                     selectItems.appendChild(gDiv);
-
                     GROUPS[group].forEach(id => {
                         let item = document.createElement('div');
                         item.className = 'select-item';
@@ -469,46 +457,50 @@
                 return MODEL_NAMES[modelId] || modelId;
             }
 
+            // 完全重构的消息添加函数
             function addMessage(text, isUser = false, streaming = false, finalModel = null) {
                 if (isUser && !hasSent) {
                     welcome.style.display = 'none';
                     hasSent = true;
                 }
                 
+                let row = document.createElement('div');
+                row.className = `msg-row ${isUser ? 'user' : 'ai'}`;
+                
                 if (isUser) {
-                    let div = document.createElement('div');
-                    div.className = 'message user';
-                    let content = document.createElement('div');
-                    content.className = 'message-content';
-                    content.innerHTML = text.replace(/\n/g, '<br>');
-                    div.appendChild(content);
-                    chatContainer.appendChild(div);
+                    let bubble = document.createElement('div');
+                    bubble.className = 'msg-bubble user';
+                    let msgText = document.createElement('div');
+                    msgText.className = 'msg-text';
+                    msgText.innerHTML = text.replace(/\n/g, '<br>');
+                    bubble.appendChild(msgText);
+                    row.appendChild(bubble);
+                    chatContainer.appendChild(row);
                     chatContainer.scrollTop = chatContainer.scrollHeight;
-                    return { div, content };
+                    return { row, bubble, msgText };
                 } else {
-                    let wrapper = document.createElement('div');
-                    wrapper.className = 'message-wrapper ai';
-                    
-                    let messageDiv = document.createElement('div');
-                    messageDiv.className = 'message ai';
-                    let content = document.createElement('div');
-                    content.className = 'message-content';
+                    // AI消息：先放模型标签（如果有），再放气泡
+                    if (!streaming && finalModel) {
+                        let tag = createModelTag(finalModel);
+                        row.appendChild(tag);
+                    }
+                    let bubble = document.createElement('div');
+                    bubble.className = 'msg-bubble';
+                    let msgText = document.createElement('div');
+                    msgText.className = 'msg-text';
                     
                     if (streaming) {
-                        content.innerHTML = '<span class="typing"></span>思考中...';
-                        messageDiv.id = 'streamingMessage';
+                        msgText.innerHTML = '<span class="typing"></span>思考中...';
+                        bubble.id = 'streamingBubble';
                     } else {
-                        content.innerHTML = marked.parse(text);
-                        let modelInfo = createModelInfo(finalModel);
-                        wrapper.appendChild(modelInfo);
+                        msgText.innerHTML = marked.parse(text);
                     }
                     
-                    messageDiv.appendChild(content);
-                    wrapper.appendChild(messageDiv);
-                    chatContainer.appendChild(wrapper);
+                    bubble.appendChild(msgText);
+                    row.appendChild(bubble);
+                    chatContainer.appendChild(row);
                     chatContainer.scrollTop = chatContainer.scrollHeight;
-                    
-                    return { wrapper, content, messageDiv };
+                    return { row, bubble, msgText };
                 }
             }
 
@@ -524,7 +516,7 @@
                 isThinking = true;
                 updateSendButtonState();
 
-                let { content: streamContent } = addMessage('', false, true);
+                let { msgText } = addMessage('', false, true);
 
                 let opts = { stream: true, model: finalModel };
                 if (finalModel === 'gpt-5.2-chat' || finalModel === 'gpt-5.2' || finalModel === 'gpt-5.2-pro') {
@@ -536,12 +528,12 @@
                     let prompt = context + '用户: ' + text + '\nAI: ';
                     let res = await puter.ai.chat(prompt, opts);
                     let full = '';
-                    streamContent.innerHTML = '';
+                    msgText.innerHTML = '';
 
                     for await (let part of res) {
                         if (part?.text) {
                             full += part.text;
-                            streamContent.innerHTML = marked.parse(full);
+                            msgText.innerHTML = marked.parse(full);
                         }
                     }
 
@@ -549,18 +541,17 @@
                     let lines = context.split('\n');
                     if (lines.length > 20) context = lines.slice(-20).join('\n');
 
-                    let msgDiv = document.getElementById('streamingMessage');
-                    if (msgDiv) {
-                        msgDiv.id = '';
-                        let wrapper = msgDiv.parentNode;
-                        let existingInfo = wrapper.querySelector('.model-info');
-                        if (existingInfo) existingInfo.remove();
-                        let modelInfo = createModelInfo(finalModel);
-                        wrapper.insertBefore(modelInfo, wrapper.firstChild);
+                    // 流式完成，添加模型标签
+                    let bubble = document.getElementById('streamingBubble');
+                    if (bubble) {
+                        bubble.id = '';
+                        let row = bubble.parentNode;
+                        let tag = createModelTag(finalModel);
+                        row.insertBefore(tag, row.firstChild);
                     }
 
                 } catch (err) {
-                    streamContent.innerHTML = '错误: ' + err.message;
+                    msgText.innerHTML = '错误: ' + err.message;
                 } finally {
                     isThinking = false;
                     updateSendButtonState();
@@ -588,7 +579,6 @@
                 webEnabled = !webEnabled;
                 webToggle.classList.toggle('active', webEnabled);
             });
-
             newChat.addEventListener('click', () => {
                 if (chatContainer.children.length > 1 && !confirm('新对话将清除当前记录，确认？')) return;
                 location.reload();
@@ -598,11 +588,9 @@
                 e.stopPropagation();
                 selectItems.classList.toggle('active');
             });
-
             document.addEventListener('click', (e) => {
                 if (!customSelect.contains(e.target)) selectItems.classList.remove('active');
             });
-
             selectItems.addEventListener('click', (e) => {
                 let target = e.target.closest('.select-item');
                 if (!target || target.classList.contains('select-group')) return;
