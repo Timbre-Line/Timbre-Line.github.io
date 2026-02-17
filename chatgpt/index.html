@@ -193,8 +193,7 @@
         .message-content {
             font-size: 16px;
             line-height: 1.5;
-            word-break: break-word;
-            overflow-wrap: break-word;
+            overflow-wrap: break-word; /* 防止长单词溢出，但不强制打断正常单词 */
         }
         .welcome-message {
             text-align: center;
@@ -317,6 +316,9 @@
 
     <script>
         (function() {
+            // 设置 marked 选项：换行符转换为 <br>，启用 GFM
+            marked.setOptions({ breaks: true, gfm: true });
+
             // 硬编码模型映射
             const MODEL_NAMES = {
                 'gpt-5.2-chat': 'GPT-5.2 Instant',
