@@ -3,7 +3,7 @@
 <head>
     <title>ChatGPT</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="icon" href="favicon.png" type="image/png">
+    <link rel="icon" href="icon.png" type="image/png">
     <script src="https://js.puter.com/v2/"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
@@ -158,16 +158,16 @@
             margin-bottom: 16px;
         }
         .message {
-            margin-bottom: 0;
+            display: inline-block;          /* 宽度由内容撑开 */
+            max-width: 85%;                  /* 但不超过父容器85% */
             padding: 16px;
-            background: #f5f5f5;
             border-radius: 10px;
-            max-width: 85%;
+            margin-bottom: 0;
+            background: #f5f5f5;
         }
         .message.user {
             align-self: flex-end;
             background: #e0e0e0;
-            margin-bottom: 16px;
         }
         .message.ai {
             align-self: flex-start;
@@ -195,7 +195,7 @@
         .message-content {
             font-size: 16px;
             line-height: 1.5;
-            /* 移除所有换行控制，让浏览器自然换行 */
+            /* 无强制换行控制，浏览器自然换行 */
         }
         .welcome-message {
             text-align: center;
@@ -318,10 +318,8 @@
 
     <script>
         (function() {
-            // 设置 marked 选项：换行符转换为 <br>，启用 GFM
             marked.setOptions({ breaks: true, gfm: true });
 
-            // 硬编码模型映射
             const MODEL_NAMES = {
                 'gpt-5.2-chat': 'GPT-5.2 Instant',
                 'gpt-5.2': 'GPT-5.2 Thinking',
@@ -353,7 +351,6 @@
                 { base: 'o4-mini', enhId: 'openrouter:openai/o4-mini-deep-research', label: 'Deep Research' }
             ];
 
-            // DOM 元素
             const chatContainer = document.getElementById('chatContainer');
             const inputBox = document.getElementById('inputBox');
             const sendBtn = document.getElementById('sendButton');
@@ -365,7 +362,6 @@
             const customSelect = document.getElementById('customSelect');
             const headerEnhance = document.getElementById('headerEnhance');
 
-            // 状态
             let isThinking = false;
             let webEnabled = false;
             let context = '';
@@ -378,7 +374,6 @@
                 sendBtn.disabled = isThinking || !inputBox.value.trim();
             }
 
-            // 构建模型信息矩形
             function createModelInfo(modelId) {
                 let div = document.createElement('div');
                 div.className = 'model-info';
@@ -401,7 +396,6 @@
                 return div;
             }
 
-            // 构建下拉框
             function buildSelect() {
                 selectItems.innerHTML = '';
                 for (let group in GROUPS) {
@@ -428,7 +422,6 @@
                 }
             }
 
-            // 构建头部增强按钮
             function buildHeaderEnhance() {
                 headerEnhance.innerHTML = '';
                 ENHANCEMENTS.forEach(cfg => {
@@ -493,7 +486,6 @@
                     chatContainer.scrollTop = chatContainer.scrollHeight;
                     return { div, content };
                 } else {
-                    // AI 消息：创建 wrapper
                     let wrapper = document.createElement('div');
                     wrapper.className = 'message-wrapper ai';
                     
@@ -507,7 +499,6 @@
                         messageDiv.id = 'streamingMessage';
                     } else {
                         content.innerHTML = marked.parse(text);
-                        // 非流式立即插入模型信息
                         let modelInfo = createModelInfo(finalModel);
                         wrapper.appendChild(modelInfo);
                     }
@@ -527,7 +518,7 @@
                 if (!text) return;
 
                 inputBox.value = '';
-                let { content } = addMessage(text, true);
+                addMessage(text, true);
                 let finalModel = getFinalModel();
 
                 isThinking = true;
@@ -558,7 +549,6 @@
                     let lines = context.split('\n');
                     if (lines.length > 20) context = lines.slice(-20).join('\n');
 
-                    // 流式消息完成，添加模型信息
                     let msgDiv = document.getElementById('streamingMessage');
                     if (msgDiv) {
                         msgDiv.id = '';
@@ -578,30 +568,27 @@
                 }
             }
 
-            // 事件绑定
             inputBox.addEventListener('input', () => {
                 inputBox.style.height = 'auto';
                 inputBox.style.height = Math.min(inputBox.scrollHeight, 132) + 'px';
                 updateSendButtonState();
             });
-            // 修改 keydown 事件：移动端允许换行（不发送）
+
             inputBox.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey && !isThinking) {
-                    // 检测移动设备
                     const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-                    if (isMobile) {
-                        // 移动端允许默认行为（插入换行），不发送
-                        return;
-                    }
+                    if (isMobile) return;
                     e.preventDefault();
                     send();
                 }
             });
+
             sendBtn.addEventListener('click', send);
             webToggle.addEventListener('click', () => {
                 webEnabled = !webEnabled;
                 webToggle.classList.toggle('active', webEnabled);
             });
+
             newChat.addEventListener('click', () => {
                 if (chatContainer.children.length > 1 && !confirm('新对话将清除当前记录，确认？')) return;
                 location.reload();
@@ -611,9 +598,11 @@
                 e.stopPropagation();
                 selectItems.classList.toggle('active');
             });
+
             document.addEventListener('click', (e) => {
                 if (!customSelect.contains(e.target)) selectItems.classList.remove('active');
             });
+
             selectItems.addEventListener('click', (e) => {
                 let target = e.target.closest('.select-item');
                 if (!target || target.classList.contains('select-group')) return;
@@ -630,7 +619,6 @@
                 selectItems.classList.remove('active');
             });
 
-            // 启动
             buildSelect();
             buildHeaderEnhance();
             updateSendButtonState();
