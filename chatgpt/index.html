@@ -174,12 +174,13 @@
             background: #f5f5f5;
         }
         .model-info {
-            background-color: #000;
-            color: #fff;
+            background-color: transparent;
+            color: #000;
+            border: 1px solid #ccc;
             border-radius: 8px;
             padding: 6px 12px;
-            font-size: 13px;
-            width: 300px;
+            font-size: 16px;
+            width: 80%;
             margin-bottom: 4px;
             text-align: left;
         }
@@ -192,6 +193,8 @@
         .message-content {
             font-size: 16px;
             line-height: 1.5;
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
         .welcome-message {
             text-align: center;
@@ -577,8 +580,15 @@
                 inputBox.style.height = Math.min(inputBox.scrollHeight, 132) + 'px';
                 updateSendButtonState();
             });
+            // 修改 keydown 事件：移动端允许换行（不发送）
             inputBox.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey && !isThinking) {
+                    // 检测移动设备
+                    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+                    if (isMobile) {
+                        // 移动端允许默认行为（插入换行），不发送
+                        return;
+                    }
                     e.preventDefault();
                     send();
                 }
