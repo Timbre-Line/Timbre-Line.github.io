@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>ChatGPT</title>
+    <title>ChatGPT · 微调版</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="icon" href="favicon.png" type="image/png">
     <script src="https://js.puter.com/v2/"></script>
@@ -13,7 +13,7 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #fff;
             color: #000;
-            padding-top: 64px;
+            padding-top: 70px;
             padding-bottom: 140px;
         }
         .header {
@@ -38,11 +38,10 @@
             cursor: pointer;
             border: none;
             margin-right: 15px;
+            flex-shrink: 0;
             position: relative;
         }
-        .new-chat-btn:hover {
-            background: #e5e5e5;
-        }
+        .new-chat-btn:hover { background: #e5e5e5; }
         .new-chat-btn:hover::after {
             content: '新聊天';
             position: absolute;
@@ -56,99 +55,88 @@
             font-size: 12px;
             font-weight: bold;
             white-space: nowrap;
-            z-index: 1001;
         }
         .custom-select {
             position: relative;
-            width: fit-content;      /* 宽度根据内容自适应 */
-            min-width: 200px;         /* 最小宽度保证下拉框不缩太小 */
+            width: fit-content;
         }
         .select-selected {
-            padding: 10px 12px;
+            padding: 8px 12px;
             border: none;
             border-radius: 8px;
             background: #fff;
-            font-size: 16px;
-            font-weight: bold;        /* ChatGPT 部分加粗 */
-            height: 40px;
+            font-size: 20px;
+            font-weight: 400;          /* 常规粗细 */
+            height: 44px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            white-space: nowrap;       /* 防止换行 */
+            white-space: nowrap;
+            letter-spacing: -0.2px;     /* 保留细微字距，不影响空格 */
         }
         .select-selected .version {
-            color: #666;
-            font-weight: normal;      /* 版本号灰色不加粗 */
-            margin-left: 4px;          /* 与“ChatGPT”轻微间隔 */
+            font-weight: 400;            /* 常规粗细 */
+            color: #3c3c3c;               /* 深灰保留 */
+            margin-left: 0;                /* 间距完全由HTML空格控制 */
         }
         .select-selected::after {
             content: "";
-            width: 18px;
-            height: 18px;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>') no-repeat center/contain;
-            margin-left: 8px;
+            width: 20px;
+            height: 20px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>') no-repeat center/contain;
+            margin-left: 10px;
             flex-shrink: 0;
         }
         .select-items {
             position: absolute;
             top: calc(100% + 4px);
             left: 0;
-            width: 280px;              /* 固定宽度，不随父元素变化 */
+            width: 280px;
             background: #fff;
             border: 1px solid #d0d0d0;
-            border-radius: 8px;
+            border-radius: 10px;
             max-height: 300px;
             overflow-y: auto;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
             z-index: 100;
             display: none;
         }
-        .select-items.active {
-            display: block;
+        .select-items.active { display: block; }
+        .select-group {
+            color: #1a1a1a;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 10px 14px 5px;
+            cursor: default;
+            background: #fff;
+            border-bottom: 1px solid #eaeaea;
+            margin-bottom: 4px;
         }
         .select-item {
-            padding: 10px 30px 10px 12px;
+            padding: 10px 30px 10px 14px;
             cursor: pointer;
             display: flex;
             flex-direction: column;
             align-items: flex-start;
             position: relative;
         }
-        .select-item:hover {
-            background: #f5f5f5;
-        }
-        .select-item.selected {
-            background: #f0f0f0;
-        }
+        .select-item:hover { background: #f5f5f5; }
+        .select-item.selected { background: #f0f0f0; }
         .select-item.selected::after {
             content: "";
             position: absolute;
-            right: 12px;
+            right: 14px;
             top: 50%;
             transform: translateY(-50%);
             width: 16px;
             height: 16px;
             background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.5"><path d="M4 12l5 5 11-11"/></svg>') no-repeat center/contain;
         }
-        .item-title {
-            font-weight: 500;
-            font-size: 15px;
-        }
-        .item-desc {
-            font-size: 12px;
-            color: #666;
-            margin-top: 2px;
-        }
-        .select-group {
-            color: #666;
-            font-size: 15px;
-            padding: 8px 12px 4px;
-            cursor: default;
-            background: #fff;
-        }
+        .item-title { font-weight: 600; font-size: 16px; }
+        .item-desc { font-size: 12px; color: #666; margin-top: 2px; }
         .chat-container {
-            height: calc(100vh - 204px);
+            height: calc(100vh - 210px);
             overflow-y: auto;
             padding: 15px;
             display: flex;
@@ -161,21 +149,16 @@
             flex-direction: column;
             align-items: flex-start;
         }
-        .msg-row.user {
-            align-items: flex-end;
-        }
+        .msg-row.user { align-items: flex-end; }
         .msg-bubble {
             max-width: 85%;
             background: #f5f5f5;
             border-radius: 10px;
             padding: 16px;
             word-wrap: break-word;
-            overflow-wrap: break-word;
             width: fit-content;
         }
-        .msg-bubble.user {
-            background: #e0e0e0;
-        }
+        .msg-bubble.user { background: #e0e0e0; }
         .model-tag {
             background: transparent;
             border: 1px solid #ccc;
@@ -184,15 +167,9 @@
             font-size: 16px;
             width: 80%;
             margin-bottom: 4px;
-            box-sizing: border-box;
         }
-        .model-tag div:first-child {
-            font-weight: bold;
-        }
-        .msg-text {
-            font-size: 16px;
-            line-height: 1.5;
-        }
+        .model-tag div:first-child { font-weight: bold; }
+        .msg-text { font-size: 16px; line-height: 1.5; }
         .welcome-message {
             text-align: center;
             padding: 40px 20px;
@@ -284,7 +261,7 @@
 <body>
     <div class="header">
         <button class="new-chat-btn" id="newChatBtn">
-            <img src="icon.png" width="20" height="20">
+            <img src="icon.png" width="20" height="20" alt="new">
         </button>
         <div class="custom-select" id="customSelect">
             <div class="select-selected" id="selectSelected">ChatGPT <span class="version">5.2 Instant</span></div>
@@ -311,6 +288,7 @@
         (function() {
             marked.setOptions({ breaks: true, gfm: true });
 
+            // 模型数据
             const MODEL_NAMES = {
                 'gpt-5.2-chat': 'GPT-5.2 Instant',
                 'gpt-5.2': 'GPT-5.2 Thinking',
@@ -323,6 +301,7 @@
                 { id: 'gpt-5.2-pro', title: 'Pro', desc: '研究级智能模型' }
             ];
 
+            // DOM 元素
             const chatContainer = document.getElementById('chatContainer');
             const inputBox = document.getElementById('inputBox');
             const sendBtn = document.getElementById('sendButton');
@@ -338,6 +317,7 @@
             let context = '';
             let hasSent = false;
 
+            // 随机欢迎语
             welcome.textContent = ['有什么可以帮忙的？','我们先从哪里开始呢？','准备好了','今天有什么计划？','您今天在想什么？'][Math.floor(Math.random()*5)];
 
             function updateSendButtonState() {
@@ -362,11 +342,21 @@
                 return div;
             }
 
+            // 更新选择框文字：ChatGPT 与版本号之间保留一个空格
+            function updateSelectedDisplay(modelId) {
+                const fullName = MODEL_NAMES[modelId] || modelId;
+                const versionPart = fullName.startsWith('GPT-') ? fullName.substring(4) : fullName;
+                // 注意： "ChatGPT " 后面包含一个空格，与版本号分隔
+                selectSelected.innerHTML = `ChatGPT <span class="version">${versionPart}</span>`;
+            }
+
+            // 构建下拉列表
             function buildSelect() {
                 selectItems.innerHTML = '';
 
+                // 分组标题（不可点击）
                 let groupDiv = document.createElement('div');
-                groupDiv.className = 'select-item select-group';
+                groupDiv.className = 'select-group';
                 groupDiv.textContent = 'GPT-5.2';
                 selectItems.appendChild(groupDiv);
 
@@ -382,10 +372,11 @@
                     selectItems.appendChild(opt);
                 });
 
-                let firstItem = document.querySelector('.select-item[data-value="gpt-5.2-chat"]');
-                if (firstItem) {
-                    firstItem.classList.add('selected');
-                    selectSelected.innerHTML = `ChatGPT <span class="version">${MODEL_NAMES['gpt-5.2-chat'].replace('GPT-', '')}</span>`;
+                // 默认选中 Instant
+                let defaultItem = document.querySelector('.select-item[data-value="gpt-5.2-chat"]');
+                if (defaultItem) {
+                    defaultItem.classList.add('selected');
+                    updateSelectedDisplay('gpt-5.2-chat');
                 }
             }
 
@@ -496,6 +487,7 @@
                 }
             }
 
+            // 事件绑定
             inputBox.addEventListener('input', () => {
                 inputBox.style.height = 'auto';
                 inputBox.style.height = Math.min(inputBox.scrollHeight, 132) + 'px';
@@ -528,6 +520,7 @@
             document.addEventListener('click', (e) => {
                 if (!customSelect.contains(e.target)) selectItems.classList.remove('active');
             });
+
             selectItems.addEventListener('click', (e) => {
                 let target = e.target.closest('.select-item');
                 if (!target || target.classList.contains('select-group')) return;
@@ -536,11 +529,12 @@
                 target.classList.add('selected');
 
                 const modelId = target.dataset.value;
-                const fullName = MODEL_NAMES[modelId];
-                const versionPart = fullName.replace('GPT-', '');
-                selectSelected.innerHTML = `ChatGPT <span class="version">${versionPart}</span>`;
+                updateSelectedDisplay(modelId);
+
+                selectItems.classList.remove('active');
             });
 
+            // 初始化
             buildSelect();
             updateSendButtonState();
             inputBox.focus();
