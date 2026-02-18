@@ -60,7 +60,8 @@
         }
         .custom-select {
             position: relative;
-            width: 280px;
+            width: fit-content;      /* 宽度根据内容自适应 */
+            min-width: 200px;         /* 最小宽度保证下拉框不缩太小 */
         }
         .select-selected {
             padding: 10px 12px;
@@ -68,14 +69,18 @@
             border-radius: 8px;
             background: #fff;
             font-size: 16px;
+            font-weight: bold;        /* ChatGPT 部分加粗 */
             height: 40px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            white-space: nowrap;       /* 防止换行 */
         }
         .select-selected .version {
             color: #666;
+            font-weight: normal;      /* 版本号灰色不加粗 */
+            margin-left: 4px;          /* 与“ChatGPT”轻微间隔 */
         }
         .select-selected::after {
             content: "";
@@ -89,7 +94,7 @@
             position: absolute;
             top: calc(100% + 4px);
             left: 0;
-            right: 0;
+            width: 280px;              /* 固定宽度，不随父元素变化 */
             background: #fff;
             border: 1px solid #d0d0d0;
             border-radius: 8px;
@@ -534,8 +539,6 @@
                 const fullName = MODEL_NAMES[modelId];
                 const versionPart = fullName.replace('GPT-', '');
                 selectSelected.innerHTML = `ChatGPT <span class="version">${versionPart}</span>`;
-
-                selectItems.classList.remove('active');
             });
 
             buildSelect();
