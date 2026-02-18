@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>ChatGPT</title>
+    <title>ChatGPT · 精简版</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="icon" href="favicon.png" type="image/png">
     <script src="https://js.puter.com/v2/"></script>
@@ -64,7 +64,7 @@
         }
         .select-selected {
             padding: 10px 12px;
-            border: 1px solid #d0d0d0;
+            border: none;                /* 去掉边框 */
             border-radius: 8px;
             background: #fff;
             font-size: 14px;
@@ -74,10 +74,14 @@
             align-items: center;
             justify-content: space-between;
         }
+        /* 向下箭头 SVG (V形, 线条风格) */
         .select-selected::after {
-            content: "▼";
-            font-size: 10px;
-            color: #666;
+            content: "";
+            width: 18px;
+            height: 18px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>') no-repeat center/contain;
+            margin-left: 8px;
+            flex-shrink: 0;
         }
         .select-items {
             position: absolute;
@@ -99,6 +103,9 @@
         .select-item {
             padding: 10px 12px;
             cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
         }
         .select-item:hover {
             background: #f5f5f5;
@@ -107,6 +114,15 @@
             background: #e3f2fd;
             font-weight: 500;
         }
+        .item-title {
+            font-weight: 500;
+            font-size: 15px;
+        }
+        .item-desc {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+        }
         .select-group {
             color: #666;
             font-size: 12px;
@@ -114,34 +130,9 @@
             cursor: default;
             background: #f8f9fa;
         }
+        /* 右侧增强按钮容器 — 完全隐藏（不再使用） */
         .header-enhance {
-            display: flex;
-            gap: 6px;
-            margin-left: 12px;
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            white-space: nowrap;
-        }
-        .header-enhance::-webkit-scrollbar {
-            display: none;
-        }
-        .enhance-btn {
-            border: 1px solid #d0d0d0;
-            border-radius: 18px;
-            background: #fff;
-            padding: 6px 12px;
-            font-size: 13px;
-            cursor: pointer;
-            height: 36px;
-            flex-shrink: 0;
-            display: none;
-        }
-        .enhance-btn.active {
-            background: #e3f2fd;
-            color: #1565c0;
-            border-color: #1565c0;
+            display: none !important;
         }
         .chat-container {
             height: calc(100vh - 204px);
@@ -150,7 +141,6 @@
             display: flex;
             flex-direction: column;
         }
-        /* 完全重构的气泡结构 - 修复上下布局 */
         .msg-row {
             width: 100%;
             margin-bottom: 16px;
@@ -288,9 +278,10 @@
             <img src="icon.png" width="20" height="20">
         </button>
         <div class="custom-select" id="customSelect">
-            <div class="select-selected" id="selectSelected">GPT-5.2 Instant</div>
+            <div class="select-selected" id="selectSelected">Instant</div>
             <div class="select-items" id="selectItems"></div>
         </div>
+        <!-- 右侧增强按钮容器已废弃，样式隐藏 -->
         <div class="header-enhance" id="headerEnhance"></div>
     </div>
     
@@ -313,37 +304,21 @@
         (function() {
             marked.setOptions({ breaks: true, gfm: true });
 
+            // 只保留 GPT-5.2 系列, 显示完整名称用于模型标签
             const MODEL_NAMES = {
                 'gpt-5.2-chat': 'GPT-5.2 Instant',
                 'gpt-5.2': 'GPT-5.2 Thinking',
-                'gpt-5.2-pro': 'GPT-5.2 Pro',
-                'o1': 'OpenAI o1',
-                'o3': 'OpenAI o3',
-                'o3-mini': 'OpenAI o3-mini',
-                'o4-mini': 'OpenAI o4-mini',
-                'openrouter:openai/o3-deep-research': 'o3 Deep Research',
-                'openrouter:openai/o3-pro': 'o3 Pro',
-                'openrouter:openai/o3-mini-high': 'o3-mini High',
-                'openrouter:openai/o4-mini-high': 'o4-mini High',
-                'openrouter:openai/o4-mini-deep-research': 'o4-mini Deep Research',
-                'openrouter:openai/gpt-4': 'GPT-4',
-                'openrouter:openai/gpt-4-turbo': 'GPT-4 Turbo',
-                'openrouter:openai/gpt-3.5-turbo': 'GPT-3.5 Turbo'
+                'gpt-5.2-pro': 'GPT-5.2 Pro'
             };
 
-            const GROUPS = {
-                'GPT-5.2 系列': ['gpt-5.2-chat', 'gpt-5.2', 'gpt-5.2-pro'],
-                'o 系列': ['o1', 'o3', 'o3-mini', 'o4-mini'],
-                'Legacy (不能联网)': ['openrouter:openai/gpt-4', 'openrouter:openai/gpt-4-turbo', 'openrouter:openai/gpt-3.5-turbo']
-            };
-
-            const ENHANCEMENTS = [
-                { base: 'o3', enhId: 'openrouter:openai/o3-deep-research', label: 'Deep Research' },
-                { base: 'o3-mini', enhId: 'openrouter:openai/o3-mini-high', label: 'High' },
-                { base: 'o4-mini', enhId: 'openrouter:openai/o4-mini-high', label: 'High' },
-                { base: 'o4-mini', enhId: 'openrouter:openai/o4-mini-deep-research', label: 'Deep Research' }
+            // 模型列表：id, 标题(下拉框主文字), 描述
+            const MODEL_LIST = [
+                { id: 'gpt-5.2-chat', title: 'Instant', desc: '即刻回答' },
+                { id: 'gpt-5.2', title: 'Thinking', desc: '思考更充分，回答更优质' },
+                { id: 'gpt-5.2-pro', title: 'Pro', desc: '研究级智能模型' }
             ];
 
+            // 移除所有增强按钮相关 (o系列彻底删除)
             const chatContainer = document.getElementById('chatContainer');
             const inputBox = document.getElementById('inputBox');
             const sendBtn = document.getElementById('sendButton');
@@ -353,13 +328,13 @@
             const selectSelected = document.getElementById('selectSelected');
             const selectItems = document.getElementById('selectItems');
             const customSelect = document.getElementById('customSelect');
-            const headerEnhance = document.getElementById('headerEnhance');
+            // 隐藏头部增强容器 (以防万一)
+            document.getElementById('headerEnhance').style.display = 'none';
 
             let isThinking = false;
             let webEnabled = false;
             let context = '';
             let hasSent = false;
-            let activeEnhancement = null;
 
             welcome.textContent = ['有什么可以帮忙的？','我们先从哪里开始呢？','准备好了','今天有什么计划？','您今天在想什么？'][Math.floor(Math.random()*5)];
 
@@ -367,13 +342,13 @@
                 sendBtn.disabled = isThinking || !inputBox.value.trim();
             }
 
-            // 修改：支持传入实际耗时（秒），仅对 gpt-5.2-pro 显示第二行
+            // 模型标签：若是 pro 则显示耗时
             function createModelTag(modelId, elapsedSeconds = null) {
                 let div = document.createElement('div');
                 div.className = 'model-tag';
                 let line1 = document.createElement('div');
                 line1.style.fontWeight = 'bold';
-                line1.textContent = `Request for ${getDisplayName(modelId)}`;
+                line1.textContent = `Request for ${MODEL_NAMES[modelId] || modelId}`;
                 div.appendChild(line1);
                 if (modelId === 'gpt-5.2-pro' && elapsedSeconds !== null) {
                     let line2 = document.createElement('div');
@@ -386,79 +361,48 @@
                 return div;
             }
 
+            // 构建下拉框：只有GPT-5.2组 + 三个选项(带描述)
             function buildSelect() {
                 selectItems.innerHTML = '';
-                for (let group in GROUPS) {
-                    let gDiv = document.createElement('div');
-                    gDiv.className = 'select-item select-group';
-                    gDiv.textContent = group;
-                    selectItems.appendChild(gDiv);
-                    GROUPS[group].forEach(id => {
-                        let item = document.createElement('div');
-                        item.className = 'select-item';
-                        item.dataset.value = id;
-                        item.textContent = MODEL_NAMES[id] || id;
-                        if (group.includes('Legacy')) item.dataset.legacy = 'true';
-                        selectItems.appendChild(item);
-                    });
-                }
-                let first = document.querySelector('.select-item:not(.select-group)');
-                if (first) {
-                    first.classList.add('selected');
-                    selectSelected.textContent = first.textContent;
-                    webToggle.disabled = first.dataset.legacy === 'true';
-                    updateEnhanceVisibility(first.dataset.value);
-                }
-            }
 
-            function buildHeaderEnhance() {
-                headerEnhance.innerHTML = '';
-                ENHANCEMENTS.forEach(cfg => {
-                    let btn = document.createElement('button');
-                    btn.className = 'enhance-btn';
-                    btn.dataset.base = cfg.base;
-                    btn.dataset.enh = cfg.enhId;
-                    btn.textContent = cfg.label;
-                    headerEnhance.appendChild(btn);
+                // 组标题
+                let groupDiv = document.createElement('div');
+                groupDiv.className = 'select-item select-group';
+                groupDiv.textContent = 'GPT-5.2';
+                selectItems.appendChild(groupDiv);
+
+                // 三个模型选项
+                MODEL_LIST.forEach(item => {
+                    let opt = document.createElement('div');
+                    opt.className = 'select-item';
+                    opt.dataset.value = item.id;
+                    opt.dataset.title = item.title;      // 用于显示选中后的简单标题
+                    // 内部结构：标题 + 描述小字
+                    opt.innerHTML = `
+                        <span class="item-title">${item.title}</span>
+                        <span class="item-desc">${item.desc}</span>
+                    `;
+                    selectItems.appendChild(opt);
                 });
-                for (let btn of headerEnhance.children) {
-                    btn.addEventListener('click', (e) => {
-                        let base = document.querySelector('.select-item.selected')?.dataset.value;
-                        if (btn.dataset.base !== base) return;
-                        let enhId = btn.dataset.enh;
-                        if (btn.classList.contains('active')) {
-                            btn.classList.remove('active');
-                            activeEnhancement = null;
-                        } else {
-                            for (let b of headerEnhance.children) {
-                                if (b.dataset.base === base) b.classList.remove('active');
-                            }
-                            btn.classList.add('active');
-                            activeEnhancement = enhId;
-                        }
-                    });
+
+                // 默认选中第一个 (Instant)
+                let firstItem = document.querySelector('.select-item[data-value="gpt-5.2-chat"]');
+                if (firstItem) {
+                    firstItem.classList.add('selected');
+                    selectSelected.textContent = firstItem.dataset.title; // "Instant"
                 }
+
+                // 没有legacy模型，因此永远不禁用联网
+                webToggle.disabled = false;
             }
 
-            function updateEnhanceVisibility(baseId) {
-                activeEnhancement = null;
-                for (let btn of headerEnhance.children) {
-                    let show = (btn.dataset.base === baseId);
-                    btn.style.display = show ? 'inline-block' : 'none';
-                    btn.classList.remove('active');
-                }
-            }
-
+            // 获取当前选中的模型ID (无增强按钮，直接返回base)
             function getFinalModel() {
-                let base = document.querySelector('.select-item.selected')?.dataset.value || 'gpt-5.2-chat';
-                return activeEnhancement || base;
+                let selected = document.querySelector('.select-item.selected');
+                return selected ? selected.dataset.value : 'gpt-5.2-chat';
             }
 
-            function getDisplayName(modelId) {
-                return MODEL_NAMES[modelId] || modelId;
-            }
-
-            // 完全重构的消息添加函数 - 修复上下布局
+            // 添加消息 (完全重构的布局，保持上下结构)
             function addMessage(text, isUser = false, streaming = false, finalModel = null) {
                 if (isUser && !hasSent) {
                     welcome.style.display = 'none';
@@ -480,7 +424,7 @@
                     chatContainer.scrollTop = chatContainer.scrollHeight;
                     return { row, bubble, msgText };
                 } else {
-                    // AI消息：模型标签在上，气泡在下，各自独立宽度
+                    // AI消息：模型标签在上，气泡在下
                     if (!streaming && finalModel) {
                         let tag = createModelTag(finalModel);
                         row.appendChild(tag);
@@ -525,7 +469,6 @@
                 }
                 if (webEnabled && !webToggle.disabled) opts.tools = [{ type: 'web_search' }];
 
-                // 记录开始时间（真实耗时起点）
                 const startTime = Date.now();
 
                 try {
@@ -545,16 +488,14 @@
                     let lines = context.split('\n');
                     if (lines.length > 20) context = lines.slice(-20).join('\n');
 
-                    // 流式完成，获取bubble并插入模型标签
+                    // 流完成，插入模型标签
                     let bubble = document.getElementById('streamingBubble');
                     if (bubble) {
                         bubble.id = '';
                         let row = bubble.parentNode;
-                        // 计算实际耗时（秒）
                         const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
                         let tag;
                         if (finalModel === 'gpt-5.2-pro') {
-                            // 只有pro模型才传入耗时
                             tag = createModelTag(finalModel, elapsedSeconds);
                         } else {
                             tag = createModelTag(finalModel);
@@ -596,6 +537,7 @@
                 location.reload();
             });
 
+            // 下拉框交互
             selectSelected.addEventListener('click', (e) => {
                 e.stopPropagation();
                 selectItems.classList.toggle('active');
@@ -606,23 +548,25 @@
             selectItems.addEventListener('click', (e) => {
                 let target = e.target.closest('.select-item');
                 if (!target || target.classList.contains('select-group')) return;
+
                 document.querySelectorAll('.select-item:not(.select-group)').forEach(el => el.classList.remove('selected'));
                 target.classList.add('selected');
-                selectSelected.textContent = target.textContent;
 
-                let base = target.dataset.value;
-                webToggle.disabled = target.dataset.legacy === 'true';
-                if (webToggle.disabled) webEnabled = false;
-                webToggle.classList.toggle('active', webEnabled && !webToggle.disabled);
+                // 更新选中显示: 用 data-title (短标题)
+                selectSelected.textContent = target.dataset.title || 'Instant';
+                // 没有legacy模型，永远不禁用联网，且无需改变webEnabled
+                webToggle.disabled = false;   // 保持可用
 
-                updateEnhanceVisibility(base);
                 selectItems.classList.remove('active');
             });
 
+            // 初始化
             buildSelect();
-            buildHeaderEnhance();
             updateSendButtonState();
             inputBox.focus();
+
+            // 确保联网按钮初始不禁用
+            webToggle.disabled = false;
         })();
     </script>
 </body>
