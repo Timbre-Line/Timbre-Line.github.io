@@ -66,19 +66,16 @@
             border-radius: 8px;
             background: #fff;
             font-size: 20px;
-            font-weight: 400;          /* 常规粗细 */
             height: 44px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: space-between;
             white-space: nowrap;
-            letter-spacing: -0.2px;     /* 保留细微字距，不影响空格 */
         }
         .select-selected .version {
-            font-weight: 400;            /* 常规粗细 */
-            color: #3c3c3c;               /* 深灰保留 */
-            margin-left: 0;                /* 间距完全由HTML空格控制 */
+            font-weight: 400;
+            color: #3c3c3c;
         }
         .select-selected::after {
             content: "";
@@ -288,7 +285,6 @@
         (function() {
             marked.setOptions({ breaks: true, gfm: true });
 
-            // 模型数据
             const MODEL_NAMES = {
                 'gpt-5.2-chat': 'GPT-5.2 Instant',
                 'gpt-5.2': 'GPT-5.2 Thinking',
@@ -300,8 +296,7 @@
                 { id: 'gpt-5.2', title: 'Thinking', desc: '思考更充分，回答更优质' },
                 { id: 'gpt-5.2-pro', title: 'Pro', desc: '研究级智能模型' }
             ];
-
-            // DOM 元素
+            
             const chatContainer = document.getElementById('chatContainer');
             const inputBox = document.getElementById('inputBox');
             const sendBtn = document.getElementById('sendButton');
@@ -317,7 +312,6 @@
             let context = '';
             let hasSent = false;
 
-            // 随机欢迎语
             welcome.textContent = ['有什么可以帮忙的？','我们先从哪里开始呢？','准备好了','今天有什么计划？','您今天在想什么？'][Math.floor(Math.random()*5)];
 
             function updateSendButtonState() {
@@ -342,19 +336,15 @@
                 return div;
             }
 
-            // 更新选择框文字：ChatGPT 与版本号之间保留一个空格
             function updateSelectedDisplay(modelId) {
                 const fullName = MODEL_NAMES[modelId] || modelId;
                 const versionPart = fullName.startsWith('GPT-') ? fullName.substring(4) : fullName;
-                // 注意： "ChatGPT " 后面包含一个空格，与版本号分隔
-                selectSelected.innerHTML = `ChatGPT <span class="version">${versionPart}</span>`;
+                selectSelected.innerHTML = `ChatGPT&nbsp;<span class="version">${versionPart}</span>`;
             }
 
-            // 构建下拉列表
             function buildSelect() {
                 selectItems.innerHTML = '';
 
-                // 分组标题（不可点击）
                 let groupDiv = document.createElement('div');
                 groupDiv.className = 'select-group';
                 groupDiv.textContent = 'GPT-5.2';
@@ -487,7 +477,6 @@
                 }
             }
 
-            // 事件绑定
             inputBox.addEventListener('input', () => {
                 inputBox.style.height = 'auto';
                 inputBox.style.height = Math.min(inputBox.scrollHeight, 132) + 'px';
@@ -534,7 +523,6 @@
                 selectItems.classList.remove('active');
             });
 
-            // 初始化
             buildSelect();
             updateSendButtonState();
             inputBox.focus();
