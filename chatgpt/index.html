@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>ChatGPT · 精简版</title>
+    <title>ChatGPT</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="icon" href="favicon.png" type="image/png">
     <script src="https://js.puter.com/v2/"></script>
@@ -60,21 +60,23 @@
         }
         .custom-select {
             position: relative;
-            width: 250px;
+            width: 280px;
         }
         .select-selected {
             padding: 10px 12px;
-            border: none;                /* 去掉边框 */
+            border: none;
             border-radius: 8px;
             background: #fff;
-            font-size: 14px;
+            font-size: 16px;
             height: 40px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
-        /* 向下箭头 SVG (V形, 线条风格) */
+        .select-selected .version {
+            color: #666;
+        }
         .select-selected::after {
             content: "";
             width: 18px;
@@ -101,18 +103,28 @@
             display: block;
         }
         .select-item {
-            padding: 10px 12px;
+            padding: 10px 30px 10px 12px;
             cursor: pointer;
             display: flex;
             flex-direction: column;
             align-items: flex-start;
+            position: relative;
         }
         .select-item:hover {
             background: #f5f5f5;
         }
         .select-item.selected {
-            background: #e3f2fd;
-            font-weight: 500;
+            background: #f0f0f0;
+        }
+        .select-item.selected::after {
+            content: "";
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.5"><path d="M4 12l5 5 11-11"/></svg>') no-repeat center/contain;
         }
         .item-title {
             font-weight: 500;
@@ -125,14 +137,10 @@
         }
         .select-group {
             color: #666;
-            font-size: 12px;
+            font-size: 15px;
             padding: 8px 12px 4px;
             cursor: default;
-            background: #f8f9fa;
-        }
-        /* 右侧增强按钮容器 — 完全隐藏（不再使用） */
-        .header-enhance {
-            display: none !important;
+            background: #fff;
         }
         .chat-container {
             height: calc(100vh - 204px);
@@ -214,10 +222,6 @@
             color: #1565c0;
             border-color: #1565c0;
         }
-        .web-search-toggle:disabled {
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
         .input-container {
             display: flex;
             align-items: flex-start;
@@ -278,11 +282,9 @@
             <img src="icon.png" width="20" height="20">
         </button>
         <div class="custom-select" id="customSelect">
-            <div class="select-selected" id="selectSelected">Instant</div>
+            <div class="select-selected" id="selectSelected">ChatGPT <span class="version">5.2 Instant</span></div>
             <div class="select-items" id="selectItems"></div>
         </div>
-        <!-- 右侧增强按钮容器已废弃，样式隐藏 -->
-        <div class="header-enhance" id="headerEnhance"></div>
     </div>
     
     <div class="chat-container" id="chatContainer">
@@ -304,21 +306,18 @@
         (function() {
             marked.setOptions({ breaks: true, gfm: true });
 
-            // 只保留 GPT-5.2 系列, 显示完整名称用于模型标签
             const MODEL_NAMES = {
                 'gpt-5.2-chat': 'GPT-5.2 Instant',
                 'gpt-5.2': 'GPT-5.2 Thinking',
                 'gpt-5.2-pro': 'GPT-5.2 Pro'
             };
 
-            // 模型列表：id, 标题(下拉框主文字), 描述
             const MODEL_LIST = [
                 { id: 'gpt-5.2-chat', title: 'Instant', desc: '即刻回答' },
                 { id: 'gpt-5.2', title: 'Thinking', desc: '思考更充分，回答更优质' },
                 { id: 'gpt-5.2-pro', title: 'Pro', desc: '研究级智能模型' }
             ];
 
-            // 移除所有增强按钮相关 (o系列彻底删除)
             const chatContainer = document.getElementById('chatContainer');
             const inputBox = document.getElementById('inputBox');
             const sendBtn = document.getElementById('sendButton');
@@ -328,8 +327,6 @@
             const selectSelected = document.getElementById('selectSelected');
             const selectItems = document.getElementById('selectItems');
             const customSelect = document.getElementById('customSelect');
-            // 隐藏头部增强容器 (以防万一)
-            document.getElementById('headerEnhance').style.display = 'none';
 
             let isThinking = false;
             let webEnabled = false;
@@ -342,7 +339,6 @@
                 sendBtn.disabled = isThinking || !inputBox.value.trim();
             }
 
-            // 模型标签：若是 pro 则显示耗时
             function createModelTag(modelId, elapsedSeconds = null) {
                 let div = document.createElement('div');
                 div.className = 'model-tag';
@@ -361,23 +357,19 @@
                 return div;
             }
 
-            // 构建下拉框：只有GPT-5.2组 + 三个选项(带描述)
             function buildSelect() {
                 selectItems.innerHTML = '';
 
-                // 组标题
                 let groupDiv = document.createElement('div');
                 groupDiv.className = 'select-item select-group';
                 groupDiv.textContent = 'GPT-5.2';
                 selectItems.appendChild(groupDiv);
 
-                // 三个模型选项
                 MODEL_LIST.forEach(item => {
                     let opt = document.createElement('div');
                     opt.className = 'select-item';
                     opt.dataset.value = item.id;
-                    opt.dataset.title = item.title;      // 用于显示选中后的简单标题
-                    // 内部结构：标题 + 描述小字
+                    opt.dataset.title = item.title;
                     opt.innerHTML = `
                         <span class="item-title">${item.title}</span>
                         <span class="item-desc">${item.desc}</span>
@@ -385,24 +377,18 @@
                     selectItems.appendChild(opt);
                 });
 
-                // 默认选中第一个 (Instant)
                 let firstItem = document.querySelector('.select-item[data-value="gpt-5.2-chat"]');
                 if (firstItem) {
                     firstItem.classList.add('selected');
-                    selectSelected.textContent = firstItem.dataset.title; // "Instant"
+                    selectSelected.innerHTML = `ChatGPT <span class="version">${MODEL_NAMES['gpt-5.2-chat'].replace('GPT-', '')}</span>`;
                 }
-
-                // 没有legacy模型，因此永远不禁用联网
-                webToggle.disabled = false;
             }
 
-            // 获取当前选中的模型ID (无增强按钮，直接返回base)
             function getFinalModel() {
                 let selected = document.querySelector('.select-item.selected');
                 return selected ? selected.dataset.value : 'gpt-5.2-chat';
             }
 
-            // 添加消息 (完全重构的布局，保持上下结构)
             function addMessage(text, isUser = false, streaming = false, finalModel = null) {
                 if (isUser && !hasSent) {
                     welcome.style.display = 'none';
@@ -424,7 +410,6 @@
                     chatContainer.scrollTop = chatContainer.scrollHeight;
                     return { row, bubble, msgText };
                 } else {
-                    // AI消息：模型标签在上，气泡在下
                     if (!streaming && finalModel) {
                         let tag = createModelTag(finalModel);
                         row.appendChild(tag);
@@ -464,10 +449,8 @@
                 let { msgText } = addMessage('', false, true);
 
                 let opts = { stream: true, model: finalModel };
-                if (finalModel === 'gpt-5.2-chat' || finalModel === 'gpt-5.2' || finalModel === 'gpt-5.2-pro') {
-                    opts.driver = 'openrouter';
-                }
-                if (webEnabled && !webToggle.disabled) opts.tools = [{ type: 'web_search' }];
+                if (finalModel.startsWith('gpt-5.2')) opts.driver = 'openrouter';
+                if (webEnabled) opts.tools = [{ type: 'web_search' }];
 
                 const startTime = Date.now();
 
@@ -488,18 +471,14 @@
                     let lines = context.split('\n');
                     if (lines.length > 20) context = lines.slice(-20).join('\n');
 
-                    // 流完成，插入模型标签
                     let bubble = document.getElementById('streamingBubble');
                     if (bubble) {
                         bubble.id = '';
                         let row = bubble.parentNode;
                         const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
-                        let tag;
-                        if (finalModel === 'gpt-5.2-pro') {
-                            tag = createModelTag(finalModel, elapsedSeconds);
-                        } else {
-                            tag = createModelTag(finalModel);
-                        }
+                        let tag = (finalModel === 'gpt-5.2-pro') 
+                            ? createModelTag(finalModel, elapsedSeconds)
+                            : createModelTag(finalModel);
                         row.insertBefore(tag, row.firstChild);
                     }
 
@@ -537,7 +516,6 @@
                 location.reload();
             });
 
-            // 下拉框交互
             selectSelected.addEventListener('click', (e) => {
                 e.stopPropagation();
                 selectItems.classList.toggle('active');
@@ -552,21 +530,17 @@
                 document.querySelectorAll('.select-item:not(.select-group)').forEach(el => el.classList.remove('selected'));
                 target.classList.add('selected');
 
-                // 更新选中显示: 用 data-title (短标题)
-                selectSelected.textContent = target.dataset.title || 'Instant';
-                // 没有legacy模型，永远不禁用联网，且无需改变webEnabled
-                webToggle.disabled = false;   // 保持可用
+                const modelId = target.dataset.value;
+                const fullName = MODEL_NAMES[modelId];
+                const versionPart = fullName.replace('GPT-', '');
+                selectSelected.innerHTML = `ChatGPT <span class="version">${versionPart}</span>`;
 
                 selectItems.classList.remove('active');
             });
 
-            // 初始化
             buildSelect();
             updateSendButtonState();
             inputBox.focus();
-
-            // 确保联网按钮初始不禁用
-            webToggle.disabled = false;
         })();
     </script>
 </body>
