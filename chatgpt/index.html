@@ -289,7 +289,8 @@
                 'gpt-5.2': 'GPT-5.2 Thinking',
                 'gpt-5.2-pro': 'GPT-5.2 Pro',
                 'gpt-5.1-chat-latest': 'GPT-5.1 Instant',
-                'gpt-5.1': 'GPT-5.1 Thinking'
+                'gpt-5.1': 'GPT-5.1 Thinking',
+                'gpt-4o': 'GPT-4o'
             };
 
             const MODEL_LIST = [
@@ -404,20 +405,24 @@
                 optLegacy2.innerHTML = `<span class="item-title">GPT-5.1 Thinking</span>`;
                 legacyContent.appendChild(optLegacy2);
 
+                let optLegacy3 = document.createElement('div');
+                optLegacy3.className = 'select-item';
+                optLegacy3.dataset.value = 'gpt-4o';
+                optLegacy3.dataset.title = 'GPT-4o';
+                optLegacy3.innerHTML = `<span class="item-title">GPT-4o</span>`;
+                legacyContent.appendChild(optLegacy3);
+
                 collapsibleGroup.appendChild(legacyHeader);
                 collapsibleGroup.appendChild(legacyContent);
                 selectItems.appendChild(collapsibleGroup);
 
-                // 点击标题展开/折叠并旋转箭头
                 legacyHeader.addEventListener('click', function(e) {
-                    e.stopPropagation(); // 防止关闭下拉框
+                    e.stopPropagation();
                     let isHidden = legacyContent.style.display === 'none';
                     legacyContent.style.display = isHidden ? 'block' : 'none';
-                    // 箭头旋转180度（无过渡）
                     arrowSvg.style.transform = isHidden ? 'rotate(180deg)' : '';
                 });
 
-                // 默认选中 Instant
                 let defaultItem = document.querySelector('.select-item[data-value="gpt-5.2-chat"]');
                 if (defaultItem) {
                     defaultItem.classList.add('selected');
