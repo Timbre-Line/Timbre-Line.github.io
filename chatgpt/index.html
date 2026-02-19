@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>ChatGPT + LaTeX</title>
+    <title>ChatGPT</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="icon" href="favicon.png" type="image/png">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" integrity="sha384-wcIxkf4k558AjM3Yz3BBFQUbk/zgIYC2R0QpeeYb+TwlBVMrlgLqwRjRtGZiK7ww" crossorigin="anonymous">
@@ -286,62 +286,19 @@
         (function() {
             marked.setOptions({ breaks: true, gfm: true });
 
-            // ---------- 新增: LaTeX 渲染函数 (最简实现, 无侵入) ----------
             function renderMarkdownWithMath(text) {
-                // 如果 KaTeX 还没加载好, 降级为普通 Markdown (保证不崩溃)
-                if (!window.katex) {
-                    return marked.parse(text);
-                }
-                let formulas = {};          // 占位符 -> 渲染后的 HTML
-                let idx = 0;
-                
-                // 1. 处理行间公式 $$ ... $$   (display mode)
-                text = text.replace(/\$\$([\s\S]*?)\$\$/g, (match, p1) => {
-                    try {
-                        let html = katex.renderToString(p1, { displayMode: true, throwOnError: false });
-                        let placeholder = `@@KATEX_${idx++}@@`;
-                        formulas[placeholder] = html;
-                        return placeholder;
-                    } catch (e) {
-                        return match;  // 渲染失败则保留原样
-                    }
+                if (!window.katex) return marked.parse(text);
+                let formulas = {}, idx = 0;
+                text = text.replace(/\$\$([\s\S]*?)\$\$/g, (m, p) => {
+                    try { let h = katex.renderToString(p, { displayMode: true, throwOnError: false }); let ph = `@@KATEX_${idx++}@@`; formulas[ph] = h; return ph; } catch { return m; }
+                }).replace(/\\\[([\s\S]*?)\\\]/g, (m, p) => {
+                    try { let h = katex.renderToString(p, { displayMode: true, throwOnError: false }); let ph = `@@KATEX_${idx++}@@`; formulas[ph] = h; return ph; } catch { return m; }
+                }).replace(/\\\(([\s\S]*?)\\\)/g, (m, p) => {
+                    try { let h = katex.renderToString(p, { displayMode: false, throwOnError: false }); let ph = `@@KATEX_${idx++}@@`; formulas[ph] = h; return ph; } catch { return m; }
                 });
-                
-                // 2. 处理行间公式 \[ ... \]
-                text = text.replace(/\\\[([\s\S]*?)\\\]/g, (match, p1) => {
-                    try {
-                        let html = katex.renderToString(p1, { displayMode: true, throwOnError: false });
-                        let placeholder = `@@KATEX_${idx++}@@`;
-                        formulas[placeholder] = html;
-                        return placeholder;
-                    } catch (e) {
-                        return match;
-                    }
-                });
-                
-                // 3. 处理行内公式 \( ... \)
-                text = text.replace(/\\\(([\s\S]*?)\\\)/g, (match, p1) => {
-                    try {
-                        let html = katex.renderToString(p1, { displayMode: false, throwOnError: false });
-                        let placeholder = `@@KATEX_${idx++}@@`;
-                        formulas[placeholder] = html;
-                        return placeholder;
-                    } catch (e) {
-                        return match;
-                    }
-                });
-                
-                // 先让 marked 处理 (此时公式已被占位符保护)
                 let html = marked.parse(text);
-                
-                // 将占位符替换回 KaTeX 渲染好的 HTML
-                html = html.replace(/@@KATEX_(\d+)@@/g, (match, p1) => {
-                    return formulas[match] || match;
-                });
-                
-                return html;
+                return html.replace(/@@KATEX_(\d+)@@/g, (match) => formulas[match] || match);
             }
-            // ------------------------------------------------------------
 
             const MODEL_NAMES = {
                 'gpt-5.2-chat': 'GPT-5.2 Instant',
@@ -351,7 +308,6 @@
                 'gpt-5.1': 'GPT-5.1 Thinking',
                 'gpt-4o': 'GPT-4o'
             };
-
             const MODEL_LIST = [
                 { id: 'gpt-5.2-chat', title: 'Instant', desc: '即刻回答' },
                 { id: 'gpt-5.2', title: 'Thinking', desc: '思考更充分，回答更优质' },
@@ -368,11 +324,7 @@
             const selectItems = document.getElementById('selectItems');
             const customSelect = document.getElementById('customSelect');
 
-            let isThinking = false;
-            let webEnabled = false;
-            let context = '';
-            let hasSent = false;
-
+            let isThinking = false, webEnabled = false, context = '', hasSent = false;
             welcome.textContent = ['有什么可以帮忙的？','我们先从哪里开始呢？','准备好了','今天有什么计划？','您今天在想什么？'][Math.floor(Math.random()*5)];
 
             function updateSendButtonState() {
@@ -388,156 +340,109 @@
                 div.appendChild(line1);
                 if (modelId === 'gpt-5.2-pro' && elapsedSeconds !== null) {
                     let line2 = document.createElement('div');
-                    let minutes = Math.floor(elapsedSeconds / 60);
-                    let seconds = elapsedSeconds % 60;
-                    let timeStr = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
-                    line2.textContent = `Reasoned for ${timeStr}`;
+                    let minutes = Math.floor(elapsedSeconds / 60), seconds = elapsedSeconds % 60;
+                    line2.textContent = `Reasoned for ${minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`}`;
                     div.appendChild(line2);
                 }
                 return div;
             }
 
             function updateSelectedDisplay(modelId) {
-                const fullName = MODEL_NAMES[modelId] || modelId;
-                const versionPart = fullName.startsWith('GPT-') ? fullName.substring(4) : fullName;
-                selectSelected.innerHTML = `ChatGPT&nbsp;<span class="version">${versionPart}</span>`;
+                let full = MODEL_NAMES[modelId] || modelId;
+                let version = full.startsWith('GPT-') ? full.substring(4) : full;
+                selectSelected.innerHTML = `ChatGPT&nbsp;<span class="version">${version}</span>`;
             }
 
             function buildSelect() {
                 selectItems.innerHTML = '';
-
-                let groupDiv = document.createElement('div');
-                groupDiv.className = 'select-group';
-                groupDiv.textContent = 'GPT-5.2';
-                selectItems.appendChild(groupDiv);
+                let group = document.createElement('div');
+                group.className = 'select-group';
+                group.textContent = 'GPT-5.2';
+                selectItems.appendChild(group);
 
                 MODEL_LIST.forEach(item => {
                     let opt = document.createElement('div');
                     opt.className = 'select-item';
                     opt.dataset.value = item.id;
                     opt.dataset.title = item.title;
-                    opt.innerHTML = `
-                        <span class="item-title">${item.title}</span>
-                        <span class="item-desc">${item.desc}</span>
-                    `;
+                    opt.innerHTML = `<span class="item-title">${item.title}</span><span class="item-desc">${item.desc}</span>`;
                     selectItems.appendChild(opt);
                 });
 
-                let collapsibleGroup = document.createElement('div');
-                collapsibleGroup.style.borderTop = '1px solid #eaeaea';
+                let collapsible = document.createElement('div');
+                collapsible.style.borderTop = '1px solid #eaeaea';
 
                 let legacyHeader = document.createElement('div');
                 legacyHeader.className = 'select-group';
-                legacyHeader.style.display = 'flex';
-                legacyHeader.style.justifyContent = 'space-between';
-                legacyHeader.style.alignItems = 'center';
-                legacyHeader.style.cursor = 'pointer';
-                legacyHeader.style.padding = '8px 14px';
-                legacyHeader.style.paddingRight = '14px';
+                legacyHeader.style.cssText = 'display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:8px 14px';
                 legacyHeader.innerHTML = 'Legacy Models';
-
-                let arrowSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                arrowSvg.setAttribute('width', '20');
-                arrowSvg.setAttribute('height', '20');
-                arrowSvg.setAttribute('viewBox', '0 0 24 24');
-                arrowSvg.setAttribute('fill', 'none');
-                arrowSvg.setAttribute('stroke', 'black');
-                arrowSvg.setAttribute('stroke-width', '2');
-                arrowSvg.style.transformOrigin = 'center';
-                arrowSvg.innerHTML = '<path d="M6 9l6 6 6-6"/>';
-                legacyHeader.appendChild(arrowSvg);
+                let arrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                arrow.setAttribute('width', '20'); arrow.setAttribute('height', '20'); arrow.setAttribute('viewBox', '0 0 24 24');
+                arrow.setAttribute('fill', 'none'); arrow.setAttribute('stroke', 'black'); arrow.setAttribute('stroke-width', '2');
+                arrow.innerHTML = '<path d="M6 9l6 6 6-6"/>';
+                legacyHeader.appendChild(arrow);
 
                 let legacyContent = document.createElement('div');
                 legacyContent.style.display = 'none';
 
-                let optLegacy1 = document.createElement('div');
-                optLegacy1.className = 'select-item';
-                optLegacy1.dataset.value = 'gpt-5.1-chat-latest';
-                optLegacy1.dataset.title = 'GPT-5.1 Instant';
-                optLegacy1.innerHTML = `<span class="item-title">GPT-5.1 Instant</span>`;
-                legacyContent.appendChild(optLegacy1);
-
-                let optLegacy2 = document.createElement('div');
-                optLegacy2.className = 'select-item';
-                optLegacy2.dataset.value = 'gpt-5.1';
-                optLegacy2.dataset.title = 'GPT-5.1 Thinking';
-                optLegacy2.innerHTML = `<span class="item-title">GPT-5.1 Thinking</span>`;
-                legacyContent.appendChild(optLegacy2);
-
-                let optLegacy3 = document.createElement('div');
-                optLegacy3.className = 'select-item';
-                optLegacy3.dataset.value = 'gpt-4o';
-                optLegacy3.dataset.title = 'GPT-4o';
-                optLegacy3.innerHTML = `<span class="item-title">GPT-4o</span>`;
-                legacyContent.appendChild(optLegacy3);
-
-                collapsibleGroup.appendChild(legacyHeader);
-                collapsibleGroup.appendChild(legacyContent);
-                selectItems.appendChild(collapsibleGroup);
-
-                legacyHeader.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    let isHidden = legacyContent.style.display === 'none';
-                    legacyContent.style.display = isHidden ? 'block' : 'none';
-                    arrowSvg.style.transform = isHidden ? 'rotate(180deg)' : '';
+                [
+                    { value: 'gpt-5.1-chat-latest', title: 'GPT-5.1 Instant' },
+                    { value: 'gpt-5.1', title: 'GPT-5.1 Thinking' },
+                    { value: 'gpt-4o', title: 'GPT-4o' }
+                ].forEach(model => {
+                    let opt = document.createElement('div');
+                    opt.className = 'select-item';
+                    opt.dataset.value = model.value;
+                    opt.dataset.title = model.title;
+                    opt.innerHTML = `<span class="item-title">${model.title}</span>`;
+                    legacyContent.appendChild(opt);
                 });
 
-                let defaultItem = document.querySelector('.select-item[data-value="gpt-5.2-chat"]');
-                if (defaultItem) {
-                    defaultItem.classList.add('selected');
-                    updateSelectedDisplay('gpt-5.2-chat');
-                }
+                collapsible.appendChild(legacyHeader);
+                collapsible.appendChild(legacyContent);
+                selectItems.appendChild(collapsible);
+
+                legacyHeader.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    let hidden = legacyContent.style.display === 'none';
+                    legacyContent.style.display = hidden ? 'block' : 'none';
+                    arrow.style.transform = hidden ? 'rotate(180deg)' : '';
+                });
+
+                document.querySelector('.select-item[data-value="gpt-5.2-chat"]')?.classList.add('selected');
+                updateSelectedDisplay('gpt-5.2-chat');
             }
 
             function getFinalModel() {
-                let selected = document.querySelector('.select-item.selected');
-                return selected ? selected.dataset.value : 'gpt-5.2-chat';
+                let sel = document.querySelector('.select-item.selected');
+                return sel ? sel.dataset.value : 'gpt-5.2-chat';
             }
 
-            function addMessage(text, isUser = false, streaming = false, finalModel = null) {
+            function addMessage(text, isUser = false, streaming = false) {
                 if (isUser && !hasSent) {
                     welcome.style.display = 'none';
                     hasSent = true;
                 }
-                
                 let row = document.createElement('div');
                 row.className = `msg-row ${isUser ? 'user' : 'ai'}`;
+                let bubble = document.createElement('div');
+                bubble.className = `msg-bubble${isUser ? ' user' : ''}`;
+                let msgText = document.createElement('div');
+                msgText.className = 'msg-text';
                 
                 if (isUser) {
-                    let bubble = document.createElement('div');
-                    bubble.className = 'msg-bubble user';
-                    let msgText = document.createElement('div');
-                    msgText.className = 'msg-text';
                     msgText.innerHTML = text.replace(/\n/g, '<br>');
-                    bubble.appendChild(msgText);
-                    row.appendChild(bubble);
-                    chatContainer.appendChild(row);
-                    chatContainer.scrollTop = chatContainer.scrollHeight;
-                    return { row, bubble, msgText };
+                } else if (!streaming) {
+                    msgText.innerHTML = renderMarkdownWithMath(text);
                 } else {
-                    if (!streaming && finalModel) {
-                        let tag = createModelTag(finalModel);
-                        row.appendChild(tag);
-                    }
-                    let bubble = document.createElement('div');
-                    bubble.className = 'msg-bubble';
-                    let msgText = document.createElement('div');
-                    msgText.className = 'msg-text';
-                    
-                    if (streaming) {
-                        msgText.innerHTML = '<span class="typing"></span>思考中...';
-                        bubble.id = 'streamingBubble';
-                    } else {
-                        // 非流式消息 (目前只有错误) 使用数学渲染
-                        msgText.innerHTML = renderMarkdownWithMath(text);
-                    }
-                    
-                    bubble.appendChild(msgText);
-                    row.appendChild(bubble);
-                    chatContainer.appendChild(row);
-                    chatContainer.scrollTop = chatContainer.scrollHeight;
-                    return { row, bubble, msgText };
+                    msgText.innerHTML = '<span class="typing"></span>思考中...';
                 }
+                
+                bubble.appendChild(msgText);
+                row.appendChild(bubble);
+                chatContainer.appendChild(row);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                return msgText; 
             }
 
             async function send() {
@@ -552,26 +457,23 @@
                 isThinking = true;
                 updateSendButtonState();
 
-                let { msgText } = addMessage('', false, true);
+                let msgText = addMessage('', false, true);
+                let bubble = msgText.parentNode;
 
                 let opts = { stream: true, model: finalModel };
-                if (finalModel.startsWith('gpt-5.2') || finalModel.startsWith('gpt-5.1')) {
-                    opts.driver = 'openrouter';
-                }
+                if (finalModel.includes('gpt-5.')) opts.driver = 'openrouter';
                 if (webEnabled) opts.tools = [{ type: 'web_search' }];
 
                 const startTime = Date.now();
-
                 try {
                     let prompt = context + '用户: ' + text + '\nAI: ';
                     let res = await puter.ai.chat(prompt, opts);
                     let full = '';
-                    msgText.innerHTML = '';   // 清空“思考中...”
+                    msgText.innerHTML = '';
 
                     for await (let part of res) {
                         if (part?.text) {
                             full += part.text;
-                            // 使用带 LaTeX 渲染的函数替换原来的 marked.parse
                             msgText.innerHTML = renderMarkdownWithMath(full);
                         }
                     }
@@ -580,19 +482,12 @@
                     let lines = context.split('\n');
                     if (lines.length > 20) context = lines.slice(-20).join('\n');
 
-                    let bubble = document.getElementById('streamingBubble');
-                    if (bubble) {
-                        bubble.id = '';
-                        let row = bubble.parentNode;
-                        const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
-                        let tag = (finalModel === 'gpt-5.2-pro') 
-                            ? createModelTag(finalModel, elapsedSeconds)
-                            : createModelTag(finalModel);
-                        row.insertBefore(tag, row.firstChild);
-                    }
+                    // 添加模型标签
+                    let elapsed = Math.floor((Date.now() - startTime) / 1000);
+                    let tag = (finalModel === 'gpt-5.2-pro') ? createModelTag(finalModel, elapsed) : createModelTag(finalModel);
+                    bubble.parentNode.insertBefore(tag, bubble.parentNode.firstChild);
 
                 } catch (err) {
-                    // 错误信息也用数学渲染 (兼容可能出现的公式)
                     msgText.innerHTML = renderMarkdownWithMath('错误: ' + err.message);
                 } finally {
                     isThinking = false;
@@ -606,16 +501,12 @@
                 inputBox.style.height = Math.min(inputBox.scrollHeight, 132) + 'px';
                 updateSendButtonState();
             });
-
             inputBox.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey && !isThinking) {
-                    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-                    if (isMobile) return;
+                if (e.key === 'Enter' && !e.shiftKey && !isThinking && !/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
                     e.preventDefault();
                     send();
                 }
             });
-
             sendBtn.addEventListener('click', send);
             webToggle.addEventListener('click', () => {
                 webEnabled = !webEnabled;
@@ -633,16 +524,12 @@
             document.addEventListener('click', (e) => {
                 if (!customSelect.contains(e.target)) selectItems.classList.remove('active');
             });
-
             selectItems.addEventListener('click', (e) => {
                 let target = e.target.closest('.select-item');
-                if (!target || target.classList.contains('select-group')) return;
-
-                document.querySelectorAll('.select-item:not(.select-group)').forEach(el => el.classList.remove('selected'));
+                if (!target) return;
+                document.querySelectorAll('.select-item').forEach(el => el.classList.remove('selected'));
                 target.classList.add('selected');
-
-                const modelId = target.dataset.value;
-                updateSelectedDisplay(modelId);
+                updateSelectedDisplay(target.dataset.value);
             });
 
             buildSelect();
