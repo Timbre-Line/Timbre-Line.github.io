@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
-    <title>ChatGPT</title>
+    <title>ChatTeX · 公式渲染</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="icon" href="favicon.png" type="image/png">
-    <script src="https://js.puter.com/v2/"></script>
+    <!-- marked 轻量级 markdown 解析 -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!-- 引入 KaTeX -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <!-- Puter.js (AI 驱动) -->
+    <script src="https://js.puter.com/v2/"></script>
+    <!-- KaTeX 核心与自动渲染 (最简 LaTeX 实现) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" crossorigin="anonymous">
+    <!-- 两个脚本按顺序加载，保证 auto-render 可用 (放在底部，内联脚本之前) -->
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         ::selection { background: #b8ddff; }
@@ -170,9 +171,8 @@
         }
         .model-tag div:first-child { font-weight: bold; }
         .msg-text { font-size: 16px; line-height: 1.5; }
-        /* KaTeX 样式微调 */
+        /* 保证 KaTeX 公式内联显示合适 */
         .msg-text .katex { font-size: 1.1em; }
-        .msg-text .katex-display { margin: 0.5em 0; overflow-x: auto; }
         .welcome-message {
             text-align: center;
             padding: 40px 20px;
@@ -264,7 +264,8 @@
 <body>
     <div class="header">
         <button class="new-chat-btn" id="newChatBtn">
-            <img src="icon.png" width="20" height="20" alt="new">
+            <!-- 纯文本图标代替图片，避免加载失败 (最简) -->
+            <span style="font-size:20px;">+</span>
         </button>
         <div class="custom-select" id="customSelect">
             <div class="select-selected" id="selectSelected">ChatGPT <span class="version">5.2 Instant</span></div>
@@ -279,17 +280,41 @@
     <div class="bottom-section">
         <button class="web-search-toggle" id="webSearchToggle">🌐 搜索</button>
         <div class="input-container">
-            <textarea class="input-box" id="inputBox" placeholder="有问题，尽管问" rows="2"></textarea>
+            <textarea class="input-box" id="inputBox" placeholder="有问题，尽管问 (支持 LaTeX：\(a^2+b^2=c^2\) )" rows="2"></textarea>
             <button class="send-button" id="sendButton">
                 <svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.58L20 12l-8-8-8 8z"></path></svg>
             </button>
         </div>
-        <div class="footer">ChatGPT 也可能会犯错。请核查重要信息。查看 Cookie 首选项。</div>
+        <div class="footer">ChatGPT 也可能会犯错。请核查重要信息。公式已启用 KaTeX 渲染。</div>
     </div>
+
+    <!-- KaTeX 核心和自动渲染 (放在内联脚本之前，保证加载顺序) -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"></script>
 
     <script>
         (function() {
             marked.setOptions({ breaks: true, gfm: true });
+
+            // ---------- LaTeX 渲染配置 (最简，支持 \(\)、\[\]、$$) ----------
+            const katexDelimiters = [
+                { left: '$$', right: '$$', display: true },
+                { left: '\\[', right: '\\]', display: true },
+                { left: '\\(', right: '\\)', display: false }
+            ];
+            function renderMath(element) {
+                if (window.renderMathInElement) {
+                    try {
+                        renderMathInElement(element, {
+                            delimiters: katexDelimiters,
+                            throwOnError: false,
+                            ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+                        });
+                    } catch (e) {
+                        console.warn('KaTeX 渲染出错（忽略）', e);
+                    }
+                }
+            }
 
             const MODEL_NAMES = {
                 'gpt-5.2-chat': 'GPT-5.2 Instant',
@@ -325,21 +350,6 @@
 
             function updateSendButtonState() {
                 sendBtn.disabled = isThinking || !inputBox.value.trim();
-            }
-
-            // 渲染 LaTeX 的最简函数
-            function renderMath(element) {
-                if (window.renderMathInElement) {
-                    renderMathInElement(element, {
-                        delimiters: [
-                            {left: '$$', right: '$$', display: true},
-                            {left: '$', right: '$', display: false},
-                            {left: '\\[', right: '\\]', display: true},
-                            {left: '\\(', right: '\\)', display: false}
-                        ],
-                        throwOnError: false
-                    });
-                }
             }
 
             function createModelTag(modelId, elapsedSeconds = null) {
@@ -457,6 +467,7 @@
                 return selected ? selected.dataset.value : 'gpt-5.2-chat';
             }
 
+            // 修改 addMessage：每次设置内容后调用 renderMath
             function addMessage(text, isUser = false, streaming = false, finalModel = null) {
                 if (isUser && !hasSent) {
                     welcome.style.display = 'none';
@@ -465,13 +476,14 @@
                 
                 let row = document.createElement('div');
                 row.className = `msg-row ${isUser ? 'user' : 'ai'}`;
+                let bubble = document.createElement('div');
+                bubble.className = `msg-bubble ${isUser ? 'user' : ''}`;
+                let msgText = document.createElement('div');
+                msgText.className = 'msg-text';
                 
                 if (isUser) {
-                    let bubble = document.createElement('div');
-                    bubble.className = 'msg-bubble user';
-                    let msgText = document.createElement('div');
-                    msgText.className = 'msg-text';
                     msgText.innerHTML = text.replace(/\n/g, '<br>');
+                    renderMath(msgText);          // 用户消息如果有 \(...\) 也渲染（可选）
                     bubble.appendChild(msgText);
                     row.appendChild(bubble);
                     chatContainer.appendChild(row);
@@ -482,20 +494,14 @@
                         let tag = createModelTag(finalModel);
                         row.appendChild(tag);
                     }
-                    let bubble = document.createElement('div');
-                    bubble.className = 'msg-bubble';
-                    let msgText = document.createElement('div');
-                    msgText.className = 'msg-text';
-                    
                     if (streaming) {
                         msgText.innerHTML = '<span class="typing"></span>思考中...';
+                        renderMath(msgText);
                         bubble.id = 'streamingBubble';
                     } else {
                         msgText.innerHTML = marked.parse(text);
-                        // 非流式消息立即渲染数学公式
-                        setTimeout(() => renderMath(msgText), 0);
+                        renderMath(msgText);
                     }
-                    
                     bubble.appendChild(msgText);
                     row.appendChild(bubble);
                     chatContainer.appendChild(row);
@@ -516,7 +522,7 @@
                 isThinking = true;
                 updateSendButtonState();
 
-                let { msgText } = addMessage('', false, true);
+                let { msgText } = addMessage('', false, true);  // 创建“思考中”气泡
 
                 let opts = { stream: true, model: finalModel };
                 if (finalModel.startsWith('gpt-5.2') || finalModel.startsWith('gpt-5.1')) {
@@ -530,14 +536,13 @@
                     let prompt = context + '用户: ' + text + '\nAI: ';
                     let res = await puter.ai.chat(prompt, opts);
                     let full = '';
-                    msgText.innerHTML = '';
+                    msgText.innerHTML = '';      // 清空“思考中”
 
                     for await (let part of res) {
                         if (part?.text) {
                             full += part.text;
                             msgText.innerHTML = marked.parse(full);
-                            // 流式更新时实时渲染数学公式
-                            renderMath(msgText);
+                            renderMath(msgText);   // 每次流式更新都重新渲染公式
                         }
                     }
 
@@ -558,6 +563,7 @@
 
                 } catch (err) {
                     msgText.innerHTML = '错误: ' + err.message;
+                    renderMath(msgText);           // 错误信息也可能有公式(极少情况)
                 } finally {
                     isThinking = false;
                     updateSendButtonState();
