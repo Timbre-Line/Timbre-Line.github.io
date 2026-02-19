@@ -287,7 +287,9 @@
             const MODEL_NAMES = {
                 'gpt-5.2-chat': 'GPT-5.2 Instant',
                 'gpt-5.2': 'GPT-5.2 Thinking',
-                'gpt-5.2-pro': 'GPT-5.2 Pro'
+                'gpt-5.2-pro': 'GPT-5.2 Pro',
+                'gpt-5.1-chat-latest': 'GPT-5.1 Instant',
+                'gpt-5.1': 'GPT-5.1 Thinking'
             };
 
             const MODEL_LIST = [
@@ -359,6 +361,60 @@
                         <span class="item-desc">${item.desc}</span>
                     `;
                     selectItems.appendChild(opt);
+                });
+
+                let collapsibleGroup = document.createElement('div');
+                collapsibleGroup.style.borderTop = '1px solid #eaeaea';
+
+                let legacyHeader = document.createElement('div');
+                legacyHeader.className = 'select-group';
+                legacyHeader.style.display = 'flex';
+                legacyHeader.style.justifyContent = 'space-between';
+                legacyHeader.style.alignItems = 'center';
+                legacyHeader.style.cursor = 'pointer';
+                legacyHeader.style.padding = '8px 14px';
+                legacyHeader.style.paddingRight = '14px';
+                legacyHeader.innerHTML = 'Legacy Models';
+
+                let arrowSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                arrowSvg.setAttribute('width', '20');
+                arrowSvg.setAttribute('height', '20');
+                arrowSvg.setAttribute('viewBox', '0 0 24 24');
+                arrowSvg.setAttribute('fill', 'none');
+                arrowSvg.setAttribute('stroke', 'black');
+                arrowSvg.setAttribute('stroke-width', '2');
+                arrowSvg.style.transformOrigin = 'center';
+                arrowSvg.innerHTML = '<path d="M6 9l6 6 6-6"/>';
+                legacyHeader.appendChild(arrowSvg);
+
+                let legacyContent = document.createElement('div');
+                legacyContent.style.display = 'none';
+
+                let optLegacy1 = document.createElement('div');
+                optLegacy1.className = 'select-item';
+                optLegacy1.dataset.value = 'gpt-5.1-chat-latest';
+                optLegacy1.dataset.title = 'GPT-5.1 Instant';
+                optLegacy1.innerHTML = `<span class="item-title">GPT-5.1 Instant</span>`;
+                legacyContent.appendChild(optLegacy1);
+
+                let optLegacy2 = document.createElement('div');
+                optLegacy2.className = 'select-item';
+                optLegacy2.dataset.value = 'gpt-5.1';
+                optLegacy2.dataset.title = 'GPT-5.1 Thinking';
+                optLegacy2.innerHTML = `<span class="item-title">GPT-5.1 Thinking</span>`;
+                legacyContent.appendChild(optLegacy2);
+
+                collapsibleGroup.appendChild(legacyHeader);
+                collapsibleGroup.appendChild(legacyContent);
+                selectItems.appendChild(collapsibleGroup);
+
+                // 点击标题展开/折叠并旋转箭头
+                legacyHeader.addEventListener('click', function(e) {
+                    e.stopPropagation(); // 防止关闭下拉框
+                    let isHidden = legacyContent.style.display === 'none';
+                    legacyContent.style.display = isHidden ? 'block' : 'none';
+                    // 箭头旋转180度（无过渡）
+                    arrowSvg.style.transform = isHidden ? 'rotate(180deg)' : '';
                 });
 
                 // 默认选中 Instant
@@ -434,7 +490,9 @@
                 let { msgText } = addMessage('', false, true);
 
                 let opts = { stream: true, model: finalModel };
-                if (finalModel.startsWith('gpt-5.2')) opts.driver = 'openrouter';
+                if (finalModel.startsWith('gpt-5.2') || finalModel.startsWith('gpt-5.1')) {
+                    opts.driver = 'openrouter';
+                }
                 if (webEnabled) opts.tools = [{ type: 'web_search' }];
 
                 const startTime = Date.now();
