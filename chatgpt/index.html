@@ -254,6 +254,13 @@
             animation: blink 1s infinite;
         }
         @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+        /* 最小修复：禁止整个页面滚动，只保留聊天区域内部滚动 */
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
