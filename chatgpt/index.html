@@ -17,6 +17,7 @@
             color: #000;
             padding-top: 70px;
             padding-bottom: 140px;
+            touch-action: pan-x pan-y;
         }
         .header {
             position: fixed;
@@ -451,6 +452,7 @@
                 if (!text) return;
 
                 inputBox.value = '';
+                inputBox.style.height = '';
                 addMessage(text, true);
                 let finalModel = getFinalModel();
 
