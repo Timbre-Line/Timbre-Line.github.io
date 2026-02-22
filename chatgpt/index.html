@@ -330,7 +330,48 @@
             const selectItems = document.getElementById('selectItems');
             const customSelect = document.getElementById('customSelect');
 
-            let isThinking = false, webEnabled = false, context = '', hasSent = false;
+            // ---------- 新增：基于token的上下文管理 ----------
+            const MAX_TOKENS = 32768;                // 总token上限
+            const HISTORY_SAFE_LIMIT = MAX_TOKENS - 2048; // 发送前历史安全上限（预留新消息+回答空间）
+
+            // 简单的token估算：中文字符每个2 token，其他字符每4个字符1 token（向上取整）
+            function countTokens(text) {
+                if (!text) return 0;
+                const chineseRegex = /[\u4e00-\u9fff\u3400-\u4dbf\u3000-\u303f\uff00-\uffef]/g;
+                const chineseMatches = text.match(chineseRegex) || [];
+                const chineseCount = chineseMatches.length;
+                const otherCount = text.length - chineseCount;
+                return Math.ceil(chineseCount * 2 + otherCount / 4);
+            }
+
+            // 存储消息历史，每条包含 role, content, tokens (缓存)
+            let messages = [];
+
+            // 将消息数组转换为纯文本格式（用于构造prompt）
+            function messagesToText() {
+                return messages.map(msg => {
+                    return (msg.role === 'user' ? '用户: ' : 'AI: ') + msg.content;
+                }).join('\n');
+            }
+
+            // 修剪历史至不超过指定token限制（默认MAX_TOKENS），优先移除最早的成对消息
+            function trimMessagesIfNeeded(limit = MAX_TOKENS) {
+                let total = messages.reduce((sum, msg) => sum + msg.tokens, 0);
+                // 当超出限制且至少还有两条消息时，移除最早的一组对话（user+assistant）
+                while (total > limit && messages.length >= 2) {
+                    const removed1 = messages.shift();
+                    const removed2 = messages.shift();
+                    total -= (removed1.tokens + removed2.tokens);
+                }
+                // 极端情况：只剩一条消息且仍超限（几乎不可能，因为单条很难达到32k），若发生则清空（保守处理）
+                while (total > limit && messages.length > 0) {
+                    const removed = messages.shift();
+                    total -= removed.tokens;
+                }
+            }
+            // ------------------------------------------------
+
+            let isThinking = false, webEnabled = false, hasSent = false;
             welcome.textContent = ['有什么可以帮忙的？','我们先从哪里开始呢？','准备好了','今天有什么计划？','您今天在想什么？'][Math.floor(Math.random()*5)];
 
             function updateSendButtonState() {
@@ -461,6 +502,9 @@
                 addMessage(text, true);
                 let finalModel = getFinalModel();
 
+                // 发送前确保历史不超过安全限制（为新消息预留token）
+                trimMessagesIfNeeded(HISTORY_SAFE_LIMIT);
+
                 isThinking = true;
                 updateSendButtonState();
 
@@ -473,7 +517,11 @@
 
                 const startTime = Date.now();
                 try {
-                    let prompt = context + '用户: ' + text + '\nAI: ';
+                    // 构建prompt：历史 + 新用户消息 + "AI: "
+                    let history = messagesToText();
+                    let prompt = history ? history + '\n' : '';
+                    prompt += '用户: ' + text + '\nAI: ';
+
                     let res = await puter.ai.chat(prompt, opts);
                     let full = '';
                     msgText.innerHTML = '';
@@ -485,9 +533,14 @@
                         }
                     }
 
-                    context += '用户: ' + text + '\nAI: ' + full + '\n';
-                    let lines = context.split('\n');
-                    if (lines.length > 20) context = lines.slice(-20).join('\n');
+                    // 将本轮对话存入历史（带token缓存）
+                    const userTokens = countTokens(text);
+                    const assistantTokens = countTokens(full);
+                    messages.push({ role: 'user', content: text, tokens: userTokens });
+                    messages.push({ role: 'assistant', content: full, tokens: assistantTokens });
+
+                    // 按总token上限修剪历史（包含新对话）
+                    trimMessagesIfNeeded(MAX_TOKENS);
 
                     // 添加模型标签
                     let elapsed = Math.floor((Date.now() - startTime) / 1000);
