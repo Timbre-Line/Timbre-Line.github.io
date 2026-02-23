@@ -250,6 +250,9 @@
             let particles = [];
             const PARTICLE_COUNT = 120;
             const MAX_DIST = 150;
+            const MOUSE_RADIUS = 120;
+            let mouseX = -1000, mouseY = -1000;
+            let mouseActive = false;
 
             function initParticles() {
                 particles = [];
@@ -273,6 +276,20 @@
 
             function updateParticles() {
                 for (let p of particles) {
+                    if (mouseActive) {
+                        const dx = p.x - mouseX;
+                        const dy = p.y - mouseY;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < MOUSE_RADIUS) {
+                            const angle = Math.atan2(dy, dx);
+                            const force = (1 - dist / MOUSE_RADIUS) * 0.3;
+                            p.x += Math.cos(angle) * force * 2;
+                            p.y += Math.sin(angle) * force * 2;
+                            p.vx += (Math.random() - 0.5) * 0.05;
+                            p.vy += (Math.random() - 0.5) * 0.05;
+                        }
+                    }
+
                     p.x += p.vx;
                     p.y += p.vy;
 
@@ -292,8 +309,6 @@
             function draw() {
                 ctx.clearRect(0, 0, width, height);
 
-                ctx.strokeStyle = 'rgba(100, 180, 255, 0.25)';
-                ctx.lineWidth = 1.2;
                 for (let i = 0; i < particles.length; i++) {
                     for (let j = i + 1; j < particles.length; j++) {
                         const dx = particles[i].x - particles[j].x;
@@ -302,6 +317,7 @@
                         if (dist < MAX_DIST) {
                             const opacity = (1 - dist / MAX_DIST) * 0.35;
                             ctx.strokeStyle = `rgba(80, 170, 255, ${opacity})`;
+                            ctx.lineWidth = 1.2;
                             ctx.beginPath();
                             ctx.moveTo(particles[i].x, particles[i].y);
                             ctx.lineTo(particles[j].x, particles[j].y);
@@ -331,6 +347,31 @@
                 draw();
                 requestAnimationFrame(animate);
             }
+
+            function onMouseMove(e) {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                mouseActive = true;
+            }
+            function onMouseLeave() {
+                mouseActive = false;
+            }
+            function onTouchMove(e) {
+                if (e.touches.length > 0) {
+                    mouseX = e.touches[0].clientX;
+                    mouseY = e.touches[0].clientY;
+                    mouseActive = true;
+                }
+            }
+            function onTouchEnd() {
+                mouseActive = false;
+            }
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseleave', onMouseLeave);
+            document.addEventListener('touchmove', onTouchMove);
+            document.addEventListener('touchend', onTouchEnd);
+            document.addEventListener('touchcancel', onTouchEnd);
 
             window.addEventListener('resize', () => {
                 resizeCanvas();
