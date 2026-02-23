@@ -75,6 +75,10 @@
             justify-content: space-between;
             white-space: nowrap;
         }
+        /* 模型选择框悬停背景变灰 (类似新对话按钮) */
+        .select-selected:hover {
+            background: #e5e5e5;
+        }
         .select-selected .version {
             font-weight: 400;
             color: #3c3c3c;
@@ -168,6 +172,20 @@
         }
         .model-tag div:first-child { font-weight: bold; }
         .msg-text { font-size: 16px; line-height: 1.5; }
+        /* 黑色呼吸圆点 (思考中) */
+        .thinking-dot {
+            width: 40px;
+            height: 40px;
+            background: black;
+            border-radius: 50%;
+            margin: 0 0 16px 0;  /* 保持与消息一致的底部间距 */
+            animation: breathe 1.2s ease-in-out infinite;
+        }
+        @keyframes breathe {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
         .welcome-message {
             text-align: center;
             padding: 40px 20px;
@@ -244,16 +262,6 @@
             font-size: 12px;
             color: #666;
         }
-        .typing {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            background: #888;
-            border-radius: 50%;
-            margin-right: 4px;
-            animation: blink 1s infinite;
-        }
-        @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
 
         html, body {
             height: 100%;
@@ -338,15 +346,14 @@
                 let tokens = 0;
                 for (let i = 0; i < text.length; i++) {
                     const code = text.charCodeAt(i);
-                    // 中文字符范围（CJK统一表意文字、CJK符号和标点、全角ASCII等）
-                    if ((code >= 0x4E00 && code <= 0x9FFF) ||  // CJK统一表意文字
-                        (code >= 0x3400 && code <= 0x4DBF) ||  // CJK扩展A
-                        (code >= 0x20000 && code <= 0x2A6DF) || // CJK扩展B（基本很少见，保留）
-                        (code >= 0x3000 && code <= 0x303F) ||  // CJK符号和标点
-                        (code >= 0xFF00 && code <= 0xFFEF)) {  // 全角ASCII、全角标点
+                    if ((code >= 0x4E00 && code <= 0x9FFF) ||  
+                        (code >= 0x3400 && code <= 0x4DBF) ||  
+                        (code >= 0x20000 && code <= 0x2A6DF) || 
+                        (code >= 0x3000 && code <= 0x303F) ||  
+                        (code >= 0xFF00 && code <= 0xFFEF)) {  
                         tokens += 2;
                     } else {
-                        tokens += 1;  // 其他字符（包括英文字母、数字、常见符号、emoji等）
+                        tokens += 1; 
                     }
                 }
                 return tokens;
@@ -482,10 +489,8 @@
                 
                 if (isUser) {
                     msgText.innerHTML = text.replace(/\n/g, '<br>');
-                } else if (!streaming) {
-                    msgText.innerHTML = renderMarkdownWithMath(text);
                 } else {
-                    msgText.innerHTML = '<span class="typing"></span>思考中...';
+                    msgText.innerHTML = renderMarkdownWithMath(text);
                 }
                 
                 bubble.appendChild(msgText);
@@ -502,53 +507,86 @@
 
                 inputBox.value = '';
                 inputBox.style.height = '';
-                addMessage(text, true);
+                addMessage(text, true); // 用户消息
                 let finalModel = getFinalModel();
 
-                // 直接按32k截断，无安全预留
                 trimMessagesIfNeeded(MAX_TOKENS);
 
                 isThinking = true;
                 updateSendButtonState();
 
-                let msgText = addMessage('', false, true);
-                let bubble = msgText.parentNode;
+                // 创建黑色呼吸圆点 (思考中)
+                let thinkingRow = document.createElement('div');
+                thinkingRow.className = 'msg-row ai';  // 保持左对齐
+                thinkingRow.innerHTML = '<div class="thinking-dot"></div>';
+                chatContainer.appendChild(thinkingRow);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
 
                 let opts = { stream: true, model: finalModel };
                 if (finalModel.includes('gpt-5.')) opts.driver = 'openrouter';
                 if (webEnabled) opts.tools = [{ type: 'web_search' }];
 
                 const startTime = Date.now();
+                let firstChunkReceived = false;
+                let bubbleRow = null;   // 保存气泡所在的行
+                let msgText = null;      // 气泡内的文本元素
+                let full = '';
+
                 try {
                     let history = messagesToText();
                     let prompt = history ? history + '\n' : '';
                     prompt += '用户: ' + text + '\nAI: ';
 
                     let res = await puter.ai.chat(prompt, opts);
-                    let full = '';
-                    msgText.innerHTML = '';
-
+                    
                     for await (let part of res) {
+                        if (!firstChunkReceived) {
+                            // 收到第一个块：移除呼吸圆点，创建真实气泡
+                            thinkingRow.remove();
+                            thinkingRow = null;
+
+                            let row = document.createElement('div');
+                            row.className = 'msg-row ai';
+                            let bubble = document.createElement('div');
+                            bubble.className = 'msg-bubble';
+                            msgText = document.createElement('div');
+                            msgText.className = 'msg-text';
+                            bubble.appendChild(msgText);
+                            row.appendChild(bubble);
+                            chatContainer.appendChild(row);
+                            bubbleRow = row;
+                            firstChunkReceived = true;
+                        }
+
                         if (part?.text) {
                             full += part.text;
                             msgText.innerHTML = renderMarkdownWithMath(full);
+                            chatContainer.scrollTop = chatContainer.scrollHeight;
                         }
                     }
 
-                    const userTokens = countTokens(text);
-                    const assistantTokens = countTokens(full);
-                    messages.push({ role: 'user', content: text, tokens: userTokens });
-                    messages.push({ role: 'assistant', content: full, tokens: assistantTokens });
+                    // 流式结束，处理可能空响应的情况
+                    if (!firstChunkReceived) {
+                        // 从未收到任何块：移除圆点，显示空响应消息
+                        if (thinkingRow) thinkingRow.remove();
+                        addMessage('模型返回了空响应', false);
+                    } else {
+                        // 正常结束，插入模型标签
+                        const userTokens = countTokens(text);
+                        const assistantTokens = countTokens(full);
+                        messages.push({ role: 'user', content: text, tokens: userTokens });
+                        messages.push({ role: 'assistant', content: full, tokens: assistantTokens });
+                        trimMessagesIfNeeded(MAX_TOKENS);
 
-                    // 再次按32k截断
-                    trimMessagesIfNeeded(MAX_TOKENS);
-
-                    let elapsed = Math.floor((Date.now() - startTime) / 1000);
-                    let tag = (finalModel === 'gpt-5.2-pro') ? createModelTag(finalModel, elapsed) : createModelTag(finalModel);
-                    bubble.parentNode.insertBefore(tag, bubble.parentNode.firstChild);
+                        let elapsed = Math.floor((Date.now() - startTime) / 1000);
+                        let tag = createModelTag(finalModel, finalModel === 'gpt-5.2-pro' ? elapsed : null);
+                        bubbleRow.insertBefore(tag, bubbleRow.firstChild);
+                    }
 
                 } catch (err) {
-                    msgText.innerHTML = renderMarkdownWithMath('错误: ' + err.message);
+                    // 出错：移除呼吸圆点，显示错误消息
+                    if (thinkingRow) thinkingRow.remove();
+                    addMessage('错误: ' + err.message, false);
                 } finally {
                     isThinking = false;
                     updateSendButtonState();
@@ -572,8 +610,8 @@
                 webEnabled = !webEnabled;
                 webToggle.classList.toggle('active', webEnabled);
             });
+            // 新聊天按钮：直接刷新，不提示
             newChat.addEventListener('click', () => {
-                if (chatContainer.children.length > 1 && !confirm('新对话将清除当前记录，确认？')) return;
                 location.reload();
             });
 
