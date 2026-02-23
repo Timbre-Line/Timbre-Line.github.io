@@ -5,7 +5,7 @@
     <script>
         puter.ai.txt2img(
             "A futuristic cityscape at sunset with flying cars and towering skyscrapers",
-            { model: "ByteDance-Seed/Seedream-4.0", provider: "together-ai", disable_safety_checker: true }
+            { model: "openrouter:bytedance-seed/seedream-4.5" }
         )
         .then(imageElement => {
             document.body.appendChild(imageElement);
